@@ -232,54 +232,6 @@
                         </ul>
                     </li>
 
-                    <!-- <li class="menu-item <?= $judul == 'Guru' ? 'active' : '' ?>">
-                        <a href="<?= base_url('guru') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-user-badge"></i>
-                            <div data-i18n="Analytics">Guru</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Gaji Pokok' ? 'active' : '' ?>">
-                        <a href="<?= base_url('gapok') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-money"></i>
-                            <div data-i18n="Analytics">Gaji Pokok</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Tunjangan Fungsional' ? 'active' : '' ?>">
-                        <a href="<?= base_url('fungsional') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-wallet"></i>
-                            <div data-i18n="Analytics">Tunjangan Fungsional</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Tunjangan Kinerja' ? 'active' : '' ?>">
-                        <a href="<?= base_url('kinerja') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-bank"></i>
-                            <div data-i18n="Analytics">Tunjangan Kinerja</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Tunjangan Struktural' ? 'active' : '' ?>">
-                        <a href="<?= base_url('struktural') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bxs-credit-card-alt"></i>
-                            <div data-i18n="Analytics">Tunjangan Struktural</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Tunjangan BPJS' ? 'active' : '' ?>">
-                        <a href="<?= base_url('bpjs') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-health"></i>
-                            <div data-i18n="Analytics">Tunjangan BPJS</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Tunjangan Wali Kelas' ? 'active' : '' ?>">
-                        <a href="<?= base_url('walas') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                            <div data-i18n="Analytics">Tunjangan Wali Kelas</div>
-                        </a>
-                    </li>
-                    <li class="menu-item <?= $judul == 'Tunjangan Penyesuaian' ? 'active' : '' ?>">
-                        <a href="<?= base_url('penyesuaian') ?>" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-chalkboard"></i>
-                            <div data-i18n="Analytics">Tunjangan Penyesuaian</div>
-                        </a>
-                    </li> -->
                     <li class="menu-item <?= $judul == 'Master Gaji' ? 'active' : '' ?>">
                         <a href="<?= base_url('gaji') ?>" class="menu-link text-info">
                             <i class="menu-icon tf-icons bx bx-bowl-hot"></i>
@@ -296,7 +248,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a href="<?= base_url('settings') ?>" class="menu-link text-danger">
+                        <a href="<?= base_url('login/logout') ?>" class="menu-link text-danger tbl-confirm" value="Anda akan keluar dari aplikasi">
                             <i class="menu-icon tf-icons bx bx-power-off"></i>
                             <div data-i18n="Analytics">LogOut</div>
                         </a>
@@ -338,18 +290,18 @@
                             <li class="nav-item lh-1 me-3">
                                 <a
                                     class="github-button"
-                                    href="https://github.com/themeselection/sneat-html-admin-template-free"
+                                    href="#"
                                     data-icon="octicon-star"
                                     data-size="large"
                                     data-show-count="true"
-                                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub">Star</a>
+                                    aria-label="Star themeselection/sneat-html-admin-template-free on GitHub"><?= $user->nama ?></a>
                             </li>
 
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                                     <div class="avatar avatar-online">
-                                        <img src="<?= base_url() ?>assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                        <img src="<?= base_url() ?>assets/img/illustrations/man-with-laptop-light.png" alt class="w-px-40 h-auto rounded-circle" />
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
@@ -358,12 +310,12 @@
                                             <div class="d-flex">
                                                 <div class="flex-shrink-0 me-3">
                                                     <div class="avatar avatar-online">
-                                                        <img src="<?= base_url() ?>assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                        <img src="<?= base_url() ?>assets/img/illustrations/man-with-laptop-light.png" alt class="w-px-40 h-auto rounded-circle" />
                                                     </div>
                                                 </div>
                                                 <div class="flex-grow-1">
-                                                    <span class="fw-semibold d-block">John Doe</span>
-                                                    <small class="text-muted">Admin</small>
+                                                    <span class="fw-semibold d-block"><?= $user->nama ?></span>
+                                                    <small class="text-muted"><?= $user->level ?></small>
                                                 </div>
                                             </div>
                                         </a>
@@ -385,7 +337,7 @@
                                     </li>
 
                                     <li>
-                                        <a class="dropdown-item" href="auth-login-basic.html">
+                                        <a class="dropdown-item tbl-confirm" value="Anda akan keluar dari aplikasi" href="<?= base_url('login/logout') ?>">
                                             <i class="bx bx-power-off me-2"></i>
                                             <span class="align-middle">Log Out</span>
                                         </a>

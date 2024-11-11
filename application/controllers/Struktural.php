@@ -8,21 +8,23 @@ class Struktural extends CI_Controller
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
-        // $this->load->model('Auth_model');
+        $this->load->model('Auth_model');
 
         // $user = $this->Auth_model->current_user();
 
         // $this->user = $user->nama;
-        // if (!$this->Auth_model->current_user() || $user->level != 'adm' && $user->level != 'admin') {
-        //     redirect('login/logout');
-        // }
+        if (!$this->Auth_model->current_user()) {
+            redirect('login/logout');
+        }
     }
+
 
     public function index()
     {
         $data['judul'] = 'Tunjangan Struktural';
         $data['sub'] = 'tunjangan';
-        
+        $data['user'] = $this->Auth_model->current_user();
+
         $data['data'] = $this->db->query("SELECT struktural.*, satminkal.nama as nmsatminkal, jabatan.nama as nmjabatan FROM struktural 
         JOIN satminkal ON satminkal.id=struktural.satminkal_id
         JOIN jabatan ON jabatan.jabatan_id=struktural.jabatan_id

@@ -8,20 +8,21 @@ class Golongan extends CI_Controller
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
-        // $this->load->model('Auth_model');
+        $this->load->model('Auth_model');
 
         // $user = $this->Auth_model->current_user();
 
         // $this->user = $user->nama;
-        // if (!$this->Auth_model->current_user() || $user->level != 'adm' && $user->level != 'admin') {
-        //     redirect('login/logout');
-        // }
+        if (!$this->Auth_model->current_user()) {
+            redirect('login/logout');
+        }
     }
 
     public function index()
     {
         $data['judul'] = 'Golongan';
         $data['sub'] = 'master';
+        $data['user'] = $this->Auth_model->current_user();
 
         $data['data'] = $this->model->getData('golongan')->result();
         $this->load->view('golongan', $data);

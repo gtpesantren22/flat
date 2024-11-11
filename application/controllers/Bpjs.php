@@ -8,20 +8,21 @@ class Bpjs extends CI_Controller
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
-        // $this->load->model('Auth_model');
+        $this->load->model('Auth_model');
 
-        // $user = $this->Auth_model->current_user();
+        $user = $this->Auth_model->current_user();
 
         // $this->user = $user->nama;
-        // if (!$this->Auth_model->current_user() || $user->level != 'adm' && $user->level != 'admin') {
-        //     redirect('login/logout');
-        // }
+        if (!$this->Auth_model->current_user()) {
+            redirect('login/logout');
+        }
     }
 
     public function index()
     {
         $data['judul'] = 'Tunjangan BPJS';
         $data['sub'] = 'tunjangan';
+        $data['user'] = $this->Auth_model->current_user();
 
         $data['data'] = $this->db->query("SELECT bpjs.*, guru.nama as nmguru FROM bpjs JOIN guru ON guru.guru_id=bpjs.guru_id ")->result();
 

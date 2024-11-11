@@ -8,21 +8,22 @@ class Walas extends CI_Controller
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
-        // $this->load->model('Auth_model');
+        $this->load->model('Auth_model');
 
         // $user = $this->Auth_model->current_user();
 
         // $this->user = $user->nama;
-        // if (!$this->Auth_model->current_user() || $user->level != 'adm' && $user->level != 'admin') {
-        //     redirect('login/logout');
-        // }
+        if (!$this->Auth_model->current_user()) {
+            redirect('login/logout');
+        }
     }
 
     public function index()
     {
         $data['judul'] = 'Tunjangan Wali Kelas';
         $data['sub'] = 'tunjangan';
-        
+        $data['user'] = $this->Auth_model->current_user();
+
         $data['data'] = $this->db->query("SELECT walas.*, satminkal.nama as nmsatminkal FROM walas JOIN satminkal ON satminkal.id=walas.satminkal_id ")->result();
 
         $data['satminkalOpt'] = $this->model->getData('satminkal')->result();

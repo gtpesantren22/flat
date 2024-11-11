@@ -8,20 +8,21 @@ class Gaji extends CI_Controller
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
-        // $this->load->model('Auth_model');
+        $this->load->model('Auth_model');
 
         // $user = $this->Auth_model->current_user();
 
         // $this->user = $user->nama;
         $this->tahun = '2024/2025';
-        // if (!$this->Auth_model->current_user() || $user->level != 'adm' && $user->level != 'admin') {
-        //     redirect('login/logout');
-        // }
+        if (!$this->Auth_model->current_user()) {
+            redirect('login/logout');
+        }
     }
 
     public function index()
     {
         $data['judul'] = 'Master Gaji';
+        $data['user'] = $this->Auth_model->current_user();
 
         $data['gaji'] = $this->model->getOrder('gaji', 'created_at', 'DESC')->result();
 
@@ -30,6 +31,7 @@ class Gaji extends CI_Controller
     public function detail($id)
     {
         $data['judul'] = 'Master Gaji';
+        $data['user'] = $this->Auth_model->current_user();
         $data['idgaji'] = $id;
         // $data['gaji_list'] = [];
 
