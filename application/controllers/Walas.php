@@ -49,14 +49,14 @@ class Walas extends CI_Controller
 
     public function hapus($id)
     {
-        $this->model->hapus('bpjs', 'bpjs_id', $id);
+        $this->model->hapus('walas', 'walas_id', $id);
 
         if ($this->db->affected_rows() > 0) {
-            $this->session->set_flashdata('ok', 'bpjs berhasil dihapus');
-            redirect('bpjs');
+            $this->session->set_flashdata('ok', 'Walas berhasil dihapus');
+            redirect('walas');
         } else {
-            $this->session->set_flashdata('error', 'bpjs gagal dihapus');
-            redirect('bpjs');
+            $this->session->set_flashdata('error', 'Walas gagal dihapus');
+            redirect('walas');
         }
     }
 
@@ -68,13 +68,13 @@ class Walas extends CI_Controller
             'nominal' => rmRp($this->input->post('nominal', true)),
         ];
 
-        $this->model->edit('bpjs', 'bpjs_id', $id, $data);
+        $this->model->edit('walas', 'walas_id', $id, $data);
         if ($this->db->affected_rows() > 0) {
-            $this->session->set_flashdata('ok', 'bpjs berhasil diupdate');
-            redirect('bpjs');
+            $this->session->set_flashdata('ok', 'Walas berhasil diupdate');
+            redirect('walas');
         } else {
-            $this->session->set_flashdata('error', 'bpjs gagal diupdate');
-            redirect('bpjs');
+            $this->session->set_flashdata('error', 'Walas gagal diupdate');
+            redirect('walas');
         }
     }
 }
