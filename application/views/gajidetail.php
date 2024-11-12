@@ -1,6 +1,7 @@
     <?php
     include 'head.php';
     $a = 1;
+    $url = $datagaji->status == 'kunci' ? base_url('gaji/detail3/' . $datagaji->gaji_id) : base_url('gaji/detail2/' . $datagaji->gaji_id);
     ?>
 
     <!-- Content -->
@@ -13,8 +14,10 @@
                     </div> -->
                     <div class="card-body">
                         <h5 class="card-title">
-                            Data Gaji Guru/Karyawan
-                            <a class="btn btn-primary btn-sm float-end tbl-confirm" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-refresh"></i> Generate Ulang</a>
+                            <?= $datagaji->status == 'kunci' ? "<span class='text-danger bx bxs-key'>locked</span> || " : '' ?> Data Gaji Guru/Karyawan
+                            <a class="btn btn-outline-primary btn-sm float-end tbl-confirm" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-refresh"></i> Generate Ulang</a>
+                            <a class="btn btn-outline-danger btn-sm float-end tbl-confirm" value="Fitur ini akan mengunci dan mempermanenkan data" href="<?= base_url('gaji/kunci/' . $idgaji) ?>"><i class="bx bxs-key"></i> Kunci Data</a>
+                            <a class="btn btn-outline-success btn-sm float-end" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-spreadsheet"></i> Export to Excel</a>
                         </h5>
                         <p class="card-text"></p>
                         <div class="table-responsive card-table">
@@ -29,13 +32,6 @@
                                         <th>SIK</th>
                                         <th>Ijazah</th>
                                         <th>TMT</th>
-                                        <!-- <th>Gaji Pokok</th>
-                                        <th>T. Fungsional</th>
-                                        <th>T. Kinerja</th>
-                                        <th>T. BPJS</th>
-                                        <th>T. Struktural</th>
-                                        <th>T. Walas</th>
-                                        <th>T. Penyesuaian</th> -->
                                         <th>TOTAL</th>
                                         <th>#</th>
                                     </tr>
@@ -129,7 +125,7 @@
                 "processing": true,
                 "serverSide": true,
                 "ajax": {
-                    "url": "<?= base_url('gaji/detail2/' . $idgaji); ?>",
+                    "url": "<?= $url ?>",
                     "type": "POST",
 
                 },
