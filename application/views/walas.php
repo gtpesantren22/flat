@@ -65,7 +65,7 @@
                     <div class="modal-body">
 
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="a_satminkal">Nama satminkal</label>
+                            <label class="col-sm-2 col-form-label" for="a_satminkal">Lembaga</label>
                             <div class="col-sm-10">
                                 <select class="form-select" data-allow-clear="true" id="a_satminkal" name="satminkal" required>
                                     <option value=""> -pilih- </option>
@@ -107,7 +107,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="satminkal">Nama satminkal</label>
+                            <label class="col-sm-2 col-form-label" for="satminkal">Lembaga</label>
                             <div class="col-sm-10">
                                 <select class="select2 form-select form-select-lg" id="satminkal" name="satminkal" required>
                                     <option value=""> -pilih- </option>

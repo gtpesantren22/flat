@@ -64,7 +64,7 @@ class Walas extends CI_Controller
     {
         $id = $this->input->post('id', true);
         $data = [
-            'guru_id' => $this->input->post('guru', true),
+            'satminkal_id' => $this->input->post('satminkal', true),
             'nominal' => rmRp($this->input->post('nominal', true)),
         ];
 
