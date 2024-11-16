@@ -186,6 +186,12 @@
                             <div data-i18n="Analytics">Gaji Pokok</div>
                         </a>
                     </li>
+                    <li class="menu-item <?= $judul == 'Honor' ? 'active' : '' ?>">
+                        <a href="<?= base_url('honor') ?>" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-credit-card"></i>
+                            <div data-i18n="Analytics">Honor (PTTY)</div>
+                        </a>
+                    </li>
                     <li class="menu-item <?= isset($sub) && $sub == 'tunjangan'  ? 'active open' : '' ?>">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-layout"></i>

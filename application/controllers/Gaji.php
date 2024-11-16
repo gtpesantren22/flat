@@ -35,10 +35,13 @@ class Gaji extends CI_Controller
         $data['idgaji'] = $id;
         // $data['gaji_list'] = [];
 
-        $data['datagaji'] = $this->model->getBy('gaji', 'gaji_id', $id)->row();
-
-        // echo var_dump($cek);
-        $this->load->view('gajidetail', $data);
+        $cek = $this->model->getBy('gaji_detail', 'gaji_id', $id)->row();
+        if ($cek) {
+            $data['datagaji'] = $this->model->getBy('gaji', 'gaji_id', $id)->row();
+            $this->load->view('gajidetail', $data);
+        } else {
+            redirect('gaji/generate/' . $id);
+        }
     }
 
     public function tambah()
@@ -164,10 +167,19 @@ class Gaji extends CI_Controller
         $query = $this->db->get();
         $data = [];
         $row_number = $start + 1;
+        $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
 
         foreach ($query->result() as $row) {
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
-            $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+            if ($guru->sik === 'PTY') {
+                $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $gapok = $gapok ? $gapok->nominal : 0;
+            } else {
+                $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+                $gapok = $gapok ? $gapok->kehadiran : 0;
+                $gapok = $guru->santri == 'santri' ? $gapok * 6000 : $gapok * 12000;
+            }
+
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             $struktural = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -187,7 +199,7 @@ class Gaji extends CI_Controller
                 $row->sik, // 6
                 $row->ijazah, // 7
                 $row->tmt, // 8
-                $gapok && in_array('gapok', $payments) ? $gapok->nominal : 0, // 9
+                in_array('gapok', $payments) ? $gapok : 0, // 9
                 $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
                 $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal : 0, // 11
                 $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
@@ -195,7 +207,7 @@ class Gaji extends CI_Controller
                 $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
                 $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
                 (
-                    ($gapok && in_array('gapok', $payments) ? $gapok->nominal : 0) +
+                    (in_array('gapok', $payments) ? $gapok : 0) +
                     ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
                     ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal : 0) +
                     ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
@@ -294,6 +306,8 @@ class Gaji extends CI_Controller
     public  function kunci($id)
     {
         $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
+        $blnpak = $cek->bulan;
+        $thnpak = $cek->tahun;
         if ($cek->status == 'kunci') {
             $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
             redirect('gaji/detail/' . $id);
@@ -301,7 +315,16 @@ class Gaji extends CI_Controller
         $gajidata = $this->model->getBy('gaji_detail', 'gaji_id', $id);
         foreach ($gajidata->result() as $row) {
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
-            $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+
+            if ($guru->sik === 'PTY') {
+                $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $gapok = $gapok1 ? $gapok1->nominal : 0;
+            } else {
+                $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $blnpak, 'tahun', $thnpak)->row();
+                $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
+                $gapok = $guru->santri == 'santri' ? $gapok2 * 6000 : $gapok2 * 12000;
+            }
+
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             $struktural = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -312,7 +335,7 @@ class Gaji extends CI_Controller
             $payments = array_column($cek, 'payment');
 
             $data = [
-                'gapok' => $gapok && in_array('gapok', $payments) ? $gapok->nominal : 0, // 9
+                'gapok' =>  in_array('gapok', $payments) ? $gapok : 0, // 9
                 'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
                 'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal : 0, // 11
                 'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
