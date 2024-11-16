@@ -22,6 +22,7 @@
                                     <th>Ijzah</th>
                                     <th>TMT</th>
                                     <th>Gol</th>
+                                    <th>Ket</th>
                                     <th>#</th>
                                 </tr>
                             </thead>
@@ -35,13 +36,14 @@
                                         <td><?= $data->nmijazah ?></td>
                                         <td><?= $data->tmt ?> <span class="badge bg-secondary"><?= selisihTahun($data->tmt) ?> thn</span></td>
                                         <td><?= $data->nmgolongan ?></td>
+                                        <td><?= $data->santri ?></td>
                                         <td>
                                             <div class="dropdown">
                                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('guru/hapus/' . $data->guru_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
                                                 </div>
                                             </div>
@@ -152,6 +154,16 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="a_santri">Jenis</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="a_santri" name="santri" required>
+                                    <option value=""> -pilih- </option>
+                                    <option value="santri">Santri</option>
+                                    <option value="non-santri">Non-Santri</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -255,6 +267,16 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="santri">Jenis</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="santri" name="santri" required>
+                                    <option value=""> -pilih- </option>
+                                    <option value="santri">Santri</option>
+                                    <option value="non-santri">Non-Santri</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
@@ -286,6 +308,7 @@
                 var ijazah = $(this).data('ijazah');
                 var tmt = $(this).data('tmt');
                 var golongan = $(this).data('golongan');
+                var santri = $(this).data('santri');
 
                 $('#nama').val(nama);
                 $('#id').val(id);
@@ -297,6 +320,7 @@
                 $('#ijazah').val(ijazah).change();
                 $('#tmt').val(tmt);
                 $('#golongan').val(golongan).change();
+                $('#santri').val(santri).change();
 
                 $('#editModal').modal('show');
             });

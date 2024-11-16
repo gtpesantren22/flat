@@ -97,4 +97,6 @@ class Guru extends CI_Controller
             redirect('guru');
         }
     }
+
+    
 }
