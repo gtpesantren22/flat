@@ -34,8 +34,10 @@ class Penyesuaian extends CI_Controller
     {
         $guru_id = $this->input->post('id', true);
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
+        $sik = $guru->sik;
 
         $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
+        $honor = $this->db->query("SELECT * FROM honor ORDER BY created_at DESC LIMIT 1")->row();
 
         $no = 1;
         $total = 0;
@@ -44,13 +46,23 @@ class Penyesuaian extends CI_Controller
 
         foreach ($hak->result() as $hakhasil) {
             if ($hakhasil->payment == 'gapok') {
-                $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                if ($sik == 'PTY') {
+                    $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                } else {
+                    $isi = $this->db->query("SELECT 
+                    CASE 
+                        WHEN guru.santri = 'santri' THEN kehadiran * 6000
+                        ELSE kehadiran * 12000
+                    END AS nominal
+                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $honor->bulan AND tahun = '$honor->tahun'")->row();
+                }
             } elseif ($hakhasil->payment == 'fungsional') {
-                $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
             } elseif ($hakhasil->payment == 'kinerja') {
-                $isi = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $masa = selisihTahun($guru->tmt);
+                $isi = $this->db->query("SELECT nominal * 24 as nominal FROM kinerja WHERE masa_kerja = $masa ")->row();
             } elseif ($hakhasil->payment == 'struktural') {
-                $isi = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $isi = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row();
             } elseif ($hakhasil->payment == 'bpjs') {
                 $isi = $this->model->getBy('bpjs', 'guru_id', $guru_id)->row();
             } elseif ($hakhasil->payment == 'walas') {

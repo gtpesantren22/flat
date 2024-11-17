@@ -28,7 +28,7 @@
                                         <th>Nama Guru</th>
                                         <th>Satminkal</th>
                                         <th>Jabatan</th>
-                                        <th>Gol</th>
+                                        <th>Golongan</th>
                                         <th>SIK</th>
                                         <th>Ijazah</th>
                                         <th>TMT</th>
@@ -145,7 +145,9 @@
                         "data": 4
                     },
                     {
-                        "data": 5
+                        "render": function(data, type, row, meta) {
+                            return row[5] + '-' + row[17];
+                        }
                     },
                     {
                         "data": 6

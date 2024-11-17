@@ -24,11 +24,13 @@ class Fungsional extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT fungsional.*, golongan.nama as nmgolongan FROM fungsional 
+        $data['data'] = $this->db->query("SELECT fungsional.*, golongan.nama as nmgolongan, kategori.nama as nmkategori FROM fungsional 
         JOIN golongan ON golongan.id=fungsional.golongan_id
+        JOIN kategori ON kategori.id=fungsional.kategori
         ")->result();
 
         $data['golonganOpt'] = $this->model->getData('golongan')->result();
+        $data['kategoriOpt'] = $this->model->getData('kategori')->result();
         $this->load->view('fungsional', $data);
     }
 
@@ -36,7 +38,7 @@ class Fungsional extends CI_Controller
     {
         $data = [
             'golongan_id' => $this->input->post('golongan', true),
-            'kategory' => $this->input->post('kategory', true),
+            'kategori' => $this->input->post('kategori', true),
             'masa_kerja' => $this->input->post('masa_kerja', true),
             'nominal' => rmRp($this->input->post('nominal', true)),
         ];
@@ -68,7 +70,7 @@ class Fungsional extends CI_Controller
     {
         $id = $this->input->post('id', true);
         $data = [
-            'kategory' => $this->input->post('kategory', true),
+            'kategori' => $this->input->post('kategori', true),
             'golongan_id' => $this->input->post('golongan', true),
             'masa_kerja' => $this->input->post('masa_kerja', true),
             'nominal' => rmRp($this->input->post('nominal', true)),

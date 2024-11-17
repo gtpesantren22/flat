@@ -15,8 +15,8 @@
                                 <tr>
                                     <th>Jabatan</th>
                                     <th>Satminkal</th>
-                                    <th>Masa Kerja</th>
-                                    <th>Jam Kerja</th>
+                                    <!-- <th>Masa Kerja</th> -->
+                                    <!-- <th>Jam Kerja</th> -->
                                     <th>Nominal</th>
                                     <th>#</th>
                                 </tr>
@@ -26,8 +26,8 @@
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmjabatan ?></strong></td>
                                         <td><?= $data->nmsatminkal ?></td>
-                                        <td><?= $data->masa_kerja ?> tahun</td>
-                                        <td><?= $data->jam_kerja ?> jp</td>
+                                        <!-- <td><?= $data->masa_kerja ?> tahun</td> -->
+                                        <!-- <td><?= $data->jam_kerja ?> jp</td> -->
                                         <td><?= rupiah($data->nominal) ?></td>
                                         <td>
                                             <div class="dropdown">

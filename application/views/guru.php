@@ -21,7 +21,7 @@
                                     <th>SIK</th>
                                     <th>Ijzah</th>
                                     <th>TMT</th>
-                                    <th>Gol</th>
+                                    <th>Golongan</th>
                                     <th>Ket</th>
                                     <th>#</th>
                                 </tr>
@@ -35,7 +35,7 @@
                                         <td><?= $data->sik ?></td>
                                         <td><?= $data->nmijazah ?></td>
                                         <td><?= $data->tmt ?> <span class="badge bg-secondary"><?= selisihTahun($data->tmt) ?> thn</span></td>
-                                        <td><?= $data->nmgolongan ?></td>
+                                        <td><?= $data->nmgolongan . ' - ' . $data->nmkategori ?></td>
                                         <td><?= $data->santri ?></td>
                                         <td>
                                             <div class="dropdown">
@@ -43,7 +43,7 @@
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-kategori="<?= $data->kategori ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('guru/hapus/' . $data->guru_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
                                                 </div>
                                             </div>
@@ -150,6 +150,17 @@
                                     <option value=""> -pilih- </option>
                                     <?php foreach ($golonganOpt as $golongan): ?>
                                         <option value="<?= $golongan->id ?>"><?= $golongan->nama ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="a_kategori">Kategori</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="a_kategori" name="kategori" required>
+                                    <option value=""> -pilih- </option>
+                                    <?php foreach ($kategoriOpt as $kategori): ?>
+                                        <option value="<?= $kategori->id ?>"><?= $kategori->nama ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>
@@ -268,6 +279,17 @@
                             </div>
                         </div>
                         <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="kategori">Kategori</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="kategori" name="kategori" required>
+                                    <option value=""> -pilih- </option>
+                                    <?php foreach ($kategoriOpt as $kategori): ?>
+                                        <option value="<?= $kategori->id ?>"><?= $kategori->nama ?></option>
+                                    <?php endforeach ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="santri">Jenis</label>
                             <div class="col-sm-10">
                                 <select class="form-control" id="santri" name="santri" required>
@@ -309,6 +331,7 @@
                 var tmt = $(this).data('tmt');
                 var golongan = $(this).data('golongan');
                 var santri = $(this).data('santri');
+                var kategori = $(this).data('kategori');
 
                 $('#nama').val(nama);
                 $('#id').val(id);
@@ -321,6 +344,7 @@
                 $('#tmt').val(tmt);
                 $('#golongan').val(golongan).change();
                 $('#santri').val(santri).change();
+                $('#kategori').val(kategori).change();
 
                 $('#editModal').modal('show');
             });

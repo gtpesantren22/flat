@@ -15,7 +15,7 @@
                                 <tr>
                                     <th>Golongan</th>
                                     <th>Kategori</th>
-                                    <th>Masa Kerja</th>
+                                    <!-- <th>Masa Kerja</th> -->
                                     <th>Nominal</th>
                                     <th>#</th>
                                 </tr>
@@ -24,8 +24,8 @@
                                 <?php foreach ($data as $data): ?>
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmgolongan ?></strong></td>
-                                        <td><?= $data->kategory ?></td>
-                                        <td><?= $data->masa_kerja ?> tahun</td>
+                                        <td><?= $data->nmkategori ?></td>
+                                        <!-- <td><?= $data->masa_kerja ?> tahun</td> -->
                                         <td><?= rupiah($data->nominal) ?></td>
                                         <td>
                                             <div class="dropdown">
@@ -33,7 +33,7 @@
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->fungsional_id ?>" data-kategory="<?= $data->kategory ?>" data-golongan="<?= $data->golongan_id ?>" data-nominal="<?= $data->nominal ?>" data-masa_kerja="<?= $data->masa_kerja ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->fungsional_id ?>" data-kategori="<?= $data->kategori ?>" data-golongan="<?= $data->golongan_id ?>" data-nominal="<?= $data->nominal ?>" data-masa_kerja="<?= $data->masa_kerja ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
 
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('fungsional/hapus/' . $data->fungsional_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
                                                 </div>
@@ -81,21 +81,26 @@
                         </div>
 
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="a_kategory">Kategori</label>
+                            <label class="col-sm-2 col-form-label" for="a_kategori">Kategori</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="a_kategory" name="kategory" placeholder="Kategory" required />
+                                <select class="form-control" id="a_kategori" name="kategori" required>
+                                    <option value=""> -pilih- </option>
+                                    <?php foreach ($kategoriOpt as $kategori): ?>
+                                        <option value="<?= $kategori->id ?>"><?= $kategori->nama ?></option>
+                                    <?php endforeach ?>
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="a_masa_kerja">Masa kerja</label>
                             <div class="col-sm-10">
-                                <input type="number" class="form-control" id="a_masa_kerja" name="masa_kerja" placeholder="Masa Kerja Karyawan" required />
+                                <input type="number" class="form-control" id="a_masa_kerja" name="masa_kerja" value="0" required />
                             </div>
                         </div>
                         <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="a_nominal">Nominal</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control uang" id="a_nominal" name="nominal" placeholder="Nominal Gapok" required />
+                                <input type="text" class="form-control uang" id="a_nominal" name="nominal" placeholder="Nominal Tunjangan" required />
                             </div>
                         </div>
                     </div>
@@ -135,15 +140,20 @@
                             </div>
                         </div>
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="kategory">Kategori</label>
+                            <label class="col-sm-2 col-form-label" for="kategori">Kategori</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" id="kategory" name="kategory" placeholder="Kategory" required />
+                                <select class="form-control" id="kategori" name="kategori" required>
+                                    <option value=""> -pilih- </option>
+                                    <?php foreach ($kategoriOpt as $kategori): ?>
+                                        <option value="<?= $kategori->id ?>"><?= $kategori->nama ?></option>
+                                    <?php endforeach ?>
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="masa_kerja">Masa kerja</label>
                             <div class="col-sm-10">
-                                <input type="number" class="form-control" id="masa_kerja" name="masa_kerja" placeholder="Masa Kerja Karyawan" required />
+                                <input type="number" class="form-control" id="masa_kerja" name="masa_kerja" value="0" required />
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -175,13 +185,13 @@
 
                 var id = $(this).data('id');
                 var golongan = $(this).data('golongan');
-                var kategory = $(this).data('kategory');
+                var kategori = $(this).data('kategori');
                 var masa_kerja = $(this).data('masa_kerja');
                 var nominal = $(this).data('nominal');
 
                 $('#id').val(id);
                 $('#golongan').val(golongan).change();
-                $('#kategory').val(kategory);
+                $('#kategori').val(kategori);
                 $('#masa_kerja').val(masa_kerja);
                 $('#nominal').val(nominal);
 

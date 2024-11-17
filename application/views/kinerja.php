@@ -24,7 +24,7 @@
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->masa_kerja ?> tahun</strong></td>
                                         <td><?= rupiah($data->nominal) ?></td>
-                                        <td><?= rupiah($data->masa_kerja * $data->nominal) ?></td>
+                                        <td><?= rupiah($data->nominal * 24) ?></td>
                                         <td>
                                             <div class="dropdown">
                                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -145,7 +145,7 @@
 
                 $('#editModal').modal('show');
             });
-            
+
             $('#table1').DataTable();
             $('.uang').mask('000.000.000.000', {
                 reverse: true
