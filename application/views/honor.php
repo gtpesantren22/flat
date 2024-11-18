@@ -27,7 +27,10 @@
                                 <?php foreach ($honorGroup as $row): ?>
                                     <tr>
                                         <td><?= bulan($row->bulan) . ' ' . $row->tahun ?></td>
-                                        <td><button class="btn btn-xs btn-info btn-cek" data-id="<?= $row->id ?>">Cek</button></td>
+                                        <td>
+                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $row->id ?>">Cek</button>
+                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $row->id ?>">Refresh</button>
+                                        </td>
                                     </tr>
                                 <?php endforeach ?>
                             </tbody>
@@ -45,7 +48,7 @@
                     <div class="card-body">
                         <h5 class="card-title">
                             Daftar Guru/Karyawan PTTY
-                            <!-- <a href="<?= base_url('settings/generateAllHak') ?>" class="btn btn-outline-danger btn-sm float-end tbl-confirm" value="Fitur ini akan memperbarui semua data hak guru berdasarkan SIK">Generate All</a> -->
+                            <!-- <a href="<?= base_url('honor/refresh/') ?>" class="btn btn-outline-danger btn-sm float-end">Refresh Data</a> -->
 
                         </h5>
                         <p class="card-text">
@@ -135,6 +138,31 @@
                 $('#table1').empty(); // Kosongkan elemen tabel
             }
             showTable(id);
+        })
+        $('.btn-refresh').on('click', function() {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '<?= base_url("honor/refresh") ?>', // endpoint untuk update data
+                type: 'POST',
+                data: {
+                    id: id
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status == 'ok') {
+                        if ($.fn.DataTable.isDataTable('#table1')) {
+                            $('#table1').DataTable().destroy();
+                            $('#table1').empty(); // Kosongkan elemen tabel
+                        }
+                        showTable(id);
+                    } else {
+                        alert('Gagal mengupdate data');
+                    }
+                },
+                error: function() {
+                    alert('Terjadi kesalahan saat mengupdate data');
+                }
+            });
         })
 
         function showTable(params) {

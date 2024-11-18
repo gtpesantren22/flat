@@ -22,6 +22,10 @@ class Gaji extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
+
+        $this->honor_santri = 7000;
+        $this->honor_non = 14000;
+        $this->jamkinerja = 24;
     }
 
     public function index()
@@ -188,7 +192,7 @@ class Gaji extends CI_Controller
             } else {
                 $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
                 $gapok = $gapok ? $gapok->kehadiran : 0;
-                $gapok = $guru->santri == 'santri' ? $gapok * 6000 : $gapok * 12000;
+                $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
             }
 
             // $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -214,7 +218,7 @@ class Gaji extends CI_Controller
                 $row->tmt, // 8
                 in_array('gapok', $payments) ? $gapok : 0, // 9
                 $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
-                $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * 24 : 0, // 11
+                $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0, // 11
                 $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
                 $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0, // 13
                 $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
@@ -222,13 +226,21 @@ class Gaji extends CI_Controller
                 (
                     (in_array('gapok', $payments) ? $gapok : 0) +
                     ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
-                    ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * 24 : 0) +
+                    ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
                     ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                     ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                     ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
                     ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0)
                 ), // 16
                 $row->kategori, // 17
+                in_array('gapok', $payments) ? 'Y' : 'N', // 18
+                in_array('fungsional', $payments) ? 'Y' : 'N', // 19
+                in_array('kinerja', $payments) ? 'Y' : 'N', // 20
+                in_array('struktural', $payments) ? 'Y' : 'N', // 21
+                in_array('bpjs', $payments) ? 'Y' : 'N', // 22
+                in_array('walas', $payments) ? 'Y' : 'N', // 23
+                in_array('penyesuaian', $payments) ? 'Y' : 'N', // 24
+                $row->guru_id, // 25
             ];
         }
 
@@ -337,7 +349,7 @@ class Gaji extends CI_Controller
             } else {
                 $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $blnpak, 'tahun', $thnpak)->row();
                 $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
-                $gapok = $guru->santri == 'santri' ? $gapok2 * 6000 : $gapok2 * 12000;
+                $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
             }
 
             // $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -354,7 +366,7 @@ class Gaji extends CI_Controller
             $data = [
                 'gapok' =>  in_array('gapok', $payments) ? $gapok : 0, // 9
                 'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
-                'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * 24 : 0, // 11
+                'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0, // 11
                 'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
                 'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0, // 13
                 'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
@@ -613,5 +625,60 @@ class Gaji extends CI_Controller
 
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
+    }
+
+    public function reloadGaji()
+    {
+        $guru_id = $this->input->post('guru_id', true);
+        $gaji_id = $this->input->post('gaji_id', true);
+        $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
+        $gajis = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
+
+        if ($guru->sik === 'PTY') {
+            $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+            $gapok = $gapok ? $gapok->nominal : 0;
+        } else {
+            $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+            $gapok = $gapok ? $gapok->kehadiran : 0;
+            $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
+        }
+
+        // $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+        $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+        $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
+        // $struktural = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row();
+        $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row();
+        $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
+        $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
+        $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+        $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
+        $payments = array_column($cek, 'payment');
+
+        echo json_encode([
+            'guru_id' => $guru_id, // 9
+            'gapok' => in_array('gapok', $payments) ? $gapok : 0, // 9
+            'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
+            'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0, // 11
+            'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
+            'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0, // 13
+            'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
+            'penyesuaian' => $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+            'total' => (
+                (in_array('gapok', $payments) ? $gapok : 0) +
+                ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
+                ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
+                ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
+                ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
+                ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
+                ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0)
+            ), // 16
+            'cek_gapok' => in_array('gapok', $payments) ? 'Y' : 'N', // 18
+            'cek_fungsional' => in_array('fungsional', $payments) ? 'Y' : 'N', // 19
+            'cek_kinerja' => in_array('kinerja', $payments) ? 'Y' : 'N', // 20
+            'cek_struktural' => in_array('struktural', $payments) ? 'Y' : 'N', // 21
+            'cek_bpjs' => in_array('bpjs', $payments) ? 'Y' : 'N', // 22
+            'cek_walas' => in_array('walas', $payments) ? 'Y' : 'N', // 23
+            'cek_penyesuaian' => in_array('penyesuaian', $payments) ? 'Y' : 'N', // 24
+        ]);
     }
 }

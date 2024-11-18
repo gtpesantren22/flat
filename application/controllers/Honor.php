@@ -16,6 +16,8 @@ class Honor extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
+        $this->honor_santri = 7000;
+        $this->honor_non = 14000;
     }
 
     public function index()
@@ -23,7 +25,7 @@ class Honor extends CI_Controller
         $data['judul'] = 'Honor';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['honorGroup'] = $this->db->query("SELECT * FROM honor GROUP BY created_at ORDER BY created_at DESC")->result();
+        $data['honorGroup'] = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC")->result();
         $data['honor'] = $this->model->getData('sik_setting')->result();
 
         $this->load->view('honor', $data);
@@ -114,7 +116,7 @@ class Honor extends CI_Controller
                 $gruru->nama,  // 1
                 $gruru->santri, // 2
                 $row->kehadiran, // 3
-                $gruru->santri == 'santri' ? $row->kehadiran * 6000 : $row->kehadiran * 12000, // 4 
+                $gruru->santri == 'santri' ? $row->kehadiran * $this->honor_santri : $row->kehadiran * $this->honor_non, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 // $row->ijazah, // 7
@@ -141,11 +143,34 @@ class Honor extends CI_Controller
         $jam = $this->input->post('value');
         $dtlHonor = $this->model->getBy('honor', 'id', $id)->row();
         $guru = $this->model->getBy('guru', 'guru_id', $dtlHonor->guru_id)->row();
-        $nomBesaran = $guru->santri == 'santri' ? 6000 : 12000;
+        $nomBesaran = $guru->santri == 'santri' ? $this->honor_santri : $this->honor_non;
 
         $this->model->edit('honor', 'id', $id, ['kehadiran' => $jam]);
         if ($this->db->affected_rows() > 0) {
             echo json_encode(['status' => 'ok', 'besaran' => $nomBesaran]);
+        } else {
+            echo json_encode(['status' => 'gagal']);
+        }
+    }
+
+    public function refresh()
+    {
+        $id = $this->input->post('id', true);
+        $honor = $this->model->getBy('honor', 'id', $id)->row();
+
+        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM honor WHERE honor_id = '$honor->honor_id' AND honor.guru_id = guru.guru_id) AND sik = 'PTTY' ")->result();
+        foreach ($guru as $value) {
+            $data = [
+                'guru_id' => $value->guru_id,
+                'honor_id' => $honor->honor_id,
+                'bulan' => $honor->bulan,
+                'tahun' => $honor->tahun,
+                'created_at' => date('Y-m-d H:i'),
+            ];
+            $this->model->tambah('honor', $data);
+        }
+        if ($this->db->affected_rows() > 0) {
+            echo json_encode(['status' => 'ok']);
         } else {
             echo json_encode(['status' => 'gagal']);
         }
