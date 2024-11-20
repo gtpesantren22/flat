@@ -238,10 +238,22 @@
                         </ul>
                     </li>
 
+                    <li class="menu-item <?= $judul == 'Perbandingan' ? 'active' : '' ?>">
+                        <a href="<?= base_url('perbandingan') ?>" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-code-alt"></i>
+                            <div data-i18n="Analytics">Perbandingan Gaji</div>
+                        </a>
+                    </li>
                     <li class="menu-item <?= $judul == 'Master Gaji' ? 'active' : '' ?>">
                         <a href="<?= base_url('gaji') ?>" class="menu-link text-info">
                             <i class="menu-icon tf-icons bx bx-bowl-hot"></i>
-                            <div data-i18n="Analytics">Master Gaji</div>
+                            <div data-i18n="Analytics">Total Gaji</div>
+                        </a>
+                    </li>
+                    <li class="menu-item <?= $judul == 'Potongan' ? 'active' : '' ?>">
+                        <a href="<?= base_url('potongan') ?>" class="menu-link text-warning">
+                            <i class="menu-icon tf-icons bx bx-cut"></i>
+                            <div data-i18n="Analytics">Potongan</div>
                         </a>
                     </li>
                     <li class="menu-header small text-uppercase">

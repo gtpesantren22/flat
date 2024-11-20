@@ -28,7 +28,7 @@ class Modeldata extends CI_Model
         $this->db->where($where2, $dtwhere2);
         $this->db->delete($table);
     }
-    public function  edit($table, $where, $dtwhere, $data)
+    public function edit($table, $where, $dtwhere, $data)
     {
         $this->db->where($where, $dtwhere);
         $this->db->update($table, $data);

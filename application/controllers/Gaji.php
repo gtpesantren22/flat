@@ -364,15 +364,18 @@ class Gaji extends CI_Controller
             $payments = array_column($cek, 'payment');
 
             $data = [
-                'gapok' =>  in_array('gapok', $payments) ? $gapok : 0, // 9
-                'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
-                'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0, // 11
-                'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
-                'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0, // 13
-                'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
-                'penyesuaian' => $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+                'gapok' =>  in_array('gapok', $payments) ? $gapok : '0', // 9
+                'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : '0', // 10
+                'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : '0', // 11
+                'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : '0', // 12
+                'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : '0', // 13
+                'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : '0', // 14
+                'penyesuaian' => $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : '0', // 15
             ];
             $this->model->edit('gaji_detail', 'id_detail', $row->id_detail, $data);
+            // echo '<pre>';
+            // var_dump($data);
+            // echo '</pre>';
         }
         if ($this->db->affected_rows() > 0) {
             $this->model->edit('gaji', 'gaji_id', $id, ['status' => 'kunci']);
