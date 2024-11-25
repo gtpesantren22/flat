@@ -53,11 +53,10 @@
     </div>
 
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel1">Rincian Nominal Gaji</h5>
+                    <!-- <h5 class="modal-title" id="exampleModalLabel1">Rincian Nominal Gaji</h5> -->
                     <button
                         type="button"
                         class="btn-close"
@@ -66,104 +65,129 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <table class="table table-sm">
-                            <tr>
-                                <td class="text-bold text-primary">Nama Guru</td>
-                                <td class="text-bold text-primary"><b id="nama"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_gapok"></input>
-                                        <?php endif ?>
-                                        Gapok/Honor
-                                    </div>
-                                </td>
-                                <td><b id="gapok"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_fungsional"></input>
-                                        <?php endif ?>
-                                        Tunjangan Fungsional
-                                    </div>
-                                </td>
-                                <td><b id="fungsional"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_kinerja"></input>
-                                        <?php endif ?>
-                                        Tunjangan Kinerja
-                                    </div>
-                                </td>
-                                <td><b id="kinerja"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_bpjs"></input>
-                                        <?php endif ?>
-                                        Tunjangan BPJS
-                                    </div>
-                                </td>
-                                <td><b id="bpjs"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_struktural"></input>
-                                        <?php endif ?>
-                                        Tunjangan Struktural
-                                    </div>
-                                </td>
-                                <td><b id="struktural"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_walas"></input>
-                                        <?php endif ?>
-                                        Tunjangan Wali Kelas
-                                    </div>
-                                </td>
-                                <td><b id="walas"></b></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="form-check">
-                                        <?php if ($datagaji->status != 'kunci'): ?>
-                                            <input type="checkbox" class="form-check-input" value="Y" id="cek_penyesuaian"></input>
-                                        <?php endif ?>
-                                        Tunjangan Penyesuaian
-                                    </div>
-                                </td>
-                                <td><b id="penyesuaian"></b></td>
-                            </tr>
-                            <tr>
-                                <th class="text-bold text-primary">TOTAL GAJI</th>
-                                <th class="text-bold text-primary"><b id="total"></b></th>
-                            </tr>
-                        </table>
+                        <div class="col-md-3">
+                            <table>
+                                <tr>
+                                    <td>Nama</td>
+                                    <td>:</td>
+                                    <td><b id="nama" class="text-primary"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>Lembaga</td>
+                                    <td>:</td>
+                                    <td><b id="lembaga" class="text-primary"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>Gaji</td>
+                                    <td>:</td>
+                                    <td><b id="waktu" class="text-primary"></b></td>
+                                </tr>
+                            </table>
+                            <hr>
+                            <h5>Total akhir</h5>
+                            <h3 id="total-akhir"></h3>
+                            <hr>
+                            <?php if ($datagaji->status != 'kunci'): ?>
+                                <form action="<?= base_url("gaji/reloadGaji") ?>" method="post" class="form-update">
+                                    <input type="hidden" name="guru_id" id="guru_id">
+                                    <input type="hidden" name="gaji_id" value="<?= $idgaji ?>">
+                                    <button type="submit" class="btn btn-outline-success">Refresh Data</button>
+                                </form>
+                            <?php endif ?>
+                        </div>
+                        <div class="col-md-5">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td class="text-bold text-primary" colspan="2">Rincian Gaji</td>
+                                    <!-- <td class="text-bold text-primary"><b id="nama"></b></td> -->
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_gapok"></input>
+                                            <?php endif ?>
+                                            Gapok/Honor
+                                        </div>
+                                    </td>
+                                    <td><b id="gapok"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_fungsional"></input>
+                                            <?php endif ?>
+                                            Tunjangan Fungsional
+                                        </div>
+                                    </td>
+                                    <td><b id="fungsional"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_kinerja"></input>
+                                            <?php endif ?>
+                                            Tunjangan Kinerja
+                                        </div>
+                                    </td>
+                                    <td><b id="kinerja"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_bpjs"></input>
+                                            <?php endif ?>
+                                            Tunjangan BPJS
+                                        </div>
+                                    </td>
+                                    <td><b id="bpjs"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_struktural"></input>
+                                            <?php endif ?>
+                                            Tunjangan Struktural
+                                        </div>
+                                    </td>
+                                    <td><b id="struktural"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_walas"></input>
+                                            <?php endif ?>
+                                            Tunjangan Wali Kelas
+                                        </div>
+                                    </td>
+                                    <td><b id="walas"></b></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-check">
+                                            <?php if ($datagaji->status != 'kunci'): ?>
+                                                <input type="checkbox" class="form-check-input" value="Y" id="cek_penyesuaian"></input>
+                                            <?php endif ?>
+                                            Tunjangan Penyesuaian
+                                        </div>
+                                    </td>
+                                    <td><b id="penyesuaian"></b></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-bold text-primary">TOTAL GAJI</th>
+                                    <th class="text-bold text-primary"><b id="total"></b></th>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
+                            <div id="hasil-potong"></div>
+                        </div>
                     </div>
-
-                </div>
-                <div class="modal-footer">
-                    <?php if ($datagaji->status != 'kunci'): ?>
-                        <form action="<?= base_url("gaji/reloadGaji") ?>" method="post" class="form-update">
-                            <input type="hidden" name="guru_id" id="guru_id">
-                            <input type="hidden" name="gaji_id" value="<?= $idgaji ?>">
-                            <button type="submit" class="btn btn-outline-success">Refresh Data</button>
-                        </form>
-                    <?php endif ?>
                 </div>
             </div>
 
@@ -224,8 +248,9 @@
                     {
                         "render": function(data, type, row) {
                             var total = row[16];
+                            var potong = row[18];
                             return `
-                                <b class="text-bold text-primary">${formatRupiah(total)}</b>
+                                <b class="text-bold text-primary">${formatRupiah(total-potong)}</b>
                             `;
                         }
 
@@ -233,7 +258,7 @@
                     {
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-xs btn-warning btn-detail" data-nama="${row[2]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-total="${formatRupiah(row[16])}" data-cek_gapok="${row[18]}" data-cek_fungsional="${row[19]}" data-cek_kinerja="${row[20]}" data-cek_bpjs="${row[21]}" data-cek_struktural="${row[22]}" data-cek_walas="${row[23]}" data-cek_penyesuaian="${row[24]}" data-guru_id="${row[25]}">Rincian</button>
+                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-total="${formatRupiah(row[16])}" data-cek_gapok="${row[26]}" data-cek_fungsional="${row[19]}" data-cek_kinerja="${row[20]}" data-cek_bpjs="${row[21]}" data-cek_struktural="${row[22]}" data-cek_walas="${row[23]}" data-cek_penyesuaian="${row[24]}" data-guru_id="${row[25]}">Rincian</button>
                             `;
                         }
 
@@ -259,6 +284,7 @@
                     success: function(response) {
                         if (response) {
                             // console.log(response)
+                            var total = response.total;
                             $('#gapok').text(formatRupiah(response.gapok));
                             $('#fungsional').text(formatRupiah(response.fungsional));
                             $('#kinerja').text(formatRupiah(response.kinerja));
@@ -276,6 +302,30 @@
                             $('#cek_walas').prop('checked', response.cek_walas === 'Y').attr('onchange', `updateCheckbox2('${response.guru_id}', 'walas', this.checked)`);
                             $('#cek_struktural').prop('checked', response.cek_struktural === 'Y').attr('onchange', `updateCheckbox2('${response.guru_id}', 'struktural', this.checked)`);
                             $('#cek_penyesuaian').prop('checked', response.cek_penyesuaian === 'Y').attr('onchange', `updateCheckbox2('${response.guru_id}', 'penyesuaian', this.checked)`);
+
+                            $.ajax({
+                                type: "POST",
+                                url: "<?= base_url('gaji/getPotongan') ?>",
+                                data: formData,
+                                dataType: 'json',
+                                success: function(data) {
+                                    // console.log(data);
+                                    // let cleanedStr = total.replace(/[^\d]/g, '');
+                                    let num = parseInt(total, 10);
+                                    let total_akhir = parseInt(num, 10) - parseInt(data.total_potong, 10);
+                                    $('#hasil-potong').empty();
+                                    $('#lembaga').empty();
+                                    $('#total-akhir').empty();
+                                    $('#waktu').empty();
+                                    $('#hasil-potong').html(data.hasil);
+                                    $('#lembaga').text(data.lembaga);
+                                    $('#total-akhir').text(formatRupiah(total_akhir));
+                                    $('#waktu').text(data.bulan + ' ' + data.tahun);
+                                },
+                                error: function(xhr, status, error) {
+                                    console.log(xhr.responseText);
+                                }
+                            })
                         } else {
                             alert('Respon kosong. Pastikan server mengembalikan data dengan benar.');
                         }
@@ -298,6 +348,7 @@
             var penyesuaian = $(this).data('penyesuaian');
             var total = $(this).data('total');
             var guru_id = $(this).data('guru_id');
+            var id = $(this).data('id');
 
             var cek_gapok = $(this).data('cek_gapok');
             var cek_fungsional = $(this).data('cek_fungsional');
@@ -327,6 +378,33 @@
             $('#cek_penyesuaian').prop('checked', cek_penyesuaian === 'Y').attr('onchange', `updateCheckbox2('${guru_id}', 'penyesuaian', this.checked)`);
 
             $('#editModal').modal('show');
+
+            $.ajax({
+                type: "POST",
+                url: "<?= base_url('gaji/getPotongan') ?>",
+                data: {
+                    gaji_id: id,
+                    guru_id: guru_id,
+                },
+                dataType: 'json',
+                success: function(data) {
+                    // console.log(data);
+                    let cleanedStr = total.replace(/[^\d]/g, '');
+                    let num = parseInt(cleanedStr, 10);
+                    let total_akhir = parseInt(num, 10) - parseInt(data.total_potong, 10);
+                    $('#hasil-potong').empty();
+                    $('#lembaga').empty();
+                    $('#total-akhir').empty();
+                    $('#waktu').empty();
+                    $('#hasil-potong').html(data.hasil);
+                    $('#lembaga').text(data.lembaga);
+                    $('#total-akhir').text(formatRupiah(total_akhir));
+                    $('#waktu').text(data.bulan + ' ' + data.tahun);
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            })
         });
 
         function formatRupiah(number) {

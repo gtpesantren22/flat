@@ -35,8 +35,6 @@
                                         <td>
                                             <button onclick="window.location='<?= base_url('gaji/detail/' . $gaji->gaji_id) ?>'" class="btn btn-info btn-sm"><i class="bx bx-detail"></i> Detail</button>
                                             <a href="<?= base_url('gaji/hapus/' . $gaji->gaji_id) ?>" class="btn btn-danger btn-sm tombol-hapus"><i class="bx bx-trash"></i> Hapus</a>
-                                            <!-- || -->
-                                            <!-- <a class="btn btn-success btn-sm tbl-confirm" value="Fitur ini akan mengenerate gaji seluruh guru dan mungkin membutuhkan waktu" href="<?= base_url('gaji/generate/' . $gaji->gaji_id) ?>"><i class="bx bx-refresh"></i> Generate</a> -->
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
@@ -97,27 +95,3 @@
 
     <!-- / Content -->
     <?php include 'foot.php' ?>
-
-    <script>
-        $('document').ready(function() {
-            $('#table1').DataTable();
-        })
-
-        function updateCheckbox(id, field, isChecked) {
-            $.ajax({
-                url: '<?= base_url("settings/update_sik") ?>',
-                type: 'POST',
-                data: {
-                    id: id,
-                    field: field,
-                    value: isChecked ? 'Y' : 'N'
-                },
-                success: function(response) {
-                    console.log('Data updated successfully');
-                },
-                error: function() {
-                    console.error('Failed to update data');
-                }
-            });
-        }
-    </script>

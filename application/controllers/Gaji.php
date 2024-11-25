@@ -185,6 +185,7 @@ class Gaji extends CI_Controller
         $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
 
         foreach ($query->result() as $row) {
+            $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             if ($guru->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -233,7 +234,7 @@ class Gaji extends CI_Controller
                     ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0)
                 ), // 16
                 $row->kategori, // 17
-                in_array('gapok', $payments) ? 'Y' : 'N', // 18
+                $potong ? $potong->total : 0, //18
                 in_array('fungsional', $payments) ? 'Y' : 'N', // 19
                 in_array('kinerja', $payments) ? 'Y' : 'N', // 20
                 in_array('struktural', $payments) ? 'Y' : 'N', // 21
@@ -241,6 +242,7 @@ class Gaji extends CI_Controller
                 in_array('walas', $payments) ? 'Y' : 'N', // 23
                 in_array('penyesuaian', $payments) ? 'Y' : 'N', // 24
                 $row->guru_id, // 25
+                in_array('gapok', $payments) ? 'Y' : 'N', // 26
             ];
         }
 
@@ -285,8 +287,9 @@ class Gaji extends CI_Controller
         $data = [];
         $row_number = $start + 1;
 
+        $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
         foreach ($query->result() as $row) {
-
+            $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
             $data[] = [
                 $row_number++, // 0
                 $row->gaji_id,  // 1
@@ -314,6 +317,7 @@ class Gaji extends CI_Controller
                     ($row->penyesuaian)
                 ), // 16
                 $row->kategori, // 17
+                $potong ? $potong->total : 0, //18
             ];
         }
 
@@ -683,5 +687,37 @@ class Gaji extends CI_Controller
             'cek_walas' => in_array('walas', $payments) ? 'Y' : 'N', // 23
             'cek_penyesuaian' => in_array('penyesuaian', $payments) ? 'Y' : 'N', // 24
         ]);
+    }
+
+    public function getPotongan()
+    {
+        $id = $this->input->post('gaji_id', 'true');
+        $guru_id = $this->input->post('guru_id', 'true');
+        $data = $this->model->getBy('gaji', 'gaji_id', $id)->row();
+        $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
+        $rinci = $this->model->getBy3('potongan', 'bulan', $data->bulan, 'tahun', $data->tahun, 'guru_id', $guru_id)->result();
+        $lembaga = $this->model->getBy('satminkal', 'id', $guru->satminkal)->row();
+
+        $hasil = "<table class='table table-sm'>
+        <tr>
+            <th colspan='2' class='text-primary'>Rincian Potongan</th>
+            </tr>
+        ";
+        $total = 0;
+        foreach ($rinci as $value) {
+            $hasil .= '<tr>';
+            $hasil .= '<td>' . $value->ket . '</td>';
+            $hasil .= '<td>' . rupiah($value->nominal) . '</td>';
+            $hasil .= '</tr>';
+            $total += $value->nominal;
+        }
+        $hasil .= "
+        <tr>
+            <th class='text-primary'>Total Potongan</th>
+            <th class='text-primary'>" . rupiah($total) . "</th>
+        </tr>
+        </table>";
+
+        echo json_encode(['hasil' => $hasil, 'lembaga' => $lembaga->nama, 'bulan' => bulan($data->bulan), 'tahun' => $data->tahun, 'total_potong' => $total]);
     }
 }
