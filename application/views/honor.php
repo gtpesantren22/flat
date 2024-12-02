@@ -61,6 +61,7 @@
                                         <th>Nama</th>
                                         <th>Ket</th>
                                         <th>Jml Jam</th>
+                                        <th>: 4</th>
                                         <th>Nominal</th>
                                     </tr>
                                 </thead>
@@ -118,6 +119,7 @@
                             Close
                         </button>
                         <button type="submit" class="btn btn-primary">Simpan</button>
+
                     </div>
                 </div>
             </form>
@@ -135,7 +137,7 @@
             var id = $(this).data('id');
             if ($.fn.DataTable.isDataTable('#table1')) {
                 $('#table1').DataTable().destroy();
-                $('#table1').empty(); // Kosongkan elemen tabel
+                $('#table1 tbody').empty();
             }
             showTable(id);
         })
@@ -199,6 +201,11 @@
                     },
                     {
                         "render": function(data, type, row, meta) {
+                            return `<strong id='hasil-bagi-${row[5]}'>${(row[3] / 4)}</strong>`;
+                        }
+                    },
+                    {
+                        "render": function(data, type, row, meta) {
                             return `<b id='hasil-honor-${row[5]}'>${formatRupiah(row[4])}</b>`;
                         }
                     }
@@ -231,7 +238,8 @@
                 success: function(response) {
                     if (response.status == 'ok') {
                         $(this).val(newValue);
-                        $(`#hasil-honor-${id}`).text(formatRupiah(newValue * response.besaran));
+                        $(`#hasil-honor-${id}`).text(formatRupiah((newValue / 4) * response.besaran));
+                        $(`#hasil-bagi-${id}`).text(newValue / 4);
                     } else {
                         alert('Gagal mengupdate data');
                     }

@@ -23,6 +23,9 @@
                                     <th>#</th>
                                     <th>Keterangan</th>
                                     <th>Tahun Pelajaran</th>
+                                    <th>Total Gaji</th>
+                                    <th>Total Potongan</th>
+                                    <th>Total Akhir</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -30,11 +33,14 @@
                                 <?php foreach ($gaji as $gaji): ?>
                                     <tr>
                                         <td><?= $a++; ?></td>
-                                        <td><?= $gaji->status == 'kunci' ? "<span class='text-warning bx bxs-key'></span>" : '' ?> <?= bulan($gaji->bulan) . ' ' . $gaji->tahun ?></td>
-                                        <td><?= $gaji->tapel ?></td>
+                                        <td><?= $gaji['status'] == 'kunci' ? "<span class='text-warning bx bxs-key'></span>" : '' ?> <?= bulan($gaji['bulan']) . ' ' . $gaji['tahun'] ?></td>
+                                        <td><?= $gaji['tapel'] ?></td>
+                                        <td><?= rupiah($gaji['total']) ?></td>
+                                        <td><?= rupiah($gaji['potong']) ?></td>
+                                        <td><?= rupiah($gaji['total'] - $gaji['potong']) ?></td>
                                         <td>
-                                            <button onclick="window.location='<?= base_url('gaji/detail/' . $gaji->gaji_id) ?>'" class="btn btn-info btn-sm"><i class="bx bx-detail"></i> Detail</button>
-                                            <a href="<?= base_url('gaji/hapus/' . $gaji->gaji_id) ?>" class="btn btn-danger btn-sm tombol-hapus"><i class="bx bx-trash"></i> Hapus</a>
+                                            <button onclick="window.location='<?= base_url('gaji/detail/' . $gaji['gaji_id']) ?>'" class="btn btn-info btn-sm"><i class="bx bx-detail"></i> Detail</button>
+                                            <a href="<?= base_url('gaji/hapus/' . $gaji['gaji_id']) ?>" class="btn btn-danger btn-sm tombol-hapus"><i class="bx bx-trash"></i> Hapus</a>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>

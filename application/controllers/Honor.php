@@ -111,12 +111,13 @@ class Honor extends CI_Controller
 
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $hasil_hadir = $row->kehadiran / 4;
             $data[] = [
                 $row_number++, // 0
                 $gruru->nama,  // 1
                 $gruru->santri, // 2
                 $row->kehadiran, // 3
-                $gruru->santri == 'santri' ? $row->kehadiran * $this->honor_santri : $row->kehadiran * $this->honor_non, // 4 
+                $gruru->santri == 'santri' ? $hasil_hadir * $this->honor_santri : $hasil_hadir * $this->honor_non, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 // $row->ijazah, // 7

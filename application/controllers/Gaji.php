@@ -33,7 +33,64 @@ class Gaji extends CI_Controller
         $data['judul'] = 'Master Gaji';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['gaji'] = $this->model->getOrder('gaji', 'created_at', 'DESC')->result();
+        // $data['gaji'] = $this->model->getOrder('gaji', 'created_at', 'DESC')->result();
+        $gajiAwal = $this->model->getOrder('gaji', 'created_at', 'DESC')->result();
+        $totalakhir = 0;
+        $potongakhir = 0;
+        $datakirim = [];
+        // var_dump($gajiAwal);
+        foreach ($gajiAwal as  $value) {
+            if ($value->status == 'kunci') {
+            } else {
+                $query = $this->model->getBy('gaji_detail', 'gaji_id', $value->gaji_id);
+                $totalawal = 0;
+                $potongawal = 0;
+                foreach ($query->result() as $row) {
+                    $gajis = $this->model->getBy('gaji', 'gaji_id', $row->gaji_id)->row();
+                    $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
+                    $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+                    if ($guru->sik === 'PTY') {
+                        $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                        $gapok = $gapok ? $gapok->nominal : 0;
+                    } else {
+                        $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+                        $gapok = $gapok ? ($gapok->kehadiran / 4) : 0;
+                        $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
+                    }
+
+                    // $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                    $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+                    $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
+                    // $struktural = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                    $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row();
+                    $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
+                    $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
+                    $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+                    $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
+                    $payments = array_column($cek, 'payment');
+                    $totalawal += (in_array('gapok', $payments) ? $gapok : 0) +
+                        ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
+                        ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
+                        ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
+                        ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
+                        ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
+                        ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0);
+                    $potongawal += $potong ? $potong->total : 0;
+                }
+                $totalakhir += $totalawal;
+                $potongakhir += $potongawal;
+                $datakirim[] = [
+                    'gaji_id' => $row->gaji_id,  // 1
+                    'status' => $value->status,  // 1
+                    'tapel' => $value->tapel,  // 1
+                    'bulan' => $gajis->bulan,  // 1
+                    'tahun' => $gajis->tahun,  // 1
+                    'total' => $totalakhir,
+                    'potong' => $potongakhir //18
+                ];
+            }
+        }
+        $data['gaji'] = $datakirim;
 
         $this->load->view('gaji', $data);
     }
@@ -192,7 +249,7 @@ class Gaji extends CI_Controller
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
                 $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
-                $gapok = $gapok ? $gapok->kehadiran : 0;
+                $gapok = $gapok ? ($gapok->kehadiran / 4) : 0;
                 $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
             }
 
@@ -646,7 +703,7 @@ class Gaji extends CI_Controller
             $gapok = $gapok ? $gapok->nominal : 0;
         } else {
             $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
-            $gapok = $gapok ? $gapok->kehadiran : 0;
+            $gapok = $gapok ? ($gapok->kehadiran / 4) : 0;
             $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }
 
