@@ -159,21 +159,25 @@ class Honor extends CI_Controller
         $id = $this->input->post('id', true);
         $honor = $this->model->getBy('honor', 'id', $id)->row();
 
-        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM honor WHERE honor_id = '$honor->honor_id' AND honor.guru_id = guru.guru_id) AND sik = 'PTTY' ")->result();
-        foreach ($guru as $value) {
-            $data = [
-                'guru_id' => $value->guru_id,
-                'honor_id' => $honor->honor_id,
-                'bulan' => $honor->bulan,
-                'tahun' => $honor->tahun,
-                'created_at' => date('Y-m-d H:i'),
-            ];
-            $this->model->tambah('honor', $data);
-        }
-        if ($this->db->affected_rows() > 0) {
-            echo json_encode(['status' => 'ok']);
+        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM honor WHERE honor_id = '$honor->honor_id' AND honor.guru_id = guru.guru_id) AND sik = 'PTTY' ");
+        if ($guru->row()) {
+            foreach ($guru->result() as $value) {
+                $data = [
+                    'guru_id' => $value->guru_id,
+                    'honor_id' => $honor->honor_id,
+                    'bulan' => $honor->bulan,
+                    'tahun' => $honor->tahun,
+                    'created_at' => date('Y-m-d H:i'),
+                ];
+                $this->model->tambah('honor', $data);
+            }
+            if ($this->db->affected_rows() > 0) {
+                echo json_encode(['status' => 'ok']);
+            } else {
+                echo json_encode(['status' => 'gagal']);
+            }
         } else {
-            echo json_encode(['status' => 'gagal']);
+            echo json_encode(['status' => 'ok']);
         }
     }
 }
