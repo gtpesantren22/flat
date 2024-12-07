@@ -54,8 +54,8 @@ class Penyesuaian extends CI_Controller
                 } else {
                     $isi = $this->db->query("SELECT 
                     CASE 
-                        WHEN guru.santri = 'santri' THEN kehadiran * $this->honor_santri
-                        ELSE kehadiran * $this->honor_non
+                        WHEN guru.santri = 'santri' THEN (kehadiran/4) * $this->honor_santri
+                        ELSE (kehadiran/4) * $this->honor_non
                     END AS nominal
                     FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $honor->bulan AND tahun = '$honor->tahun'")->row();
                 }
