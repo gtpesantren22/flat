@@ -45,6 +45,15 @@
                                         </tr>
                                     <?php endforeach ?>
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3">TOTAL</th>
+                                        <th><?= rupiah($t_akhir) ?></th>
+                                        <th><?= rupiah($p_akhir) ?></th>
+                                        <th><?= rupiah($t_akhir - $p_akhir) ?></th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                         </p>

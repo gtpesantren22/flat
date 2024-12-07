@@ -67,4 +67,10 @@ class Modeldata extends CI_Model
         $this->db->order_by($orderby, $list);
         return $this->db->get($table);
     }
+    public function getOrder2($table, $orderby, $list, $orderby2, $list2)
+    {
+        $this->db->order_by($orderby, $list);
+        $this->db->order_by($orderby2, $list2);
+        return $this->db->get($table);
+    }
 }
