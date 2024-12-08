@@ -53,6 +53,7 @@ class Perbandingan extends CI_Controller
 
             $kirim[] = [
                 'nama' =>  $guru->nama, // 9
+                'sik' =>  $guru->sik, // 9
                 'lembaga' =>  $satminkal->nama, // 9
                 'sebelum' =>  $row->nominal, // 9
                 'total' => (in_array('gapok', $payments) ? $gapok : 0) + // 9
