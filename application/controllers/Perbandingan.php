@@ -32,6 +32,7 @@ class Perbandingan extends CI_Controller
         foreach ($dataguru as $row) {
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $satminkal = $this->model->getBy('satminkal', 'id', $guru->satminkal)->row();
+            $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
 
             if ($guru->sik === 'PTY') {
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -55,6 +56,7 @@ class Perbandingan extends CI_Controller
                 'nama' =>  $guru->nama, // 9
                 'sik' =>  $guru->sik, // 9
                 'lembaga' =>  $satminkal->nama, // 9
+                'jabatan' =>  $jabatan->nama, // 9
                 'sebelum' =>  $row->nominal, // 9
                 'total' => (in_array('gapok', $payments) ? $gapok : 0) + // 9
                     ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) + // 10

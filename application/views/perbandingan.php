@@ -15,6 +15,7 @@
                                     <th>#</th>
                                     <th>Nama</th>
                                     <th>SIK</th>
+                                    <th>Jabatan</th>
                                     <th>Lembaga</th>
                                     <th>Nominal Flat</th>
                                     <th>Nominal Sebelum</th>
@@ -29,6 +30,7 @@
                                         <td><?= $no++ ?></td>
                                         <td><?= $data['nama'] ?></td>
                                         <td><?= $data['sik'] ?></td>
+                                        <td><?= $data['jabatan'] ?></td>
                                         <td><?= $data['lembaga'] ?></td>
                                         <td><?= rupiah($data['total']) ?></td>
                                         <td><?= rupiah($data['sebelum']) ?></td>
