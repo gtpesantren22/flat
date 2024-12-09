@@ -9,7 +9,7 @@
                         Data Perbandingan Honor
                     </h5>
                     <div class="table-responsive card-datatable">
-                        <table class="table mb-10" id="table1">
+                        <table class="table mb-10 table-hover" id="table1">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -26,7 +26,7 @@
                                 <?php foreach ($hasil as $data):
                                     $selisih = $data['total'] - $data['sebelum'];
                                 ?>
-                                    <tr>
+                                    <tr data-id="<?= $data['id'] ?>">
                                         <td><?= $no++ ?></td>
                                         <td><?= $data['nama'] ?></td>
                                         <td><?= $data['sik'] ?></td>
@@ -53,7 +53,6 @@
                 <!-- Bootstrap Table with Caption -->
 
             </div>
-
         </div>
 
     </div>
@@ -65,15 +64,125 @@
     <script>
         $(document).ready(function() {
 
-            $('.edit-btn').on('click', function() {
-                var id = $(this).data('id');
-                var nama = $(this).data('nama');
+            var table = $('#table1').DataTable();
 
-                $('#nama').val(nama);
-                $('#id').val(id);
-                $('#editModal').modal('show');
+            // Event klik pada baris tabel untuk toggle card
+            $('#table1 tbody').on('click', 'tr', function() {
+                var tr = $(this); // Baris yang diklik
+                var row = table.row(tr);
+                var id = tr.data('id'); // Ambil ID dari atribut data-id
+
+                if (row.child.isShown()) {
+                    // Tutup card jika sudah ada
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    // Tambahkan card dengan konten bawaan template
+                    $.ajax({
+                        url: '<?= base_url('perbandingan/detail') ?>', // Endpoint untuk ambil data
+                        type: 'POST',
+                        data: {
+                            id: id
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            // var detail = JSON.parse(data); // Parse data JSON
+
+                            // Tambahkan card dengan data dari server
+                            row.child(`
+                                <div class="card shadow-none bg-transparent border border-primary mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${data.nama}</h5>
+                                        <div class='row'>
+                                            <div class='col-6'>
+                                                <div class='table-responsive text-nowrap'>
+                                                    <table class='table table-sm table-borderless'>
+                                                        <tr>
+                                                            <td>Satminkal</td>
+                                                            <td>${data.satminkal}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Jabatan</td>
+                                                            <td>${data.jabatan}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Golongan</td>
+                                                            <td>${data.golongan}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>SIK</td>
+                                                            <td>${data.sik}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Ijazah</td>
+                                                            <td>${data.ijazah}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>TMT</td>
+                                                            <td>${data.tmt} (${data.masa} tahun)</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Ket</td>
+                                                            <td>${data.ket}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class='col-6'>
+                                                <div class='table-responsive text-nowrap'>
+                                                    <table class='table table-sm table-borderless'>
+                                                        <tr>
+                                                            <td>Gaopok/Honor</td>
+                                                            <td>${formatRupiah(data.gapok)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>T. Fungsional</td>
+                                                            <td>${formatRupiah(data.fungsional)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>T. Kinerja</td>
+                                                            <td>${formatRupiah(data.kinerja)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>T. Struktural</td>
+                                                            <td>${formatRupiah(data.struktural)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>T. BPJS</td>
+                                                            <td>${formatRupiah(data.bpjs)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>T. Wali Kelas</td>
+                                                            <td>${formatRupiah(data.walas)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>T. Penyesuaian</td>
+                                                            <td>${formatRupiah(data.penyesuaian)}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).show();
+                            tr.addClass('shown');
+                        },
+                        error: function() {
+                            alert('Gagal mengambil data.');
+                        }
+                    });
+                }
             });
 
-            $('#table1').DataTable();
+            // $('#table1').DataTable();
         });
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(number);
+        }
     </script>
