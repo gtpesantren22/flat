@@ -31,6 +31,61 @@
             </div>
 
         </div>
+        <div class="row g-6">
+            <!-- Card Border Shadow -->
+            <div class="col-lg-4 col-sm-6">
+                <div class="card card-border-shadow-primary h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar me-4">
+                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-money bx-lg"></i></span>
+                            </div>
+                            <h4 class="mb-0"><?= formatUangSingkat($pagu) ?></h4>
+                        </div>
+                        <p class="mb-2">Budged 1 tahun honor</p>
+                        <!-- <p class="mb-0">
+                            <span class="text-heading fw-medium me-2">+18.2%</span>
+                            <span class="text-muted">than last week</span>
+                        </p> -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6">
+                <div class="card card-border-shadow-danger h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar me-4">
+                                <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-money bx-lg'></i></span>
+                            </div>
+                            <h4 class="mb-0"><?= formatUangSingkat($pakai) ?></h4>
+                        </div>
+                        <p class="mb-2">Jumlah terpakai</p>
+                        <!-- <p class="mb-0">
+                            <span class="text-heading fw-medium me-2">-8.7%</span>
+                            <span class="text-muted">than last week</span>
+                        </p> -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6">
+                <div class="card card-border-shadow-success h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar me-4">
+                                <span class="avatar-initial rounded bg-label-success"><i class='bx bx-money bx-lg'></i></span>
+                            </div>
+                            <h4 class="mb-0"><?= formatUangSingkat($pagu - $pakai) ?></h4>
+                        </div>
+                        <p class="mb-2">Sisa pemakaian</p>
+                        <!-- <p class="mb-0">
+                            <span class="text-heading fw-medium me-2">-8.7%</span>
+                            <span class="text-muted">than last week</span>
+                        </p> -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
     </div>
     <!-- / Content -->

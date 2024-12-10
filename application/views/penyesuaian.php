@@ -22,12 +22,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($data as $data): ?>
+                                <?php
+                                $total = 0;
+                                foreach ($data as $data):
+                                    $selisih = $data->sebelum - $data->sesudah;
+                                    $total += $selisih;
+                                ?>
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmguru ?></strong></td>
                                         <td><?= rupiah($data->sebelum) ?></td>
                                         <td><?= rupiah($data->sesudah) ?></td>
-                                        <td><?= rupiah($data->sebelum - $data->sesudah) ?></td>
+                                        <td><?= rupiah($selisih) ?></td>
                                         <td>
                                             <div class="dropdown">
                                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -44,6 +49,13 @@
                                     </tr>
                                 <?php endforeach ?>
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3">TOTAL</th>
+                                    <th><?= rupiah($total) ?></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                         </table>
                         <br>
                     </div>
@@ -208,6 +220,6 @@
             $('.uang').mask('000.000.000.000', {
                 reverse: true
             });
-            
+
         });
     </script>

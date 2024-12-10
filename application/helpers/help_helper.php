@@ -47,3 +47,21 @@ function bulan($bulan)
 
     return isset($namaBulan[$bulan]) ? $namaBulan[$bulan] : date('F');
 }
+
+function formatUangSingkat($angka)
+{
+    // Jika angka lebih dari atau sama dengan 1 miliar
+    if ($angka >= 1000000000) {
+        return number_format($angka / 1000000000, 2) . ' B';
+    }
+    // Jika angka lebih dari atau sama dengan 1 juta
+    elseif ($angka >= 1000000) {
+        return number_format($angka / 1000000, 2) . ' M';
+    }
+    // Jika angka lebih dari atau sama dengan 1 ribu
+    elseif ($angka >= 1000) {
+        return number_format($angka / 1000, 2) . ' K';
+    }
+    // Jika angka di bawah 1 ribu
+    return number_format($angka);
+}
