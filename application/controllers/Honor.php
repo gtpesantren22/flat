@@ -16,8 +16,8 @@ class Honor extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
-        $this->honor_santri = 7000;
-        $this->honor_non = 14000;
+        $this->honor_santri = 3000;
+        $this->honor_non = 6000;
     }
 
     public function index()
@@ -111,7 +111,8 @@ class Honor extends CI_Controller
 
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
-            $hasil_hadir = $row->kehadiran / 4;
+            // $hasil_hadir = $row->kehadiran / 4;
+            $hasil_hadir = $row->kehadiran;
             $data[] = [
                 $row_number++, // 0
                 $gruru->nama,  // 1

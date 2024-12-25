@@ -16,8 +16,8 @@ class Perbandingan extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
-        $this->honor_santri = 7000;
-        $this->honor_non = 14000;
+        $this->honor_santri = 3000;
+        $this->honor_non = 6000;
         $this->jamkinerja = 24;
     }
 
@@ -39,7 +39,8 @@ class Perbandingan extends CI_Controller
                 $gapok = $gapok1 ? $gapok1->nominal : 0;
             } else {
                 $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
-                $gapok2 = $gapok1 ? $gapok1->kehadiran / 4 : 0;
+                // $gapok2 = $gapok1 ? $gapok1->kehadiran / 4 : 0;
+                $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
                 $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
             }
 
@@ -92,7 +93,8 @@ class Perbandingan extends CI_Controller
             $gapok = $gapok1 ? $gapok1->nominal : 0;
         } else {
             $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
-            $gapok2 = $gapok1 ? $gapok1->kehadiran / 4 : 0;
+            // $gapok2 = $gapok1 ? $gapok1->kehadiran / 4 : 0;
+            $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
             $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
         }
 

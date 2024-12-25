@@ -61,7 +61,7 @@
                                         <th>Nama</th>
                                         <th>Ket</th>
                                         <th>Jml Jam</th>
-                                        <th>: 4</th>
+                                        <!-- <th>: 4</th> -->
                                         <th>Nominal</th>
                                     </tr>
                                 </thead>
@@ -199,11 +199,11 @@
                             return `<input type="text" class="form-control form-input" data-id="${row[5]}" value="${data}">`;
                         }
                     },
-                    {
-                        "render": function(data, type, row, meta) {
-                            return `<strong id='hasil-bagi-${row[5]}'>${(row[3] / 4)}</strong>`;
-                        }
-                    },
+                    // {
+                    //     "render": function(data, type, row, meta) {
+                    //         return `<strong id='hasil-bagi-${row[5]}'>${(row[3] / 4)}</strong>`;
+                    //     }
+                    // },
                     {
                         "render": function(data, type, row, meta) {
                             return `<b id='hasil-honor-${row[5]}'>${formatRupiah(row[4])}</b>`;

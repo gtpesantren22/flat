@@ -23,8 +23,8 @@ class Gaji extends CI_Controller
             redirect('login/logout');
         }
 
-        $this->honor_santri = 7000;
-        $this->honor_non = 14000;
+        $this->honor_santri = 3000;
+        $this->honor_non = 6000;
         $this->jamkinerja = 24;
     }
 
@@ -71,7 +71,7 @@ class Gaji extends CI_Controller
                             $gapok = $gapok ? $gapok->nominal : 0;
                         } else {
                             $gapokData = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $value->bulan, 'tahun', $value->tahun)->row();
-                            $gapok = $gapokData ? ($gapokData->kehadiran / 4) : 0;
+                            $gapok = $gapokData ? ($gapokData->kehadiran) : 0;
                             $gapok = $guru->santri === 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
                         }
 
@@ -284,7 +284,7 @@ class Gaji extends CI_Controller
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
                 $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
-                $gapok = $gapok ? ($gapok->kehadiran / 4) : 0;
+                $gapok = $gapok ? ($gapok->kehadiran) : 0;
                 $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
             }
 
@@ -740,7 +740,7 @@ class Gaji extends CI_Controller
             $gapok = $gapok ? $gapok->nominal : 0;
         } else {
             $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
-            $gapok = $gapok ? ($gapok->kehadiran / 4) : 0;
+            $gapok = $gapok ? ($gapok->kehadiran) : 0;
             $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }
 
