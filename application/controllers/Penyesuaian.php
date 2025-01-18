@@ -18,7 +18,6 @@ class Penyesuaian extends CI_Controller
         }
         $this->honor_santri = 3000;
         $this->honor_non = 6000;
-        $this->jamkinerja = 24;
     }
 
     public function index()
@@ -40,7 +39,11 @@ class Penyesuaian extends CI_Controller
         $sik = $guru->sik;
 
         $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
-        $honor = $this->db->query("SELECT * FROM honor ORDER BY created_at DESC LIMIT 1")->row();
+        // $honor = $this->db->query("SELECT * FROM honor ORDER BY created_at DESC LIMIT 1")->row();
+        // $kehadiran = $this->db->query("SELECT * FROM kehadiran ORDER BY created_at DESC LIMIT 1")->row();
+        $bulanini = date('m');
+        $tahunini = date('Y');
+        $sebelum = $this->model->getBy('perbandingan', 'guru_id', $guru_id)->row();
 
         $no = 1;
         $total = 0;
@@ -50,33 +53,35 @@ class Penyesuaian extends CI_Controller
         foreach ($hak->result() as $hakhasil) {
             if ($hakhasil->payment == 'gapok') {
                 if ($sik == 'PTY') {
-                    $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                    $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
                 } else {
                     $isi = $this->db->query("SELECT 
                     CASE 
                         WHEN guru.santri = 'santri' THEN (kehadiran) * $this->honor_santri
                         ELSE (kehadiran) * $this->honor_non
                     END AS nominal
-                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $honor->bulan AND tahun = '$honor->tahun'")->row();
+                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' ")->row('nominal');
                 }
             } elseif ($hakhasil->payment == 'fungsional') {
-                $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+                $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row('nominal');
             } elseif ($hakhasil->payment == 'kinerja') {
                 $masa = selisihTahun($guru->tmt);
-                $isi = $this->db->query("SELECT nominal * $this->jamkinerja as nominal FROM kinerja WHERE masa_kerja = $masa ")->row();
+                $besaran = $this->db->query("SELECT nominal FROM kinerja WHERE masa_kerja = $masa ")->row('nominal');
+                $hadir = $this->db->query("SELECT kehadiran FROM kehadiran JOIN guru ON guru.guru_id=kehadiran.guru_id WHERE kehadiran.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini'")->row('kehadiran');
+                $isi = $besaran * $hadir;
             } elseif ($hakhasil->payment == 'struktural') {
-                $isi = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row();
+                $isi = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
             } elseif ($hakhasil->payment == 'bpjs') {
-                $isi = $this->model->getBy('bpjs', 'guru_id', $guru_id)->row();
+                $isi = $this->model->getBy('bpjs', 'guru_id', $guru_id)->row('nominal');
             } elseif ($hakhasil->payment == 'walas') {
-                $isi = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
+                $isi = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row('nominal');
             }
             $hasilhtml .= "
             <tr>
                 <td>" . $no++ . '. ' . $hakhasil->adds . "</td>
-                <td>: " . rupiah(isset($isi) ? $isi->nominal : 0) . "</td>
+                <td>: " . rupiah(isset($isi) ? $isi : 0) . "</td>
             </tr>";
-            $total += isset($isi) ? $isi->nominal : 0;
+            $total += isset($isi) ? $isi : 0;
         }
         $hasilhtml .= "
             <tr>
@@ -88,7 +93,8 @@ class Penyesuaian extends CI_Controller
 
         echo json_encode([
             'hasil' => $hasilhtml,
-            'total' => $total
+            'total' => $total,
+            'sebelum' => $sebelum ? $sebelum->nominal : 0,
         ]);
     }
 
@@ -99,7 +105,8 @@ class Penyesuaian extends CI_Controller
         $guru_id =  $datas->guru_id;
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
         $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
-
+        $bulanini = date('m');
+        $tahunini = date('Y');
         $no = 1;
         $total = 0;
         $hasilhtml = "
@@ -107,24 +114,36 @@ class Penyesuaian extends CI_Controller
 
         foreach ($hak->result() as $hakhasil) {
             if ($hakhasil->payment == 'gapok') {
-                $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                if ($guru->sik == 'PTY') {
+                    $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
+                } else {
+                    $isi = $this->db->query("SELECT 
+                    CASE 
+                        WHEN guru.santri = 'santri' THEN (kehadiran) * $this->honor_santri
+                        ELSE (kehadiran) * $this->honor_non
+                    END AS nominal
+                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' ")->row('nominal');
+                }
             } elseif ($hakhasil->payment == 'fungsional') {
-                $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
             } elseif ($hakhasil->payment == 'kinerja') {
-                $isi = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $masa = selisihTahun($guru->tmt);
+                $besaran = $this->db->query("SELECT nominal FROM kinerja WHERE masa_kerja = $masa ")->row('nominal');
+                $hadir = $this->db->query("SELECT kehadiran FROM kehadiran JOIN guru ON guru.guru_id=kehadiran.guru_id WHERE kehadiran.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini'")->row('kehadiran');
+                $isi = $besaran * $hadir;
             } elseif ($hakhasil->payment == 'struktural') {
-                $isi = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row();
+                $isi = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
             } elseif ($hakhasil->payment == 'bpjs') {
-                $isi = $this->model->getBy('bpjs', 'guru_id', $guru_id)->row();
+                $isi = $this->model->getBy('bpjs', 'guru_id', $guru_id)->row('nominal');
             } elseif ($hakhasil->payment == 'walas') {
-                $isi = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
+                $isi = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row('nominal');
             }
             $hasilhtml .= "
             <tr>
                 <td>" . $no++ . '. ' . $hakhasil->adds . "</td>
-                <td>: " . rupiah(isset($isi) ? $isi->nominal : 0) . "</td>
+                <td>: " . rupiah(isset($isi) ? $isi : 0) . "</td>
             </tr>";
-            $total += isset($isi) ? $isi->nominal : 0;
+            $total += isset($isi) ? $isi : 0;
         }
         $hasilhtml .= "
             <tr>

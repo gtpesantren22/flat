@@ -20,6 +20,7 @@
                                     <th>Nominal Flat</th>
                                     <th>Nominal Sebelum</th>
                                     <th>Selisih</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -42,6 +43,16 @@
                                             <?php } else { ?>
                                                 <b><?= rupiah($selisih) ?></b>
                                             <?php } ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($data['total'] < $data['sebelum']) { ?>
+                                                <form action="<?= base_url('perbandingan/sesuaikan') ?>" method="post">
+                                                    <input type="hidden" name="guru_id" value="<?= $data['guru_id'] ?>">
+                                                    <input type="hidden" name="flat" value="<?= $data['total'] ?>">
+                                                    <input type="hidden" name="sebelum" value="<?= $data['sebelum'] ?>">
+                                                    <button class="btn btn-sm btn-primary">Sesuaikan</button>
+                                                </form>
+                                            <?php }  ?>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>

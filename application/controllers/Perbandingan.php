@@ -18,7 +18,6 @@ class Perbandingan extends CI_Controller
         }
         $this->honor_santri = 3000;
         $this->honor_non = 6000;
-        $this->jamkinerja = 24;
     }
 
     public function index()
@@ -33,6 +32,7 @@ class Perbandingan extends CI_Controller
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $satminkal = $this->model->getBy('satminkal', 'id', $guru->satminkal)->row();
             $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
+            $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row('kehadiran');
 
             if ($guru->sik === 'PTY') {
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -56,13 +56,14 @@ class Perbandingan extends CI_Controller
             $kirim[] = [
                 'id' =>  $row->id,
                 'nama' =>  $guru->nama,
+                'guru_id' =>  $guru->guru_id,
                 'sik' =>  $guru->sik,
                 'lembaga' =>  $satminkal->nama,
                 'jabatan' =>  $jabatan->nama,
                 'sebelum' =>  $row->nominal,
                 'total' => (in_array('gapok', $payments) ? $gapok : 0) +
                     ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
-                    ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
+                    ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $hadir : 0) +
                     ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                     ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) + // 13
                     ($walas && in_array('walas', $payments) ? $walas->nominal : 0) + // 14
@@ -87,6 +88,7 @@ class Perbandingan extends CI_Controller
         $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
         $golongan = $this->model->getBy('golongan', 'id', $guru->golongan)->row();
         $ijazah = $this->model->getBy('ijazah', 'id', $guru->ijazah)->row();
+        $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row('kehadiran');
 
         if ($guru->sik === 'PTY') {
             $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -121,11 +123,39 @@ class Perbandingan extends CI_Controller
             'sebelum' =>  $row->nominal,
             'gapok' => (in_array('gapok', $payments) ? $gapok : 0),
             'fungsional' => ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0),
-            'kinerja' => ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0),
+            'kinerja' => ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $hadir : 0),
             'struktural' => ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0),
             'bpjs' => ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0), // 13
             'walas' => ($walas && in_array('walas', $payments) ? $walas->nominal : 0), // 14
             'penyesuaian' => ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) // 15
         ]);
+    }
+
+    public function sesuaikan()
+    {
+        $guru_id = $this->input->post('guru_id', 'true');
+        $flat = $this->input->post('flat', 'true');
+        $sebelum = $this->input->post('sebelum', 'true');
+
+        $cek = $this->model->getBy('penyesuaian', 'guru_id', $guru_id)->row();
+        if ($cek) {
+            $this->model->edit('penyesuaian', 'guru_id', $guru_id, ['sebelum' => $sebelum, 'sesudah' => $flat]);
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('ok', 'Data berhasil disesuaikan');
+                redirect('perbandingan');
+            } else {
+                $this->session->set_flashdata('error', 'Data gagal disesuaikan');
+                redirect('perbandingan');
+            }
+        } else {
+            $this->model->tambah('penyesuaian', ['guru_id' => $guru_id, 'sebelum' => $sebelum, 'sesudah' => $flat]);
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('ok', 'Data berhasil disesuaikan');
+                redirect('perbandingan');
+            } else {
+                $this->session->set_flashdata('error', 'Data gagal disesuaikan');
+                redirect('perbandingan');
+            }
+        }
     }
 }

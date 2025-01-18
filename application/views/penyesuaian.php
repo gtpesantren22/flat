@@ -175,6 +175,7 @@
                         success: function(response) {
                             $('#rincian-gaji').html(response.hasil);
                             $('#a_sesudah').val(response.total);
+                            $('#a_sebelum').val(response.sebelum);
                         },
                         error: function() {
                             $('#rincian-gaji').html('<p>Gagal mengambil data.</p>');

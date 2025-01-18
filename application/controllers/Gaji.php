@@ -25,7 +25,6 @@ class Gaji extends CI_Controller
 
         $this->honor_santri = 3000;
         $this->honor_non = 6000;
-        $this->jamkinerja = 24;
     }
 
     public function index()
@@ -60,6 +59,7 @@ class Gaji extends CI_Controller
                 if ($query->row()) {
                     foreach ($query->result() as $row) {
                         $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+                        $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $value->bulan, 'tahun', $value->tahun)->row();
 
                         if (!$guru) {
                             continue; // Skip jika data guru tidak ditemukan
@@ -97,7 +97,7 @@ class Gaji extends CI_Controller
                         // Hitung total awal
                         $totalawal += (in_array('gapok', $payments) ? $gapok : 0) +
                             ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
-                            ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
+                            ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                             ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                             ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                             ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
@@ -279,6 +279,7 @@ class Gaji extends CI_Controller
         foreach ($query->result() as $row) {
             $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
             if ($guru->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok ? $gapok->nominal : 0;
@@ -311,7 +312,7 @@ class Gaji extends CI_Controller
                 $row->tmt, // 8
                 in_array('gapok', $payments) ? $gapok : 0, // 9
                 $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
-                $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0, // 11
+                $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
                 $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0, // 13
                 $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
@@ -319,7 +320,7 @@ class Gaji extends CI_Controller
                 (
                     (in_array('gapok', $payments) ? $gapok : 0) +
                     ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
-                    ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
+                    ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                     ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                     ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                     ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
@@ -438,6 +439,7 @@ class Gaji extends CI_Controller
         $gajidata = $this->model->getBy('gaji_detail', 'gaji_id', $id);
         foreach ($gajidata->result() as $row) {
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajidata->bulan, 'tahun', $gajidata->tahun)->row();
 
             if ($guru->sik === 'PTY') {
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -462,7 +464,7 @@ class Gaji extends CI_Controller
             $data = [
                 'gapok' =>  in_array('gapok', $payments) ? $gapok : '0', // 9
                 'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : '0', // 10
-                'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : '0', // 11
+                'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : '0', // 11
                 'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : '0', // 12
                 'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : '0', // 13
                 'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : '0', // 14
@@ -734,6 +736,7 @@ class Gaji extends CI_Controller
         $gaji_id = $this->input->post('gaji_id', true);
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
         $gajis = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
+        $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
 
         if ($guru->sik === 'PTY') {
             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -759,7 +762,7 @@ class Gaji extends CI_Controller
             'guru_id' => $guru_id, // 9
             'gapok' => in_array('gapok', $payments) ? $gapok : 0, // 9
             'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0, // 10
-            'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0, // 11
+            'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
             'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : 0, // 12
             'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0, // 13
             'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : 0, // 14
@@ -767,7 +770,7 @@ class Gaji extends CI_Controller
             'total' => (
                 (in_array('gapok', $payments) ? $gapok : 0) +
                 ($fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : 0) +
-                ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * $this->jamkinerja : 0) +
+                ($kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
                 ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                 ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                 ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
