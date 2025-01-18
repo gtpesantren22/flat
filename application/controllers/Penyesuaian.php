@@ -26,7 +26,7 @@ class Penyesuaian extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT penyesuaian.*, guru.nama as nmguru FROM penyesuaian JOIN guru ON guru.guru_id=penyesuaian.guru_id ")->result();
+        $data['data'] = $this->db->query("SELECT penyesuaian.*, guru.nama as nmguru, guru.sik as sik FROM penyesuaian JOIN guru ON guru.guru_id=penyesuaian.guru_id ")->result();
 
         $data['guruOpt'] = $this->model->getData('guru')->result();
         $this->load->view('penyesuaian', $data);

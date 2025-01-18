@@ -15,6 +15,7 @@
                             <thead>
                                 <tr>
                                     <th>Nama Guru</th>
+                                    <th>SIK</th>
                                     <th>Sebelum Flat</th>
                                     <th>Sesudah Flat</th>
                                     <th>Besaran Penyesuaian</th>
@@ -30,6 +31,7 @@
                                 ?>
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmguru ?></strong></td>
+                                        <td><?= $data->sik ?></td>
                                         <td><?= rupiah($data->sebelum) ?></td>
                                         <td><?= rupiah($data->sesudah) ?></td>
                                         <td><?= rupiah($selisih) ?></td>
