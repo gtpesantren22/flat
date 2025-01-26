@@ -90,6 +90,7 @@
                                     <th>#</th>
                                     <th>Bulan</th>
                                     <th>Nama</th>
+                                    <th>Satminkal</th>
                                     <th>TMT</th>
                                     <th>Jml Jam</th>
                                     <th>Nominal</th>
@@ -282,6 +283,9 @@
                     },
                     {
                         "data": 1
+                    },
+                    {
+                        "data": 8
                     },
                     {
                         "render": function(data, type, row, meta) {

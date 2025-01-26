@@ -142,6 +142,7 @@ class Kinerja extends CI_Controller
 
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $lembaga = $this->model->getBy('satminkal', 'id', $gruru->satminkal)->row();
             // $hasil_hadir = $row->kehadiran / 4;
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($gruru->tmt))->row();
             $jumlah = $row->kehadiran * ($kinerja ? $kinerja->nominal : 0);
@@ -154,7 +155,7 @@ class Kinerja extends CI_Controller
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 $kinerja ? $kinerja->nominal : 0, // 7
-                // $row->tmt, // 8
+                $lembaga->nama, // 8
             ];
         }
 

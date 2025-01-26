@@ -59,6 +59,7 @@
                                         <th>#</th>
                                         <th>Bulan</th>
                                         <th>Nama</th>
+                                        <th>Satminkal</th>
                                         <th>Ket</th>
                                         <th>Jml Jam</th>
                                         <!-- <th>: 4</th> -->
@@ -189,6 +190,9 @@
                     },
                     {
                         "data": 1
+                    },
+                    {
+                        "data": 7
                     },
                     {
                         "data": 2

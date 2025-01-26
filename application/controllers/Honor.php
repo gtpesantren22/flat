@@ -111,6 +111,7 @@ class Honor extends CI_Controller
 
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $lembaga = $this->model->getBy('satminkal', 'id', $gruru->satminkal)->row();
             // $hasil_hadir = $row->kehadiran / 4;
             $hasil_hadir = $row->kehadiran;
             $data[] = [
@@ -121,8 +122,7 @@ class Honor extends CI_Controller
                 $gruru->santri == 'santri' ? $hasil_hadir * $this->honor_santri : $hasil_hadir * $this->honor_non, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
-                // $row->ijazah, // 7
-                // $row->tmt, // 8
+                $lembaga->nama, // 7
             ];
         }
 
