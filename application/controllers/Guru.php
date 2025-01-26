@@ -52,6 +52,8 @@ class Guru extends CI_Controller
             'golongan' => $this->input->post('golongan', true),
             'santri' => $this->input->post('santri', true),
             'kategori' => $this->input->post('kategori', true),
+            'email' => $this->input->post('email', true),
+            'hp' => $this->input->post('hp', true),
         ];
 
         $this->model->tambah('guru', $data);
@@ -92,6 +94,8 @@ class Guru extends CI_Controller
             'golongan' => $this->input->post('golongan', true),
             'santri' => $this->input->post('santri', true),
             'kategori' => $this->input->post('kategori', true),
+            'email' => $this->input->post('email', true),
+            'hp' => $this->input->post('hp', true),
         ];
 
         $this->model->edit('guru', 'guru_id', $id, $data);

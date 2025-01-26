@@ -43,7 +43,7 @@
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-kategori="<?= $data->kategori ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-kategori="<?= $data->kategori ?>" data-email="<?= $data->email ?>" data-hp="<?= $data->hp ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('guru/hapus/' . $data->guru_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
                                                 </div>
                                             </div>
@@ -92,6 +92,18 @@
                             <label class="col-sm-2 col-form-label" for="a_nama">Nama</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="a_nama" name="nama" placeholder="Nama Lengkap" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="a_email">Email</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" id="a_email" name="email" placeholder="Alamat Email" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="a_hp">No. HP</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="a_hp" name="hp" placeholder="Nomor HP/WA" required />
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -219,6 +231,18 @@
                             </div>
                         </div>
                         <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="email">Email</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Alamat Email" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="hp">No. HP</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="hp" name="hp" placeholder="Nomor HP/WA" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="satminkal">Satminkal</label>
                             <div class="col-sm-10">
                                 <select class="form-control" id="satminkal" name="satminkal" required>
@@ -332,6 +356,8 @@
                 var golongan = $(this).data('golongan');
                 var santri = $(this).data('santri');
                 var kategori = $(this).data('kategori');
+                var email = $(this).data('email');
+                var hp = $(this).data('hp');
 
                 $('#nama').val(nama);
                 $('#id').val(id);
@@ -345,6 +371,8 @@
                 $('#golongan').val(golongan).change();
                 $('#santri').val(santri).change();
                 $('#kategori').val(kategori).change();
+                $('#email').val(email).change();
+                $('#hp').val(hp).change();
 
                 $('#editModal').modal('show');
             });
