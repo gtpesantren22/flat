@@ -107,6 +107,12 @@
                             </div>
                         </div>
                         <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="a_rekening">No. Rekening</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="a_rekening" name="rekening" placeholder="Nomor Rekening" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="a_satminkal">Satminkal</label>
                             <div class="col-sm-10">
                                 <select class="form-control" id="a_satminkal" name="satminkal" required>
@@ -240,6 +246,12 @@
                             <label class="col-sm-2 col-form-label" for="hp">No. HP</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control" id="hp" name="hp" placeholder="Nomor HP/WA" required />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="rekening">No. Rekening</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="rekening" name="rekening" placeholder="Nomor Rekening" required />
                             </div>
                         </div>
                         <div class="row mb-2">
