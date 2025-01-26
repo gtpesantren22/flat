@@ -370,6 +370,7 @@
                 var kategori = $(this).data('kategori');
                 var email = $(this).data('email');
                 var hp = $(this).data('hp');
+                var rekening = $(this).data('rekening');
 
                 $('#nama').val(nama);
                 $('#id').val(id);
@@ -385,6 +386,7 @@
                 $('#kategori').val(kategori).change();
                 $('#email').val(email).change();
                 $('#hp').val(hp).change();
+                $('#rekening').val(rekening).change();
 
                 $('#editModal').modal('show');
             });
