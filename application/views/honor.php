@@ -8,7 +8,7 @@
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
             <!-- SIK -->
-            <div class="col-lg-4 mb-4 order-0">
+            <div class="col-lg-12 mb-4 order-0">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">
@@ -43,7 +43,7 @@
 
             </div>
             <!-- HAK -->
-            <div class="col-lg-8 mb-4 order-0">
+            <div class="col-lg-12 mb-4 order-0">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">
