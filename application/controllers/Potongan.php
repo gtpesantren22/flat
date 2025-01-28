@@ -16,8 +16,9 @@ class Potongan extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
-        $this->honor_santri = 7000;
-        $this->honor_non = 14000;
+
+        $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
         $this->jamkinerja = 24;
     }
 

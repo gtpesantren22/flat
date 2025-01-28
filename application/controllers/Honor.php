@@ -16,8 +16,9 @@ class Honor extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
-        $this->honor_santri = 3000;
-        $this->honor_non = 6000;
+
+        $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
     }
 
     public function index()
@@ -60,6 +61,7 @@ class Honor extends CI_Controller
                 'honor_id' => $id,
                 'bulan' => $bulan,
                 'tahun' => $tahun,
+                'lembaga' => $value->satminkal,
             ];
             $this->model->tambah('honor', $data);
         }
@@ -86,13 +88,14 @@ class Honor extends CI_Controller
             $this->db->from('honor');
             $this->db->join('guru', 'honor.guru_id=guru.guru_id');
             $this->db->where('honor_id', $honorID);
+            $this->db->order_by('guru.nama', 'ASC');
         } else {
             $honorID = $this->db->query("SELECT honor_id FROM honor GROUP BY honor_id ORDER BY created_at DESC LIMIT 1")->row('honor_id');
             $this->db->from('honor');
             $this->db->join('guru', 'honor.guru_id=guru.guru_id');
             $this->db->where('honor.honor_id', $honorID);
+            $this->db->order_by('guru.nama', 'ASC');
         }
-
 
         // Filter search
         if (!empty($search_value)) {
@@ -111,7 +114,8 @@ class Honor extends CI_Controller
 
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
-            $lembaga = $this->model->getBy('satminkal', 'id', $gruru->satminkal)->row();
+            $lembaga = $this->model->getBy('satminkal', 'id', $row->lembaga)->row();
+            $total = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
             // $hasil_hadir = $row->kehadiran / 4;
             $hasil_hadir = $row->kehadiran;
             $data[] = [
@@ -123,6 +127,7 @@ class Honor extends CI_Controller
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 $lembaga->nama, // 7
+                $total ? ($total->total) * ($gruru->santri == 'santri' ?  $this->honor_santri : $this->honor_non) : 0, // 8
             ];
         }
 

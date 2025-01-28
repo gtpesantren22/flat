@@ -16,8 +16,9 @@ class Perbandingan extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
-        $this->honor_santri = 3000;
-        $this->honor_non = 6000;
+
+        $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
     }
 
     public function index()
@@ -25,6 +26,8 @@ class Perbandingan extends CI_Controller
         $data['judul'] = 'Perbandingan';
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
+        $bulan = date('m');
+        $tahun = date('Y');
 
         $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
         $kirim = [];
@@ -38,11 +41,14 @@ class Perbandingan extends CI_Controller
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok1 ? $gapok1->nominal : 0;
             } else {
-                $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
+                $gapok1 = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = $tahun ")->row();
                 // $gapok2 = $gapok1 ? $gapok1->kehadiran / 4 : 0;
                 $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
                 $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
             }
+
+            // echo $gapok;
+            // die();
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -79,6 +85,8 @@ class Perbandingan extends CI_Controller
     {
         $id = $this->input->post('id', 'true');
         $data = $this->model->getBy('perbandingan', 'id', $id)->row();
+        $bulan = date('m');
+        $tahun = date('Y');
 
         $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id WHERE a.guru_id = '$data->guru_id' ")->row();
 
@@ -94,7 +102,7 @@ class Perbandingan extends CI_Controller
             $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $gapok = $gapok1 ? $gapok1->nominal : 0;
         } else {
-            $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
+            $gapok1 = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = $tahun")->row();
             // $gapok2 = $gapok1 ? $gapok1->kehadiran / 4 : 0;
             $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
             $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;

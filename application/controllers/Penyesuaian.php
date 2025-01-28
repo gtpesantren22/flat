@@ -16,8 +16,9 @@ class Penyesuaian extends CI_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
-        $this->honor_santri = 3000;
-        $this->honor_non = 6000;
+
+        $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
     }
 
     public function index()
@@ -57,10 +58,10 @@ class Penyesuaian extends CI_Controller
                 } else {
                     $isi = $this->db->query("SELECT 
                     CASE 
-                        WHEN guru.santri = 'santri' THEN (kehadiran) * $this->honor_santri
-                        ELSE (kehadiran) * $this->honor_non
+                        WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
+                        ELSE SUM(kehadiran) * $this->honor_non
                     END AS nominal
-                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' ")->row('nominal');
+                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id ")->row('nominal');
                 }
             } elseif ($hakhasil->payment == 'fungsional') {
                 $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row('nominal');
@@ -119,8 +120,8 @@ class Penyesuaian extends CI_Controller
                 } else {
                     $isi = $this->db->query("SELECT 
                     CASE 
-                        WHEN guru.santri = 'santri' THEN (kehadiran) * $this->honor_santri
-                        ELSE (kehadiran) * $this->honor_non
+                        WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
+                        ELSE SUM(kehadiran) * $this->honor_non
                     END AS nominal
                     FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' ")->row('nominal');
                 }

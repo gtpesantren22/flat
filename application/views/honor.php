@@ -64,6 +64,7 @@
                                         <th>Jml Jam</th>
                                         <!-- <th>: 4</th> -->
                                         <th>Nominal</th>
+                                        <th>Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -211,6 +212,11 @@
                     {
                         "render": function(data, type, row, meta) {
                             return `<b id='hasil-honor-${row[5]}'>${formatRupiah(row[4])}</b>`;
+                        }
+                    },
+                    {
+                        "render": function(data, type, row, meta) {
+                            return `<b>${formatRupiah(row[8])}</b>`;
                         }
                     }
                 ],

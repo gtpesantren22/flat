@@ -189,7 +189,7 @@
                     <li class="menu-item <?= $judul == 'Honor' ? 'active' : '' ?>">
                         <a href="<?= base_url('honor') ?>" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-credit-card"></i>
-                            <div data-i18n="Analytics">Honor (PTTY)</div>
+                            <div data-i18n="Analytics">Honor Insentif</div>
                         </a>
                     </li>
                     <li class="menu-item <?= isset($sub) && $sub == 'tunjangan'  ? 'active open' : '' ?>">

@@ -23,8 +23,8 @@ class Gaji extends CI_Controller
             redirect('login/logout');
         }
 
-        $this->honor_santri = 3000;
-        $this->honor_non = 6000;
+        $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
     }
 
     public function index()
@@ -70,7 +70,7 @@ class Gaji extends CI_Controller
                             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                             $gapok = $gapok ? $gapok->nominal : 0;
                         } else {
-                            $gapokData = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $value->bulan, 'tahun', $value->tahun)->row();
+                            $gapokData = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = $tahun")->row();
                             $gapok = $gapokData ? ($gapokData->kehadiran) : 0;
                             $gapok = $guru->santri === 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
                         }
@@ -206,6 +206,7 @@ class Gaji extends CI_Controller
             }
         }
     }
+
     public function regenerate($id)
     {
         $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
@@ -284,7 +285,7 @@ class Gaji extends CI_Controller
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
-                $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+                $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
                 $gapok = $gapok ? ($gapok->kehadiran) : 0;
                 $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
             }
@@ -351,6 +352,7 @@ class Gaji extends CI_Controller
         echo json_encode($output);
         // var_dump($output);
     }
+    
     public function detail3($id)
     {
         $draw = intval($this->input->post('draw'));
@@ -445,7 +447,7 @@ class Gaji extends CI_Controller
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok1 ? $gapok1->nominal : 0;
             } else {
-                $gapok1 = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $blnpak, 'tahun', $thnpak)->row();
+                $gapok1 = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = $thnpak")->row();
                 $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
                 $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
             }
@@ -742,7 +744,7 @@ class Gaji extends CI_Controller
             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $gapok = $gapok ? $gapok->nominal : 0;
         } else {
-            $gapok = $this->model->getBy3('honor', 'guru_id', $guru->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+            $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
             $gapok = $gapok ? ($gapok->kehadiran) : 0;
             $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }

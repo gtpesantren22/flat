@@ -143,7 +143,7 @@
                                                 <div class='table-responsive text-nowrap'>
                                                     <table class='table table-sm table-borderless'>
                                                         <tr>
-                                                            <td>Gaopok/Honor</td>
+                                                            <td>Gapok/Honor</td>
                                                             <td>${formatRupiah(data.gapok)}</td>
                                                         </tr>
                                                         <tr>
