@@ -70,7 +70,7 @@ class Gaji extends CI_Controller
                             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                             $gapok = $gapok ? $gapok->nominal : 0;
                         } else {
-                            $gapokData = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = $tahun")->row();
+                            $gapokData = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = $value->tahun")->row();
                             $gapok = $gapokData ? ($gapokData->kehadiran) : 0;
                             $gapok = $guru->santri === 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
                         }
@@ -266,6 +266,7 @@ class Gaji extends CI_Controller
             $this->db->group_start();
             $this->db->like('nama', $search_value);
             $this->db->or_like('satminkal', $search_value);
+            $this->db->or_like('sik', $search_value);
             $this->db->group_end();
         }
 
@@ -352,7 +353,7 @@ class Gaji extends CI_Controller
         echo json_encode($output);
         // var_dump($output);
     }
-    
+
     public function detail3($id)
     {
         $draw = intval($this->input->post('draw'));
