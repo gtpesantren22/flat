@@ -19,6 +19,7 @@ class Honor extends CI_Controller
 
         $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
+        $this->honor_rami = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
     }
 
     public function index()
@@ -118,16 +119,23 @@ class Honor extends CI_Controller
             $total = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
             // $hasil_hadir = $row->kehadiran / 4;
             $hasil_hadir = $row->kehadiran;
+            if ($row->lembaga == 8 || $row->lembaga == 9) {
+                $honorGuru = $hasil_hadir * $this->honor_rami;
+                $totalHonor = $total ? $total->total * $this->honor_rami : 0;
+            } else {
+                $honorGuru = $gruru->santri == 'santri' ? $hasil_hadir * $this->honor_santri : $hasil_hadir * $this->honor_non;
+                $totalHonor = $total ? ($total->total) * ($gruru->santri == 'santri' ?  $this->honor_santri : $this->honor_non) : 0;
+            }
             $data[] = [
                 $row_number++, // 0
                 $gruru->nama,  // 1
                 $gruru->santri, // 2
                 $row->kehadiran, // 3
-                $gruru->santri == 'santri' ? $hasil_hadir * $this->honor_santri : $hasil_hadir * $this->honor_non, // 4 
+                $honorGuru, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 $lembaga->nama, // 7
-                $total ? ($total->total) * ($gruru->santri == 'santri' ?  $this->honor_santri : $this->honor_non) : 0, // 8
+                $totalHonor, // 8
             ];
         }
 
