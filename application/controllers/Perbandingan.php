@@ -10,9 +10,9 @@ class Perbandingan extends CI_Controller
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
 
-        // $user = $this->Auth_model->current_user();
+        $user = $this->Auth_model->current_user();
+        $this->userID = $user->id_user;
 
-        // $this->user = $user->nama;
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
@@ -26,6 +26,7 @@ class Perbandingan extends CI_Controller
         $data['judul'] = 'Perbandingan';
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
+        $this->Auth_model->log_activity($this->userID, 'Akses index C: Perbandingan');
         $bulan = date('m');
         $tahun = date('Y');
 
@@ -88,6 +89,7 @@ class Perbandingan extends CI_Controller
         $data = $this->model->getBy('perbandingan', 'id', $id)->row();
         $bulan = date('m');
         $tahun = date('Y');
+        $this->Auth_model->log_activity($this->userID, 'Akses detail C: Perbandingan');
 
         $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id WHERE a.guru_id = '$data->guru_id' ")->row();
 
@@ -146,6 +148,7 @@ class Perbandingan extends CI_Controller
         $guru_id = $this->input->post('guru_id', 'true');
         $flat = $this->input->post('flat', 'true');
         $sebelum = $this->input->post('sebelum', 'true');
+        $this->Auth_model->log_activity($this->userID, 'Akses proses penyesuaian C: Perbandingan');
 
         $cek = $this->model->getBy('penyesuaian', 'guru_id', $guru_id)->row();
         if ($cek) {

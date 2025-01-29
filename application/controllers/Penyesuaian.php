@@ -10,9 +10,9 @@ class Penyesuaian extends CI_Controller
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
 
-        // $user = $this->Auth_model->current_user();
+        $user = $this->Auth_model->current_user();
+        $this->userID = $user->id_user;
 
-        // $this->user = $user->nama;
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
@@ -27,6 +27,7 @@ class Penyesuaian extends CI_Controller
         $data['judul'] = 'Tunjangan Penyesuaian';
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
+        $this->Auth_model->log_activity($this->userID, 'Akses index C: Penyesuaian');
 
         $data['data'] = $this->db->query("SELECT penyesuaian.*, guru.nama as nmguru, guru.sik as sik FROM penyesuaian JOIN guru ON guru.guru_id=penyesuaian.guru_id ")->result();
 
@@ -39,6 +40,7 @@ class Penyesuaian extends CI_Controller
         $guru_id = $this->input->post('id', true);
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
         $sik = $guru->sik;
+        $this->Auth_model->log_activity($this->userID, 'Akses getGajis C: Penyesuaian');
 
         $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
 
@@ -107,6 +109,7 @@ class Penyesuaian extends CI_Controller
 
     public function showDetail()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses show details C: Penyesuaian');
         $id = $this->input->post('idSend', true);
         $datas = $this->model->getBy('penyesuaian', 'penyesuaian_id', $id)->row();
         $guru_id =  $datas->guru_id;
@@ -177,6 +180,7 @@ class Penyesuaian extends CI_Controller
 
     public function tambah()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses tambah data C: Penyesuaian');
         $cek = $this->model->getBy('penyesuaian', 'guru_id', $this->input->post('guru', true))->row();
         $data = [
             'guru_id' => $this->input->post('guru', true),
@@ -200,6 +204,7 @@ class Penyesuaian extends CI_Controller
 
     public function hapus($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses hapus data C: Penyesuaian');
         $this->model->hapus('penyesuaian', 'penyesuaian_id', $id);
 
         if ($this->db->affected_rows() > 0) {
@@ -213,6 +218,7 @@ class Penyesuaian extends CI_Controller
 
     public function edit()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses edit data C: Penyesuaian');
         $id = $this->input->post('id', true);
         $data = [
             'sebelum' => rmRp($this->input->post('sebelum', true)),

@@ -10,9 +10,9 @@ class Kinerja extends CI_Controller
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
 
-        // $user = $this->Auth_model->current_user();
+        $user = $this->Auth_model->current_user();
+        $this->userID = $user->id_user;
 
-        // $this->user = $user->nama;
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
@@ -20,6 +20,8 @@ class Kinerja extends CI_Controller
 
     public function index()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses index C: Kinerja');
+
         $data['judul'] = 'Tunjangan Kinerja';
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
@@ -32,6 +34,8 @@ class Kinerja extends CI_Controller
 
     public function tambah()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses tambah data C: Kinerja');
+
         $data = [
             'masa_kerja' => $this->input->post('masa_kerja', true),
             'nominal' => rmRp($this->input->post('nominal', true)),
@@ -49,6 +53,8 @@ class Kinerja extends CI_Controller
 
     public function hapus($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses hpus data C: Kinerja');
+
         $this->model->hapus('kinerja', 'kinerja_id', $id);
 
         if ($this->db->affected_rows() > 0) {
@@ -62,6 +68,8 @@ class Kinerja extends CI_Controller
 
     public function edit()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses ediit data C: Kinerja');
+
         $id = $this->input->post('id', true);
         $data = [
             'masa_kerja' => $this->input->post('masa_kerja', true),
@@ -79,6 +87,8 @@ class Kinerja extends CI_Controller
     }
     public function buatBaru()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses baut data baru C: Kinerja');
+
         $bulan = $this->input->post('bulan', true);
         $tahun = $this->input->post('tahun', true);
         $guru = $this->db->query("SELECT guru_id FROM guru JOIN kategori ON guru.kategori=kategori.id WHERE kategori.nama = 'Karyawan' ")->result();
@@ -102,6 +112,8 @@ class Kinerja extends CI_Controller
 
     public function rincian()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses data rincian C: Kinerja');
+
         $id = $this->input->post('id', true);
 
         $draw = intval($this->input->post('draw'));
@@ -174,6 +186,8 @@ class Kinerja extends CI_Controller
 
     public function editJam()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses edit jam kerja C: Kinerja');
+
         $id = $this->input->post('id');
         $jam = $this->input->post('value');
         $dtlHonor = $this->model->getBy('kehadiran', 'id', $id)->row();
@@ -190,6 +204,8 @@ class Kinerja extends CI_Controller
     }
     public function refresh()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses refresh data C: Kinerja');
+
         $id = $this->input->post('id', true);
         $kehadiran = $this->model->getBy('kehadiran', 'id', $id)->row();
 

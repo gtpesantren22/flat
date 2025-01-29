@@ -10,9 +10,9 @@ class Honor extends CI_Controller
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
 
-        // $user = $this->Auth_model->current_user();
+        $user = $this->Auth_model->current_user();
+        $this->userID = $user->id_user;
 
-        // $this->user = $user->nama;
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
@@ -26,6 +26,7 @@ class Honor extends CI_Controller
     {
         $data['judul'] = 'Honor';
         $data['user'] = $this->Auth_model->current_user();
+        $this->Auth_model->log_activity($this->userID, 'Akses index C: Honor');
 
         $honordata = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC");
         $data['honorGroup'] = $honordata->result();
@@ -41,6 +42,7 @@ class Honor extends CI_Controller
         $id = $this->input->post('id');
         $field = $this->input->post('field');
         $value = $this->input->post('value');
+        $this->Auth_model->log_activity($this->userID, 'Akses update SIK C: Honor');
 
         $this->model->edit('sik_setting', 'id', $id, [$field => $value]);
 
@@ -53,6 +55,7 @@ class Honor extends CI_Controller
 
     public function buatBaru()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses buat data honor baru C: Honor');
         $bulan = $this->input->post('bulan', true);
         $tahun = $this->input->post('tahun', true);
         $guru = $this->model->getBy('guru', 'sik', 'PTTY')->result();
@@ -77,6 +80,7 @@ class Honor extends CI_Controller
 
     public function rincian()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses rincian honor C: Honor');
         $id = $this->input->post('id', true);
 
         $draw = intval($this->input->post('draw'));
@@ -158,6 +162,7 @@ class Honor extends CI_Controller
 
     public function editJam()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses eidt jam perguru C: Honor');
         $id = $this->input->post('id', true);
         $jam = $this->input->post('value', true);
         $dtlHonor = $this->model->getBy('honor', 'id', $id)->row();
@@ -179,6 +184,8 @@ class Honor extends CI_Controller
 
     public function refresh()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses refresh data guru C: Honor');
+
         $id = $this->input->post('id', true);
         $honor = $this->model->getBy('honor', 'id', $id)->row();
 
@@ -205,6 +212,8 @@ class Honor extends CI_Controller
     }
     public function updateNominal($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses update nominal semua guru C: Honor');
+
         $honor = $this->model->getBy('honor', 'honor_id', $id)->result();
         foreach ($honor as $key) {
             $guru = $this->model->getBy('guru', 'guru_id', $key->guru_id)->row();

@@ -15,9 +15,9 @@ class Gaji extends CI_Controller
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
 
-        // $user = $this->Auth_model->current_user();
+        $user = $this->Auth_model->current_user();
+        $this->userID = $user->id_user;
 
-        // $this->user = $user->nama;
         $this->tahun = '2024/2025';
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
@@ -29,6 +29,7 @@ class Gaji extends CI_Controller
 
     public function index()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses index C: Gaji');
         $data['judul'] = 'Master Gaji';
         $data['user'] = $this->Auth_model->current_user();
 
@@ -131,6 +132,8 @@ class Gaji extends CI_Controller
     }
     public function detail($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses detail C: Gaji');
+
         $data['judul'] = 'Master Gaji';
         $data['user'] = $this->Auth_model->current_user();
         $data['idgaji'] = $id;
@@ -147,6 +150,7 @@ class Gaji extends CI_Controller
 
     public function tambah()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses buat Gaji baru C: Gaji');
         $id = $this->uuid->v4();
         $bulan = $this->input->post('bulan');
         $tahun = $this->input->post('tahun');
@@ -164,6 +168,8 @@ class Gaji extends CI_Controller
 
     public function generate($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses genaatre gaji C: Gaji');
+
         $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
         if ($cek->status == 'kunci') {
             $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
@@ -209,6 +215,8 @@ class Gaji extends CI_Controller
 
     public function regenerate($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses re generate gaji C: Gaji');
+
         $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
         if ($cek->status == 'kunci') {
             $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
@@ -249,6 +257,8 @@ class Gaji extends CI_Controller
 
     public function detail2($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses detail honor-sebelum kunci C: Gaji');
+
         $draw = intval($this->input->post('draw'));
         $start = intval($this->input->post('start'));
         $length = intval($this->input->post('length'));
@@ -357,6 +367,8 @@ class Gaji extends CI_Controller
 
     public function detail3($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses getail honor - setelah kunci C: Gaji');
+
         $draw = intval($this->input->post('draw'));
         $start = intval($this->input->post('start'));
         $length = intval($this->input->post('length'));
@@ -433,6 +445,8 @@ class Gaji extends CI_Controller
 
     public  function kunci($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses proses kunci data honor C: Gaji');
+
         $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
         $blnpak = $cek->bulan;
         $thnpak = $cek->tahun;
@@ -492,6 +506,8 @@ class Gaji extends CI_Controller
 
     public function hapus($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses hapus data gaji C: Gaji');
+
         $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
         $cekDtl = $this->model->getData('gaji_detail', 'gaji_id', $id)->row();
         if ($cek->status == 'kunci') {
@@ -515,6 +531,7 @@ class Gaji extends CI_Controller
 
     public function exportGaji($id)
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses export data gaji C: Gaji');
         $datagaji =  $this->model->getBy('gaji', 'gaji_id', $id)->row();
         $spreadsheet = new Spreadsheet();
 
@@ -737,6 +754,7 @@ class Gaji extends CI_Controller
 
     public function reloadGaji()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses reload data gaji C: Gaji');
         $guru_id = $this->input->post('guru_id', true);
         $gaji_id = $this->input->post('gaji_id', true);
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
@@ -793,6 +811,8 @@ class Gaji extends CI_Controller
 
     public function getPotongan()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses data potongan C: Gaji');
+
         $id = $this->input->post('gaji_id', 'true');
         $guru_id = $this->input->post('guru_id', 'true');
         $data = $this->model->getBy('gaji', 'gaji_id', $id)->row();
