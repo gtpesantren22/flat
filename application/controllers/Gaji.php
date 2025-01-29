@@ -286,9 +286,10 @@ class Gaji extends CI_Controller
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
-                $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
-                $gapok = $gapok ? ($gapok->kehadiran) : 0;
-                $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
+                // $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
+                // $gapok = $gapok ? ($gapok->kehadiran) : 0;
+                // $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
+                $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row('nominal');
             }
 
             // $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -448,9 +449,10 @@ class Gaji extends CI_Controller
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok1 ? $gapok1->nominal : 0;
             } else {
-                $gapok1 = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = $thnpak")->row();
-                $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
-                $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
+                // $gapok1 = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = $thnpak")->row();
+                // $gapok2 = $gapok1 ? $gapok1->kehadiran : 0;
+                // $gapok = $guru->santri == 'santri' ? $gapok2 * $this->honor_santri : $gapok2 * $this->honor_non;
+                $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = '$thnpak' GROUP BY honor.guru_id")->row('nominal');
             }
 
             // $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();

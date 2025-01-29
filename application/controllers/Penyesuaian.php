@@ -19,6 +19,7 @@ class Penyesuaian extends CI_Controller
 
         $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
+        $this->honor_rami = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
     }
 
     public function index()
@@ -40,8 +41,7 @@ class Penyesuaian extends CI_Controller
         $sik = $guru->sik;
 
         $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
-        // $honor = $this->db->query("SELECT * FROM honor ORDER BY created_at DESC LIMIT 1")->row();
-        // $kehadiran = $this->db->query("SELECT * FROM kehadiran ORDER BY created_at DESC LIMIT 1")->row();
+
         $bulanini = date('m');
         $tahunini = date('Y');
         $sebelum = $this->model->getBy('perbandingan', 'guru_id', $guru_id)->row();
@@ -56,12 +56,18 @@ class Penyesuaian extends CI_Controller
                 if ($sik == 'PTY') {
                     $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
                 } else {
-                    $isi = $this->db->query("SELECT 
-                    CASE 
-                        WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
-                        ELSE SUM(kehadiran) * $this->honor_non
-                    END AS nominal
-                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id ")->row('nominal');
+                    // $query = $this->db->query("SELECT honor.*, guru.santri AS santri
+                    // CASE 
+                    //     WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
+                    //     ELSE SUM(kehadiran) * $this->honor_non
+                    // END AS nominal
+                    // FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id ")->row();
+                    // if ($query->lembaga == 8 || $query->lembaga == 9) {
+                    //     $isi = $query->kehadiran * $this->honor_rami;
+                    // } else {
+                    //     $isi = $query->santri == 'santri' ? $query->kehadiran * $this->honor_santri : $query->kehadiran * $this->honor_non;
+                    // }
+                    $isi = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id")->row('nominal');
                 }
             } elseif ($hakhasil->payment == 'fungsional') {
                 $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row('nominal');
@@ -118,12 +124,18 @@ class Penyesuaian extends CI_Controller
                 if ($guru->sik == 'PTY') {
                     $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
                 } else {
-                    $isi = $this->db->query("SELECT 
-                    CASE 
-                        WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
-                        ELSE SUM(kehadiran) * $this->honor_non
-                    END AS nominal
-                    FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' ")->row('nominal');
+                    // $query = $this->db->query("SELECT honor.*, guru.santri AS santri
+                    // CASE 
+                    //     WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
+                    //     ELSE SUM(kehadiran) * $this->honor_non
+                    // END AS nominal
+                    // FROM honor JOIN guru ON guru.guru_id=honor.guru_id WHERE honor.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id ")->row();
+                    // if ($query->lembaga == 8 || $query->lembaga == 9) {
+                    //     $isi = $query->kehadiran * $this->honor_rami;
+                    // } else {
+                    //     $isi = $query->santri == 'santri' ? $query->kehadiran * $this->honor_santri : $query->kehadiran * $this->honor_non;
+                    // }
+                    $isi = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id")->row('nominal');
                 }
             } elseif ($hakhasil->payment == 'fungsional') {
                 $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');

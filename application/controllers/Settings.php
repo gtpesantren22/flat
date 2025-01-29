@@ -38,6 +38,10 @@ FROM
 GROUP BY 
     hak_setting.guru_id")->result();
 
+        $data['honor_non'] = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
+        $data['honor_santri'] = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $data['honor_rami'] = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
+
         $this->load->view('settings', $data);
     }
 
@@ -112,6 +116,27 @@ GROUP BY
             redirect('settings');
         } else {
             $this->session->set_flashdata('error', 'settings gagal diupdate');
+            redirect('settings');
+        }
+    }
+
+    public function updateInsentif()
+    {
+
+        $honor_non = rmRp($this->input->post('honor_non', true));
+        $honor_santri = rmRp($this->input->post('honor_santri', true));
+        $honor_rami = rmRp($this->input->post('honor_rami', true));
+
+
+        $this->model->edit('settings', 'nama', 'honor_non', ['isi' => $honor_non]);
+        $this->model->edit('settings', 'nama', 'honor_santri', ['isi' => $honor_santri]);
+        $this->model->edit('settings', 'nama', 'honor_rami', ['isi' => $honor_rami]);
+
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
+            redirect('settings');
+        } else {
+            $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
             redirect('settings');
         }
     }

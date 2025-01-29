@@ -48,8 +48,11 @@
                     <div class="card-body">
                         <h5 class="card-title">
                             Daftar Guru/Karyawan PTTY
-                            <!-- <a href="<?= base_url('honor/refresh/') ?>" class="btn btn-outline-danger btn-sm float-end">Refresh Data</a> -->
-
+                            <a href="<?= base_url('honor/updateNominal/' . $honorId) ?>" class="btn btn-outline-danger btn-sm float-end tbl-confirm" id="honor-id" value="Update nominal honor insentif">Update Nominal Data</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <br>
+                            <?php foreach ($nominal as $key) {
+                                echo $key->nama . ' : ' . number_format($key->isi) . ' | ';
+                            } ?>
                         </h5>
                         <p class="card-text">
                         <div class="table-responsive card-datatable">
@@ -206,7 +209,7 @@
                     },
                     // {
                     //     "render": function(data, type, row, meta) {
-                    //         return `<strong id='hasil-bagi-${row[5]}'>${(row[3] / 4)}</strong>`;
+                    // return `<strong id='hasil-bagi-${row[5]}'>${(row[3] / 4)}</strong>`;
                     //     }
                     // },
                     {
@@ -247,9 +250,9 @@
                 dataType: 'json',
                 success: function(response) {
                     if (response.status == 'ok') {
-                        $(this).val(newValue);
-                        $(`#hasil-honor-${id}`).text(formatRupiah((newValue / 4) * response.besaran));
-                        $(`#hasil-bagi-${id}`).text(newValue / 4);
+                        // $(this).val(newValue);
+                        $(`#hasil-honor-${id}`).text(formatRupiah(response.besaran));
+                        // $(`#hasil-bagi-${id}`).text(newValue / 4);
                     } else {
                         alert('Gagal mengupdate data');
                     }

@@ -27,8 +27,11 @@ class Honor extends CI_Controller
         $data['judul'] = 'Honor';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['honorGroup'] = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC")->result();
+        $honordata = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC");
+        $data['honorGroup'] = $honordata->result();
+        $data['honorId'] = $honordata->row('honor_id');
         $data['honor'] = $this->model->getData('sik_setting')->result();
+        $data['nominal'] = $this->db->query("SELECT * FROM settings WHERE nama LIKE 'honor_%' ")->result();
 
         $this->load->view('honor', $data);
     }
@@ -116,26 +119,27 @@ class Honor extends CI_Controller
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $lembaga = $this->model->getBy('satminkal', 'id', $row->lembaga)->row();
-            $total = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
-            // $hasil_hadir = $row->kehadiran / 4;
-            $hasil_hadir = $row->kehadiran;
-            if ($row->lembaga == 8 || $row->lembaga == 9) {
-                $honorGuru = $hasil_hadir * $this->honor_rami;
-                $totalHonor = $total ? $total->total * $this->honor_rami : 0;
-            } else {
-                $honorGuru = $gruru->santri == 'santri' ? $hasil_hadir * $this->honor_santri : $hasil_hadir * $this->honor_non;
-                $totalHonor = $total ? ($total->total) * ($gruru->santri == 'santri' ?  $this->honor_santri : $this->honor_non) : 0;
-            }
+            // $total = $this->db->query("SELECT kehadiran FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
+            // $hasil_hadir = $row->kehadiran;
+            // if ($row->lembaga == 8 || $row->lembaga == 9) {
+            //     $honorGuru = $row->kehadiran * $this->honor_rami;
+            //     $totalHonor = $total ? $total->total * $this->honor_rami : 0;
+            // } else {
+            //     $honorGuru = $gruru->santri == 'santri' ? $row->kehadiran * $this->honor_santri : $row->kehadiran * $this->honor_non;
+            //     $totalHonor = $total ? ($total->total) * ($gruru->santri == 'santri' ?  $this->honor_santri : $this->honor_non) : 0;
+            // }
+
             $data[] = [
                 $row_number++, // 0
                 $gruru->nama,  // 1
                 $gruru->santri, // 2
                 $row->kehadiran, // 3
-                $honorGuru, // 4 
+                $row->nominal ? $row->nominal : 0, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 $lembaga->nama, // 7
-                $totalHonor, // 8
+                // $row->nominal, // 8
+                0, // 8
             ];
         }
 
@@ -154,15 +158,20 @@ class Honor extends CI_Controller
 
     public function editJam()
     {
-        $id = $this->input->post('id');
-        $jam = $this->input->post('value');
+        $id = $this->input->post('id', true);
+        $jam = $this->input->post('value', true);
         $dtlHonor = $this->model->getBy('honor', 'id', $id)->row();
         $guru = $this->model->getBy('guru', 'guru_id', $dtlHonor->guru_id)->row();
-        $nomBesaran = $guru->santri == 'santri' ? $this->honor_santri : $this->honor_non;
 
-        $this->model->edit('honor', 'id', $id, ['kehadiran' => $jam]);
+        if ($dtlHonor->lembaga == 8 || $dtlHonor->lembaga == 9) {
+            $nominal = $jam * $this->honor_rami;
+        } else {
+            $nominal = $guru->santri == 'santri' ? $jam * $this->honor_santri : $jam * $this->honor_non;
+        }
+
+        $this->model->edit('honor', 'id', $id, ['kehadiran' => $jam, 'nominal' => $nominal]);
         if ($this->db->affected_rows() > 0) {
-            echo json_encode(['status' => 'ok', 'besaran' => $nomBesaran]);
+            echo json_encode(['status' => 'ok', 'besaran' => $nominal]);
         } else {
             echo json_encode(['status' => 'gagal']);
         }
@@ -192,6 +201,28 @@ class Honor extends CI_Controller
             }
         } else {
             echo json_encode(['status' => 'ok']);
+        }
+    }
+    public function updateNominal($id)
+    {
+        $honor = $this->model->getBy('honor', 'honor_id', $id)->result();
+        foreach ($honor as $key) {
+            $guru = $this->model->getBy('guru', 'guru_id', $key->guru_id)->row();
+            if ($key->lembaga == 8 || $key->lembaga == 9) {
+                $nominal = $key->kehadiran * $this->honor_rami;
+            } else {
+                $nominal = $guru->santri == 'santri' ? $key->kehadiran * $this->honor_santri : $key->kehadiran * $this->honor_non;
+            }
+
+            $this->model->edit('honor', 'id', $key->id, ['nominal' => $nominal]);
+        }
+
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'Update nominal selesai');
+            redirect('honor');
+        } else {
+            $this->session->set_flashdata('ok', 'Update nominal selesai');
+            redirect('honor');
         }
     }
 }
