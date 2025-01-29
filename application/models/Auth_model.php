@@ -41,7 +41,7 @@ class Auth_model extends CI_Model
         if ($user->aktif === 'T') {
             return FALSE;
         }
-
+        $this->log_activity($user->id_user, 'User logged in');
         // bikin session
         $this->session->set_userdata([self::SESSION_KEY => $user->id_user]);
         // $this->_update_last_login($user->id_user);
@@ -62,6 +62,7 @@ class Auth_model extends CI_Model
 
     public function logout()
     {
+        $this->log_activity($this->session->userdata(self::SESSION_KEY), 'User Logout');
         $this->session->unset_userdata(self::SESSION_KEY);
         return !$this->session->has_userdata(self::SESSION_KEY);
     }
@@ -85,5 +86,14 @@ class Auth_model extends CI_Model
     function tambah($table, $data)
     {
         $this->db->insert($table, $data);
+    }
+
+    public function log_activity($user_id, $activity)
+    {
+        $data = array(
+            'user_id' => $user_id,
+            'activity' => $activity
+        );
+        $this->db->insert('activity_logs', $data);
     }
 }
