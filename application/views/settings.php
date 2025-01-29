@@ -49,7 +49,7 @@
 
             </div>
             <!-- HAK -->
-            <div class="col-lg-8 mb-4 order-0">
+            <div class="col-lg-12 mb-4 order-0">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">
@@ -64,6 +64,9 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Nama</th>
+                                        <th>SIK</th>
+                                        <th>Satminkal</th>
+                                        <th>Jabatan</th>
                                         <th>Gapok</th>
                                         <th>T.Fu</th>
                                         <th>T.Ki</th>
@@ -78,6 +81,9 @@
                                         <tr>
                                             <td><?= $b++; ?></td>
                                             <td><?= $hak->nama ?></td>
+                                            <td><?= $hak->sik ?></td>
+                                            <td><?= $hak->lembaga ?></td>
+                                            <td><?= $hak->jabatan ?></td>
                                             <td>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" value="Y" <?= $hak->gapok != null ? 'checked' : '' ?> onchange="updateCheckbox2('<?= $hak->guru_id ?>', 'gapok', this.checked)" />

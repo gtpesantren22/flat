@@ -24,17 +24,19 @@ class Settings extends CI_Controller
         $data['user'] = $this->Auth_model->current_user();
 
         $data['sik'] = $this->model->getData('sik_setting')->result();
-        $data['hak'] = $this->db->query("SELECT guru.nama, hak_setting.id,
+        $data['hak'] = $this->db->query("SELECT guru.nama, hak_setting.id, satminkal.nama as lembaga, jabatan.nama as jabatan, guru.sik,
     guru.guru_id,
-    MAX(CASE WHEN payment = 'gapok' THEN id END) AS gapok,
-    MAX(CASE WHEN payment = 'fungsional' THEN id END) AS fungsional,
-    MAX(CASE WHEN payment = 'kinerja' THEN id END) AS kinerja,
-    MAX(CASE WHEN payment = 'struktural' THEN id END) AS struktural,
-    MAX(CASE WHEN payment = 'bpjs' THEN id END) AS bpjs,
-    MAX(CASE WHEN payment = 'walas' THEN id END) AS walas,
-    MAX(CASE WHEN payment = 'penyesuaian' THEN id END) AS penyesuaian
-FROM 
-    hak_setting JOIN guru ON guru.guru_id=hak_setting.guru_id
+    MAX(CASE WHEN payment = 'gapok' THEN hak_setting.id END) AS gapok,
+    MAX(CASE WHEN payment = 'fungsional' THEN hak_setting.id END) AS fungsional,
+    MAX(CASE WHEN payment = 'kinerja' THEN hak_setting.id END) AS kinerja,
+    MAX(CASE WHEN payment = 'struktural' THEN hak_setting.id END) AS struktural,
+    MAX(CASE WHEN payment = 'bpjs' THEN hak_setting.id END) AS bpjs,
+    MAX(CASE WHEN payment = 'walas' THEN hak_setting.id END) AS walas,
+    MAX(CASE WHEN payment = 'penyesuaian' THEN hak_setting.id END) AS penyesuaian
+FROM hak_setting 
+JOIN guru ON guru.guru_id=hak_setting.guru_id
+JOIN satminkal ON guru.satminkal=satminkal.id
+JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
 GROUP BY 
     hak_setting.guru_id")->result();
 
