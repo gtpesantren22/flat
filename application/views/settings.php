@@ -141,17 +141,26 @@
                         <p class="card-text">
                         <form action="<?= base_url('settings/updateInsentif') ?>" method="post">
                             <div class="form-group row mb-2">
-                                <div class="col-sm-4 col-md-4 col-lg-4">
+                                <div class="col-sm-3 col-md-3 col-lg-3">
                                     <label for="honor_non" class="form-label">Honor Non-Santri</label>
                                     <input type="text" class="form-control uang" id="honor_non" name="honor_non" required value="<?= $honor_non ?>">
                                 </div>
-                                <div class="col-sm-4 col-md-4 col-lg-4">
+                                <div class="col-sm-3 col-md-3 col-lg-3">
                                     <label for="honor_santri" class="form-label">Honor Santri</label>
                                     <input type="text" class="form-control uang" id="honor_santri" name="honor_santri" required value="<?= $honor_santri ?>">
                                 </div>
-                                <div class="col-sm-4 col-md-4 col-lg-4">
+                                <div class="col-sm-3 col-md-3 col-lg-3">
                                     <label for="honor_rami" class="form-label">Honor RA-MI</label>
                                     <input type="text" class="form-control uang" id="honor_rami" name="honor_rami" required value="<?= $honor_rami ?>">
+                                </div>
+                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                    <label for="honor_rami" class="form-label">Gunakan nominal untuk honor bulan</label>
+                                    <select name="honor_id" id="" class="form-select" required>
+                                        <option value="">Pilih</option>
+                                        <?php foreach ($honordata as $row): ?>
+                                            <option value="<?= $row->honor_id ?>"><?= bulan($row->bulan) . ' ' . $row->tahun ?></option>
+                                        <?php endforeach ?>
+                                    </select>
                                 </div>
                             </div>
                             <button class="btn btn-success btn-sm" type="submit">Simpan</button>

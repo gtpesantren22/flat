@@ -43,6 +43,7 @@ GROUP BY
         $data['honor_non'] = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
         $data['honor_santri'] = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $data['honor_rami'] = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
+        $data['honordata'] = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC")->result();
 
         $this->Auth_model->log_activity($this->userID, 'Akses index Settings');
         $this->load->view('settings', $data);
@@ -138,6 +139,7 @@ GROUP BY
         $honor_non = rmRp($this->input->post('honor_non', true));
         $honor_santri = rmRp($this->input->post('honor_santri', true));
         $honor_rami = rmRp($this->input->post('honor_rami', true));
+        $honor_id = ($this->input->post('honor_id', true));
 
 
         $this->model->edit('settings', 'nama', 'honor_non', ['isi' => $honor_non]);
@@ -145,11 +147,11 @@ GROUP BY
         $this->model->edit('settings', 'nama', 'honor_rami', ['isi' => $honor_rami]);
 
         if ($this->db->affected_rows() > 0) {
-            $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
-            redirect('settings');
+            // $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
+            redirect('honor/updateNominal/' . $honor_id);
         } else {
-            $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
-            redirect('settings');
+            // $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
+            redirect('honor/updateNominal/' . $honor_id);
         }
     }
 }

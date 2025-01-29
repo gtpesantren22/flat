@@ -6,7 +6,7 @@
              <script>
                  document.write(new Date().getFullYear());
              </script>
-             , Bendahara Pesantreb _ by
+             , Bendahara Pesantren _ by
              <a href="#" target="_blank" class="footer-link fw-bolder">IT Pesantren DWK</a>
          </div>
 
