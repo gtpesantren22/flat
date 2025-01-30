@@ -16,7 +16,8 @@
                         <h5 class="card-title">
                             <?= $datagaji->status == 'kunci' ? "<span class='text-danger bx bxs-key'>locked</span> || " : '' ?> Data Gaji Guru/Karyawan
                             <a class="btn btn-outline-primary btn-sm float-end tbl-confirm" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-refresh"></i> Generate Ulang</a>
-                            <a class="btn btn-outline-danger btn-sm float-end tbl-confirm" value="Fitur ini akan mengunci dan mempermanenkan data" href="<?= base_url('gaji/kunci/' . $idgaji) ?>"><i class="bx bxs-key"></i> Kunci Data</a>
+                            <!-- <a class="btn btn-outline-danger btn-sm float-end tbl-confirm" value="Fitur ini akan mengunci dan mempermanenkan data" href="<?= base_url('gaji/kunci/' . $idgaji) ?>"><i class="bx bxs-key"></i> Kunci Data</a> -->
+                            <button class="btn btn-outline-danger btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modal-kunci"><i class="bx bxs-key"></i> Kunci Data</button>
                             <a class="btn btn-outline-success btn-sm float-end tbl-confirm" value="Pastikan data gaji nya sudah dikunci terlebih dahulu" href="<?= base_url('gaji/exportGaji/' . $idgaji) ?>"><i class="bx bx-spreadsheet"></i> Export to Excel</a>
                         </h5>
                         <p class="card-text"></p>
@@ -191,6 +192,36 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-kunci" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="backDropModalTitle">Kunci Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php if ($datagaji->status == 'kunci') { ?>
+                        <div class="text-center">
+                            <b class="text-danger">Data sudah terkunci</b><br>
+                        </div>
+                    <?php } else { ?>
+                        <div class="text-center">
+                            <b class="">Proses penguncian data</b><br>
+                            <strong class="text-danger"><i class='bx bx-info-circle'></i> Pastikan data sudah valid sebelum terkuci!</strong><br><br>
+                            <button type="button" class="btn btn-primary" id="proses-kunci" data-id="<?= $datagaji->gaji_id ?>"><span class="tf-icons bx bx-bolt-circle bx-18px me-2"></span>Lanjutkan Proses!</button>
+                            <br>
+                        </div>
+                        <div id="view-hasil" class="mt-5"></div>
+                    <?php } ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <!-- <button type="button" class="btn btn-primary">Save</button> -->
+                </div>
+            </form>
         </div>
     </div>
 
@@ -432,4 +463,98 @@
                 }
             });
         }
+
+        $(document).on('click', '#proses-kunci', function() {
+            // e.preventDefault();
+            const id = $(this).data('id');
+
+            $.ajax({
+                url: '<?= base_url("gaji/getGajiRinci") ?>',
+                type: 'POST',
+                data: {
+                    id: id,
+                },
+                dataType: 'json',
+                success: function(response) {
+                    const hasil = $('#view-hasil');
+                    let berhasil = 0;
+                    let gagal = 0;
+                    let persen = 0;
+
+                    function updateProgress() {
+                        const total = Number(response.total); // Konversi ke number
+                        if (isNaN(total) || total === 0) {
+                            persen = 0; // Jika total tidak valid atau 0, set persen ke 0
+                        } else {
+                            // Hitung persentase
+                            processed = berhasil + gagal; // Total yang sudah diproses
+                            persen = (processed / total) * 100;
+                        }
+
+                        hasil.html(`
+                            <div class="text-center">
+                                <strong class="mb-2">Proses kunci data ...</strong>
+                                <div class="progress mb-3" style="height: 17px;">
+                                    <div class="progress-bar" role="progressbar" style="width: ${persen}%;" aria-valuenow="${persen}" aria-valuemin="0" aria-valuemax="100">${persen.toFixed(2)}%</div>
+                                </div>
+                            </div>
+                            <strong class="mb-1">Total success : ${berhasil}</strong><br>
+                            <strong class="mb-1 text-danger">Total error : ${gagal}</strong><br>
+                        `);
+                    }
+
+                    const ajaxRequests = response.data.map(function(item) {
+                        return $.ajax({
+                            url: '<?= base_url("gaji/updateGaji") ?>',
+                            type: 'POST',
+                            data: {
+                                gaji_id: item.gaji_id,
+                                guru_id: item.guru_id,
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                                berhasil++; // Tambahkan 1 ke variabel berhasil
+                                updateProgress(); // Perbarui tampilan progress bar dan hasil
+                                console.log('Data updated successfully');
+                            },
+                            error: function() {
+                                gagal++; // Tambahkan 1 ke variabel gagal
+                                updateProgress(); // Perbarui tampilan progress bar dan hasil
+                                console.error('Failed to update data');
+                            }
+                        });
+                    });
+
+                    Promise.all(ajaxRequests)
+                        .then(function() {
+                            // console.log('Semua permintaan AJAX selesai');
+                            $.ajax({
+                                url: '<?= base_url("gaji/updateKunci") ?>',
+                                type: 'POST',
+                                data: {
+                                    gaji_id: id,
+                                },
+                                dataType: 'json',
+                                success: function(response) {
+                                    window.location.reload()
+                                },
+                                error: function() {
+                                    gagal++; // Tambahkan 1 ke variabel gagal
+                                    updateProgress(); // Perbarui tampilan progress bar dan hasil
+                                    console.error('Failed to update data');
+                                }
+                            });
+                        })
+                        .catch(function(error) {
+                            console.error('Ada permintaan AJAX yang gagal', error);
+                        });
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                    console.log(status);
+                    console.log(error);
+                    // alert(xhr.responseText);
+                }
+            });
+        })
     </script>

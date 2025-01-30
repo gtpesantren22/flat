@@ -33,6 +33,12 @@ class Modeldata extends CI_Model
         $this->db->where($where, $dtwhere);
         $this->db->update($table, $data);
     }
+    public function edit2($table, $where, $dtwhere, $where2, $dtwhere2, $data)
+    {
+        $this->db->where($where, $dtwhere);
+        $this->db->where($where2, $dtwhere2);
+        $this->db->update($table, $data);
+    }
     public function getBy($table, $where, $dtwhere)
     {
         $this->db->where($where, $dtwhere);
@@ -53,7 +59,7 @@ class Modeldata extends CI_Model
     }
     public function getBySelect($table, $where, $dtwhere, $select)
     {
-        $this->db->select($where);
+        $this->db->select($select);
         $this->db->where($where, $dtwhere);
         return $this->db->get($table);
     }
