@@ -757,7 +757,7 @@ class Gaji extends CI_Controller
                 $sheet->getStyle('U' . $numrow)->applyFromArray($style_row);
                 $sheet->getStyle('V' . $numrow)->applyFromArray($style_row);
                 $sheet->getStyle('W' . $numrow)->applyFromArray($style_row);
-                $sheet->getStyle('X' . $numrow)->applyFromArray($style_row
+                $sheet->getStyle('X' . $numrow)->applyFromArray($style_row);
                 $sheet->getStyle('Y' . $numrow)->applyFromArray($style_row);
                 $sheet->getStyle('Z' . $numrow)->applyFromArray($style_row);
 
@@ -900,13 +900,13 @@ class Gaji extends CI_Controller
     public function updateGaji()
     {
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci gaji perorangan C: Gaji');
-        $gaji_id = $this->input->post('gaji_id', 'true');
+        $gaji_id = $this->input->post('gaji_id', true);
         $cek = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
         if ($cek->status == 'kunci') {
             return false;
             die();
         }
-        $guru_id = $this->input->post('guru_id', 'true');
+        $guru_id = $this->input->post('guru_id', true);
         $gajidtl = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
 
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
