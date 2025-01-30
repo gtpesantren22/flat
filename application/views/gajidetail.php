@@ -513,13 +513,13 @@
                             },
                             dataType: 'json',
                             success: function(response) {
-                                berhasil++; // Tambahkan 1 ke variabel berhasil
-                                updateProgress(); // Perbarui tampilan progress bar dan hasil
+                                berhasil++; 
+                                updateProgress(); 
                                 console.log('Data updated successfully');
                             },
                             error: function() {
-                                gagal++; // Tambahkan 1 ke variabel gagal
-                                updateProgress(); // Perbarui tampilan progress bar dan hasil
+                                gagal++; 
+                                updateProgress();
                                 console.error('Failed to update data');
                             }
                         });
