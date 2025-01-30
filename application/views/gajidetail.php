@@ -503,25 +503,30 @@
                         `);
                     }
 
-                    const ajaxRequests = response.data.map(function(item) {
-                        return $.ajax({
-                            url: '<?= base_url("gaji/updateGaji") ?>',
-                            type: 'POST',
-                            data: {
-                                gaji_id: item.gaji_id,
-                                guru_id: item.guru_id,
-                            },
-                            dataType: 'json',
-                            success: function(response) {
-                                berhasil++; 
-                                updateProgress(); 
-                                console.log('Data updated successfully');
-                            },
-                            error: function() {
-                                gagal++; 
-                                updateProgress();
-                                console.error('Failed to update data');
-                            }
+                    const ajaxRequests = response.data.map((item, index) => {
+                        return new Promise((resolve) => {
+                            setTimeout(() => {
+                                $.ajax({
+                                    url: '<?= base_url("gaji/updateGaji") ?>',
+                                    type: 'POST',
+                                    data: {
+                                        gaji_id: item.gaji_id,
+                                        guru_id: item.guru_id,
+                                    },
+                                    dataType: 'json',
+                                    success: function(response) {
+                                        berhasil++;
+                                        updateProgress();
+                                        console.log('Data updated successfully');
+                                    },
+                                    error: function() {
+                                        gagal++;
+                                        updateProgress();
+                                        console.error('Failed to update data');
+                                    },
+                                    complete: resolve // Menandai bahwa AJAX request selesai
+                                });
+                            }, index * 500); // Menambah jeda 500ms per request
                         });
                     });
 

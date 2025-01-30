@@ -303,14 +303,14 @@ class Gaji extends CI_Controller
             $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+
             if ($guru->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
-
-                $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row('nominal');
+                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
+                $gapok = $gapok1 ? $gapok1->nominal : 0;
             }
-
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -909,10 +909,9 @@ class Gaji extends CI_Controller
     {
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci gaji perorangan C: Gaji');
         $gaji_id = $this->input->post('gaji_id', true);
-
         $guru_id = $this->input->post('guru_id', true);
-        $gajidtl = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
 
+        $gajidtl = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
         $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $guru_id, 'bulan', $gajidtl->bulan, 'tahun', $gajidtl->tahun)->row();
 
@@ -920,7 +919,8 @@ class Gaji extends CI_Controller
             $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $gapok = $gapok1 ? $gapok1->nominal : 0;
         } else {
-            $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajidtl->bulan AND tahun = '$gajidtl->tahun' GROUP BY honor.guru_id")->row('nominal');
+            $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajidtl->bulan AND tahun = '$gajidtl->tahun' GROUP BY honor.guru_id")->row();
+            $gapok = $gapok1 ? $gapok1->nominal : 0;
         }
 
         $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -942,6 +942,7 @@ class Gaji extends CI_Controller
             'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : '0', // 14
             'penyesuaian' => $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : '0', // 15
         ];
+
         $this->model->edit2('gaji_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, $data);
 
         if ($this->db->affected_rows() > 0) {
