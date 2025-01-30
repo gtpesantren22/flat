@@ -859,8 +859,8 @@ class Gaji extends CI_Controller
     {
         $this->Auth_model->log_activity($this->userID, 'Akses data potongan C: Gaji');
 
-        $id = $this->input->post('gaji_id', 'true');
-        $guru_id = $this->input->post('guru_id', 'true');
+        $id = $this->input->post('gaji_id', true);
+        $guru_id = $this->input->post('guru_id', true);
         $data = $this->model->getBy('gaji', 'gaji_id', $id)->row();
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
         $rinci = $this->model->getBy3('potongan', 'bulan', $data->bulan, 'tahun', $data->tahun, 'guru_id', $guru_id)->result();
@@ -892,8 +892,16 @@ class Gaji extends CI_Controller
     public function getGajiRinci()
     {
         $this->Auth_model->log_activity($this->userID, 'Akses data gaji C: Gaji');
-        $id = $this->input->post('id', 'true');
+        $id = $this->input->post('gaji_id', true);
         $gaji = $this->model->getBySelect('gaji_detail', 'gaji_id', $id, 'gaji_id, guru_id');
+        $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
+        if (!$cek) {
+            return false;
+        }
+        if ($cek->status === 'kunci') {
+            return false;
+        }
+
         echo json_encode(['data' => $gaji->result(), 'total' => $gaji->num_rows()]);
     }
 
@@ -901,13 +909,7 @@ class Gaji extends CI_Controller
     {
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci gaji perorangan C: Gaji');
         $gaji_id = $this->input->post('gaji_id', true);
-        $cek = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
-        if (!$cek) {
-            return false;
-        }
-        if ($cek->status === 'kunci') {
-            return false;
-        }
+
         $guru_id = $this->input->post('guru_id', true);
         $gajidtl = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
 
@@ -952,7 +954,7 @@ class Gaji extends CI_Controller
     public function updateKunci()
     {
         $this->Auth_model->log_activity($this->userID, 'Akses update status kunci data');
-        $gaji_id = $this->input->post('gaji_id', 'true');
+        $gaji_id = $this->input->post('gaji_id', true);
         $this->model->edit('gaji', 'gaji_id', $gaji_id, ['status' => 'kunci']);
 
         if ($this->db->affected_rows() > 0) {

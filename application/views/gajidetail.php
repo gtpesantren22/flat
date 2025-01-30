@@ -472,7 +472,7 @@
                 url: '<?= base_url("gaji/getGajiRinci") ?>',
                 type: 'POST',
                 data: {
-                    id: id,
+                    gaji_id: id,
                 },
                 dataType: 'json',
                 success: function(response) {
