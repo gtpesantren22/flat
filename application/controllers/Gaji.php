@@ -943,9 +943,9 @@ class Gaji extends CI_Controller
         $this->model->edit2('gaji_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, $data);
 
         if ($this->db->affected_rows() > 0) {
-            echo json_encode(['status', 'success']);
+            echo json_encode(['status' => 'success']);
         } else {
-            echo json_encode(['status', 'error']);
+            echo json_encode(['status' => 'error']);
         }
     }
 
