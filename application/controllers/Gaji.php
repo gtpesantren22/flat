@@ -902,9 +902,11 @@ class Gaji extends CI_Controller
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci gaji perorangan C: Gaji');
         $gaji_id = $this->input->post('gaji_id', true);
         $cek = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
-        if ($cek->status == 'kunci') {
+        if (!$cek) {
             return false;
-            die();
+        }
+        if ($cek->status === 'kunci') {
+            return false;
         }
         $guru_id = $this->input->post('guru_id', true);
         $gajidtl = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
