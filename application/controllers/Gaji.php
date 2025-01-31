@@ -813,6 +813,276 @@ class Gaji extends CI_Controller
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
     }
+    public function exportGajiV2($id)
+    {
+        $this->Auth_model->log_activity($this->userID, 'Akses export data gaji C: Gaji');
+        $datagaji =  $this->model->getBy('gaji', 'gaji_id', $id)->row();
+        $spreadsheet = new Spreadsheet();
+
+        // Buat sebuah variabel untuk menampung pengaturan style dari header tabel
+        $style_col = [
+            'font' => ['bold' => true], // Set font nya jadi bold
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, // Set text jadi ditengah secara horizontal (center)
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+            ],
+            'borders' => [
+                'top' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border top dengan garis tipis
+                'right' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],  // Set border right dengan garis tipis
+                'bottom' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border bottom dengan garis tipis
+                'left' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN] // Set border left dengan garis tipis
+            ]
+        ];
+
+        // Buat sebuah variabel untuk menampung pengaturan style dari isi tabel
+        $style_row = [
+            'alignment' => [
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+            ],
+            'borders' => [
+                'top' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border top dengan garis tipis
+                'right' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],  // Set border right dengan garis tipis
+                'bottom' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border bottom dengan garis tipis
+                'left' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN] // Set border left dengan garis tipis
+            ]
+        ];
+
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $datagaji2 =  $this->db->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' ORDER BY satminkal ASC, nama ASC ")->result();
+
+        $sheet->setCellValue('A1', "DAFTAR GAJI GURU & KARYAWAN"); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $sheet->mergeCells('A1:AA1'); // Set Merge Cell pada kolom A1 sampai E1
+
+        $sheet->setCellValue('A2', "PONDOK PESANTREN DARUL LUGHAH WAL KAROMAH"); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $sheet->mergeCells('A2:AA2'); // Set Merge Cell pada kolom A1 sampai E1
+
+        $sheet->setCellValue('A3', ""); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $sheet->mergeCells('A3:AA3'); // Set Merge Cell pada kolom A1 sampai E1
+
+        $sheet->setCellValue('M4', "GAJI/HONOR"); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $sheet->mergeCells('M4:S4'); // Set Merge Cell pada kolom A1 sampai E1
+        $sheet->getStyle('M4:S4')->applyFromArray($style_col);
+
+        $spreadsheet->getActiveSheet()->getStyle('A4:Z4')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('F7EF00');
+        $spreadsheet->getActiveSheet()->getStyle('A5:Z5')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('F7EF00');
+        $spreadsheet->getActiveSheet()->getStyle('AA4')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFFF0000');
+        $spreadsheet->getActiveSheet()->getStyle('AA5')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFFF0000');
+
+        $sheet->mergeCells('A4:A5');
+        $sheet->mergeCells('B4:B5');
+        $sheet->mergeCells('C4:C5');
+        $sheet->mergeCells('D4:D5');
+        $sheet->mergeCells('E4:E5');
+        $sheet->mergeCells('F4:F5');
+        $sheet->mergeCells('G4:G5');
+        $sheet->mergeCells('H4:H5');
+        $sheet->mergeCells('I4:I5');
+        $sheet->mergeCells('J4:J5');
+        $sheet->mergeCells('K4:K5');
+        $sheet->mergeCells('L4:L5');
+        $sheet->mergeCells('T4:T5');
+        $sheet->mergeCells('U4:U5');
+        $sheet->mergeCells('V4:V5');
+        $sheet->mergeCells('W4:W5');
+        $sheet->mergeCells('X4:X5');
+        $sheet->mergeCells('Y4:Y5');
+        $sheet->mergeCells('Z4:Z5');
+        $sheet->mergeCells('AA4:AA5');
+
+        $sheet->getStyle('A4:A5')->applyFromArray($style_col);
+        $sheet->getStyle('B4:B5')->applyFromArray($style_col);
+        $sheet->getStyle('C4:C5')->applyFromArray($style_col);
+        $sheet->getStyle('D4:D5')->applyFromArray($style_col);
+        $sheet->getStyle('E4:E5')->applyFromArray($style_col);
+        $sheet->getStyle('F4:F5')->applyFromArray($style_col);
+        $sheet->getStyle('G4:G5')->applyFromArray($style_col);
+        $sheet->getStyle('H4:H5')->applyFromArray($style_col);
+        $sheet->getStyle('I4:I5')->applyFromArray($style_col);
+        $sheet->getStyle('J4:J5')->applyFromArray($style_col);
+        $sheet->getStyle('K4:K5')->applyFromArray($style_col);
+        $sheet->getStyle('L4:L5')->applyFromArray($style_col);
+        $sheet->getStyle('M4:M5')->applyFromArray($style_col);
+        $sheet->getStyle('N4:N5')->applyFromArray($style_col);
+        $sheet->getStyle('O4:O5')->applyFromArray($style_col);
+        $sheet->getStyle('P4:P5')->applyFromArray($style_col);
+        $sheet->getStyle('Q4:Q5')->applyFromArray($style_col);
+        $sheet->getStyle('R4:R5')->applyFromArray($style_col);
+        $sheet->getStyle('S4:S5')->applyFromArray($style_col);
+        $sheet->getStyle('T4:T5')->applyFromArray($style_col);
+        $sheet->getStyle('U4:U5')->applyFromArray($style_col);
+        $sheet->getStyle('V4:V5')->applyFromArray($style_col);
+        $sheet->getStyle('W4:W5')->applyFromArray($style_col);
+        $sheet->getStyle('X4:X5')->applyFromArray($style_col);
+        $sheet->getStyle('Y4:Y5')->applyFromArray($style_col);
+        $sheet->getStyle('Z4:Z5')->applyFromArray($style_col);
+        $sheet->getStyle('AA4:AA5')->applyFromArray($style_col);
+
+        // Buat header tabel nya pada baris ke 3
+        $sheet->setCellValue('A4', "NO");
+        $sheet->setCellValue('B4', "BULAN");
+        $sheet->setCellValue('C4', "TAHUN");
+        $sheet->setCellValue('D4', "NAMA GURU/KARYAWAN");
+        $sheet->setCellValue('E4', "SATMINKAL");
+        $sheet->setCellValue('F4', "JABATAN");
+        $sheet->setCellValue('G4', "GOLONGAN");
+        $sheet->setCellValue('H4', "SIK");
+        $sheet->setCellValue('I4', "IJAZAH");
+        $sheet->setCellValue('J4', "TMT");
+        $sheet->setCellValue('K4', "MASA KERJA");
+        $sheet->setCellValue('L4', "KET");
+        $sheet->setCellValue('M5', "GAPOK");
+        $sheet->setCellValue('N5', "T. FUNGSIONAL");
+        $sheet->setCellValue('O5', "T. KINERJA");
+        $sheet->setCellValue('P5', "T. BPJS");
+        $sheet->setCellValue('Q5', "T. STRUKTURAL");
+        $sheet->setCellValue('R5', "T. WALI KELAS");
+        $sheet->setCellValue('S5', "T. PENYESUAIAN");
+        $sheet->setCellValue('T4', "TOTAL GAJI");
+        $sheet->setCellValue('U4', "TOTAL POTONGAN");
+        $sheet->setCellValue('V4', "JAM MENGAJAR");
+        $sheet->setCellValue('W4', "KEHADIRAN");
+        $sheet->setCellValue('X4', "NO. REKENING");
+        $sheet->setCellValue('Y4', "NO. HP");
+        $sheet->setCellValue('Z4', "EMAIL");
+        $sheet->setCellValue('AA4', "GAJI SEBELUMNYA");
+
+
+        // Apply style header yang telah kita buat tadi ke masing-masing kolom header
+        $sheet->getStyle('A4')->applyFromArray($style_col);
+        $sheet->getStyle('B4')->applyFromArray($style_col);
+        $sheet->getStyle('C4')->applyFromArray($style_col);
+        $sheet->getStyle('D4')->applyFromArray($style_col);
+        $sheet->getStyle('E4')->applyFromArray($style_col);
+        $sheet->getStyle('F4')->applyFromArray($style_col);
+        $sheet->getStyle('G4')->applyFromArray($style_col);
+        $sheet->getStyle('H5')->applyFromArray($style_col);
+        $sheet->getStyle('I5')->applyFromArray($style_col);
+        $sheet->getStyle('J5')->applyFromArray($style_col);
+        $sheet->getStyle('K4')->applyFromArray($style_col);
+        $sheet->getStyle('L4')->applyFromArray($style_col);
+        $sheet->getStyle('M4')->applyFromArray($style_col);
+        $sheet->getStyle('T4')->applyFromArray($style_col);
+        $sheet->getStyle('U4')->applyFromArray($style_col);
+        $sheet->getStyle('V4')->applyFromArray($style_col);
+        $sheet->getStyle('W4')->applyFromArray($style_col);
+        $sheet->getStyle('X4')->applyFromArray($style_col);
+        $sheet->getStyle('Y4')->applyFromArray($style_col);
+        $sheet->getStyle('Z4')->applyFromArray($style_col);
+        $sheet->getStyle('AA4')->applyFromArray($style_col);
+
+        // Panggil function view yang ada di SiswaModel untuk menampilkan semua data siswanya
+
+
+        $no = 1; // Untuk penomoran tabel, di awal set dengan 1
+        $numrow = 6; // Set baris pertama untuk isi tabel adalah baris ke 4
+        foreach ($datagaji2 as $hasil) { // Lakukan looping pada variabel siswa
+            $totalgaji = $hasil->gapok + $hasil->fungsional + $hasil->kinerja + $hasil->bpjs + $hasil->struktural + $hasil->walas + $hasil->penyesuaian;
+            $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+            $jam = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+            $hadir = $this->db->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+            $sebelum = $this->db->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
+
+            $sheet->setCellValue('A' . $numrow, $no);
+            $sheet->setCellValue('B' . $numrow, bulan($datagaji->bulan));
+            $sheet->setCellValue('C' . $numrow, $datagaji->tahun);
+            $sheet->setCellValue('D' . $numrow, $hasil->nama);
+            $sheet->setCellValue('E' . $numrow, $hasil->satminkal);
+            $sheet->setCellValue('F' . $numrow, $hasil->jabatan);
+            $sheet->setCellValue('G' . $numrow, $hasil->golongan);
+            $sheet->setCellValue('H' . $numrow, $hasil->sik);
+            $sheet->setCellValue('I' . $numrow, $hasil->ijazah);
+            $sheet->setCellValue('J' . $numrow, $hasil->tmt);
+            $sheet->setCellValue('K' . $numrow, selisihTahun($hasil->tmt));
+            $sheet->setCellValue('L' . $numrow, $hasil->santri);
+            $sheet->setCellValue('M' . $numrow, $hasil->gapok);
+            $sheet->setCellValue('N' . $numrow, $hasil->fungsional);
+            $sheet->setCellValue('O' . $numrow, $hasil->kinerja);
+            $sheet->setCellValue('P' . $numrow, $hasil->bpjs);
+            $sheet->setCellValue('Q' . $numrow, $hasil->struktural);
+            $sheet->setCellValue('R' . $numrow, $hasil->walas);
+            $sheet->setCellValue('S' . $numrow, $hasil->penyesuaian);
+            $sheet->setCellValue('T' . $numrow, $totalgaji);
+            $sheet->setCellValue('U' . $numrow, $potong->total);
+            $sheet->setCellValue('V' . $numrow, $jam ? $jam->total : 0);
+            $sheet->setCellValue('W' . $numrow, $hadir ? $hadir->total : 0);
+            $sheet->setCellValueExplicit('X' . $numrow, $hasil->rekening, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('Y' . $numrow, $hasil->hp);
+            $sheet->setCellValue('Z' . $numrow, $hasil->email);
+            $sheet->setCellValue('AA' . $numrow, $sebelum ? $sebelum->nominal : 0);
+
+            // Apply style row yang telah kita buat tadi ke masing-masing baris (isi tabel)
+            $sheet->getStyle('A' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('B' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('C' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('D' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('E' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('F' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('G' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('H' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('I' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('J' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('K' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('L' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('M' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('N' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('O' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('P' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('Q' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('R' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('S' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('T' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('U' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('V' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('W' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('X' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('Y' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('Z' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('AA' . $numrow)->applyFromArray($style_row);
+
+            $no++; // Tambah 1 setiap kali looping
+            $numrow++; // Tambah 1 setiap kali looping
+        }
+
+        // $sheet = $spreadsheet->getActiveSheet();
+        foreach ($sheet->getColumnIterator() as $column) {
+            $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        // Set height semua kolom menjadi auto (mengikuti height isi dari kolommnya, jadi otomatis)
+        $sheet->getDefaultRowDimension()->setRowHeight(-1);
+
+        // Set orientasi kertas jadi LANDSCAPE
+        $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+
+        // Set judul file excel nya
+        $sheet->setTitle("Data Gaji");
+
+
+        // Proteksi
+        // $protection = $sheet->getProtection();
+        // $protection->setPassword('psb2023');
+        // $protection->setSheet(true);
+        // $protection->setSort(true);
+        // $protection->setInsertRows(true);
+        // $protection->setFormatCells(true);
+
+        // Proses file excel
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="Data Gaji Guru dan Karyawan (' . bulan($datagaji->bulan) . ' ' . $datagaji->tahun . ').xlsx"'); // Set nama file excel nya
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+    }
 
     public function exportPotongan($id)
     {
