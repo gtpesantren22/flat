@@ -36,7 +36,7 @@ class Welcome extends CI_Controller
 			$totalawal = 0;
 			$potongawal = 0;
 			if ($value->status == 'kunci') {
-				$datatotal = $this->db->query("SELECT SUM(fungsional) AS fungsional, SUM(kinerja) AS kinerja, SUM(bpjs) AS bpjs, SUM(struktural) AS struktural, SUM(penyesuaian) AS penyesuaian, SUM(walas) AS walas, SUM(gapok) AS gapok FROM gaji_detail WHERE tahun = '$value->tahun' AND bulan = '$value->bulan' ")->row();
+				$datatotal = $this->db->query("SELECT SUM(fungsional) AS fungsional, SUM(kinerja) AS kinerja, SUM(bpjs) AS bpjs, SUM(struktural) AS struktural, SUM(penyesuaian) AS penyesuaian, SUM(walas) AS walas, SUM(gapok) AS gapok FROM gaji_detail WHERE gaji_id = '$value->gaji_id' ")->row();
 				$potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = ? AND tahun = ?", [
 					$value->bulan,
 					$value->tahun

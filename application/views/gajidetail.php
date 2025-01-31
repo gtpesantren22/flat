@@ -18,7 +18,13 @@
                             <a class="btn btn-outline-primary btn-sm float-end tbl-confirm" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-refresh"></i> Generate Ulang</a>
                             <!-- <a class="btn btn-outline-danger btn-sm float-end tbl-confirm" value="Fitur ini akan mengunci dan mempermanenkan data" href="<?= base_url('gaji/kunci/' . $idgaji) ?>"><i class="bx bxs-key"></i> Kunci Data</a> -->
                             <button class="btn btn-outline-danger btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modal-kunci"><i class="bx bxs-key"></i> Kunci Data</button>
-                            <a class="btn btn-outline-success btn-sm float-end tbl-confirm" value="Pastikan data gaji nya sudah dikunci terlebih dahulu" href="<?= base_url('gaji/exportGaji/' . $idgaji) ?>"><i class="bx bx-spreadsheet"></i> Export to Excel</a>
+                            <div class="btn-group float-end">
+                                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-spreadsheet"></i> Export to Excel</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item tbl-confirm" value="Pastikan data gaji nya sudah dikunci terlebih dahulu" href="<?= base_url('gaji/exportGaji/' . $idgaji) ?>">Export Gaji</a></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('gaji/exportPotongan/' . $potong->potongan_id) ?>">Export Potongan</a></li>
+                                </ul>
+                            </div>
                         </h5>
                         <p class="card-text"></p>
                         <div class="table-responsive card-table">
@@ -468,6 +474,8 @@
             // e.preventDefault();
             const id = $(this).data('id');
 
+            var $button = $('#proses-kunci');
+
             $.ajax({
                 url: '<?= base_url("gaji/getGajiRinci") ?>',
                 type: 'POST',
@@ -480,6 +488,9 @@
                     let berhasil = 0;
                     let gagal = 0;
                     let persen = 0;
+
+                    $button.prop('disabled', true);
+                    $button.text('Processing...');
 
                     function updateProgress() {
                         const total = Number(response.total); // Konversi ke number

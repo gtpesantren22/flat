@@ -147,6 +147,7 @@ class Gaji extends CI_Controller
         $cek = $this->model->getBy('gaji_detail', 'gaji_id', $id)->row();
         if ($cek) {
             $data['datagaji'] = $this->model->getBy('gaji', 'gaji_id', $id)->row();
+            $data['potong'] = $this->model->getBy2('potongan', 'bulan', $data['datagaji']->bulan, 'tahun', $data['datagaji']->tahun)->row();
             $this->load->view('gajidetail', $data);
         } else {
             redirect('gaji/generate/' . $id);
@@ -175,7 +176,7 @@ class Gaji extends CI_Controller
     {
         $this->Auth_model->log_activity($this->userID, 'Akses genaatre gaji C: Gaji');
 
-        $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
+        $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
         if ($cek->status == 'kunci') {
             $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
             redirect('gaji');
@@ -225,10 +226,11 @@ class Gaji extends CI_Controller
     {
         $this->Auth_model->log_activity($this->userID, 'Akses re generate gaji C: Gaji');
 
-        $cek = $this->model->getData('gaji', 'gaji_id', $id)->row();
-        if ($cek->status == 'kunci') {
+        $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
+        if ($cek->status === 'kunci') {
             $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
             redirect('gaji/detail/' . $id);
+            die();
         }
         $this->model->hapus('gaji_detail', 'gaji_id', $id);
         $guru = $this->db->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
@@ -578,13 +580,13 @@ class Gaji extends CI_Controller
             $datagaji2 =  $this->db->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' AND satminkal = '$satminkal->satminkal' ORDER BY nama ASC ")->result();
 
             $sheet->setCellValue('A1', "DAFTAR GAJI GURU & KARYAWAN"); // Set kolom A1 dengan tulisan "DATA SISWA"
-            $sheet->mergeCells('A1:Z1'); // Set Merge Cell pada kolom A1 sampai E1
+            $sheet->mergeCells('A1:AA1'); // Set Merge Cell pada kolom A1 sampai E1
 
             $sheet->setCellValue('A2', "PONDOK PESANTREN DARUL LUGHAH WAL KAROMAH"); // Set kolom A1 dengan tulisan "DATA SISWA"
-            $sheet->mergeCells('A2:Z2'); // Set Merge Cell pada kolom A1 sampai E1
+            $sheet->mergeCells('A2:AA2'); // Set Merge Cell pada kolom A1 sampai E1
 
             $sheet->setCellValue('A3', ""); // Set kolom A1 dengan tulisan "DATA SISWA"
-            $sheet->mergeCells('A3:Z3'); // Set Merge Cell pada kolom A1 sampai E1
+            $sheet->mergeCells('A3:AA3'); // Set Merge Cell pada kolom A1 sampai E1
 
             $sheet->setCellValue('M4', "GAJI/HONOR"); // Set kolom A1 dengan tulisan "DATA SISWA"
             $sheet->mergeCells('M4:S4'); // Set Merge Cell pada kolom A1 sampai E1
@@ -596,6 +598,12 @@ class Gaji extends CI_Controller
             $spreadsheet->getActiveSheet()->getStyle('A5:Z5')->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setARGB('F7EF00');
+            $spreadsheet->getActiveSheet()->getStyle('AA4')->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFFF0000');
+            $spreadsheet->getActiveSheet()->getStyle('AA5')->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFFF0000');
 
             $sheet->mergeCells('A4:A5');
             $sheet->mergeCells('B4:B5');
@@ -616,6 +624,7 @@ class Gaji extends CI_Controller
             $sheet->mergeCells('X4:X5');
             $sheet->mergeCells('Y4:Y5');
             $sheet->mergeCells('Z4:Z5');
+            $sheet->mergeCells('AA4:AA5');
 
             $sheet->getStyle('A4:A5')->applyFromArray($style_col);
             $sheet->getStyle('B4:B5')->applyFromArray($style_col);
@@ -643,6 +652,7 @@ class Gaji extends CI_Controller
             $sheet->getStyle('X4:X5')->applyFromArray($style_col);
             $sheet->getStyle('Y4:Y5')->applyFromArray($style_col);
             $sheet->getStyle('Z4:Z5')->applyFromArray($style_col);
+            $sheet->getStyle('AA4:AA5')->applyFromArray($style_col);
 
             // Buat header tabel nya pada baris ke 3
             $sheet->setCellValue('A4', "NO");
@@ -671,6 +681,7 @@ class Gaji extends CI_Controller
             $sheet->setCellValue('X4', "NO. REKENING");
             $sheet->setCellValue('Y4', "NO. HP");
             $sheet->setCellValue('Z4', "EMAIL");
+            $sheet->setCellValue('AA4', "GAJI SEBELUMNYA");
 
 
             // Apply style header yang telah kita buat tadi ke masing-masing kolom header
@@ -694,6 +705,7 @@ class Gaji extends CI_Controller
             $sheet->getStyle('X4')->applyFromArray($style_col);
             $sheet->getStyle('Y4')->applyFromArray($style_col);
             $sheet->getStyle('Z4')->applyFromArray($style_col);
+            $sheet->getStyle('AA4')->applyFromArray($style_col);
 
             // Panggil function view yang ada di SiswaModel untuk menampilkan semua data siswanya
 
@@ -705,6 +717,7 @@ class Gaji extends CI_Controller
                 $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
                 $jam = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
                 $hadir = $this->db->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+                $sebelum = $this->db->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
 
                 $sheet->setCellValue('A' . $numrow, $no);
                 $sheet->setCellValue('B' . $numrow, bulan($datagaji->bulan));
@@ -732,6 +745,7 @@ class Gaji extends CI_Controller
                 $sheet->setCellValueExplicit('X' . $numrow, $hasil->rekening, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
                 $sheet->setCellValue('Y' . $numrow, $hasil->hp);
                 $sheet->setCellValue('Z' . $numrow, $hasil->email);
+                $sheet->setCellValue('AA' . $numrow, $sebelum ? $sebelum->nominal : 0);
 
                 // Apply style row yang telah kita buat tadi ke masing-masing baris (isi tabel)
                 $sheet->getStyle('A' . $numrow)->applyFromArray($style_row);
@@ -760,6 +774,7 @@ class Gaji extends CI_Controller
                 $sheet->getStyle('X' . $numrow)->applyFromArray($style_row);
                 $sheet->getStyle('Y' . $numrow)->applyFromArray($style_row);
                 $sheet->getStyle('Z' . $numrow)->applyFromArray($style_row);
+                $sheet->getStyle('AA' . $numrow)->applyFromArray($style_row);
 
                 $no++; // Tambah 1 setiap kali looping
                 $numrow++; // Tambah 1 setiap kali looping
@@ -797,6 +812,7 @@ class Gaji extends CI_Controller
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
     }
+
 
     public function reloadGaji()
     {
