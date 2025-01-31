@@ -5,6 +5,7 @@ require 'vendor/autoload.php';
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class Gaji extends CI_Controller
 {
@@ -813,6 +814,170 @@ class Gaji extends CI_Controller
         $writer->save('php://output');
     }
 
+    public function exportPotongan($id)
+    {
+        // $this->Auth_model->log_activity($this->userID, 'Akses export Potongan C: Gaji');
+        $spreadsheet = new Spreadsheet();
+
+        // Buat sebuah variabel untuk menampung pengaturan style dari header tabel
+        $style_col = [
+            'font' => ['bold' => true], // Set font nya jadi bold
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, // Set text jadi ditengah secara horizontal (center)
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+            ],
+            'borders' => [
+                'top' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border top dengan garis tipis
+                'right' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],  // Set border right dengan garis tipis
+                'bottom' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border bottom dengan garis tipis
+                'left' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN] // Set border left dengan garis tipis
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'argb' => 'FFFF00', // Warna kuning (format ARGB)
+                ],
+            ],
+        ];
+        $style_col_head = [
+            'font' => ['bold' => true], // Set font nya jadi bold
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, // Set text jadi ditengah secara horizontal (center)
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+            ],
+        ];
+
+        // Buat sebuah variabel untuk menampung pengaturan style dari isi tabel
+        $style_row = [
+            'alignment' => [
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER // Set text jadi di tengah secara vertical (middle)
+            ],
+            'borders' => [
+                'top' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border top dengan garis tipis
+                'right' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN],  // Set border right dengan garis tipis
+                'bottom' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN], // Set border bottom dengan garis tipis
+                'left' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN] // Set border left dengan garis tipis
+            ]
+        ];
+
+
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $detail =  $this->db->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != ''  ")->row();
+        $jenispotongan =  $this->db->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
+        $jumlahJenisPotongan = count($jenispotongan);
+
+        $sheet->setCellValue('A1', "DAFTAR POTONGAN GURU & KARYAWAN"); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $endColumn1 = chr(ord('A') + ($jumlahJenisPotongan + 4) - 1) . '1'; // Kolom akhir
+        $sheet->mergeCells("A1:$endColumn1"); // Merge cells dari M4 hingga kolom akhir
+        $sheet->getStyle("A1:$endColumn1")->applyFromArray($style_col_head);
+
+        $sheet->setCellValue('A2', "PONDOK PESANTREN DARUL LUGHAH WAL KAROMAH"); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $endColumn2 = chr(ord('A') + ($jumlahJenisPotongan + 4) - 1) . '2'; // Kolom akhir
+        $sheet->mergeCells("A2:$endColumn2"); // Merge cells dari M4 hingga kolom akhir
+        $sheet->getStyle("A2:$endColumn2")->applyFromArray($style_col_head);
+
+        $sheet->setCellValue('A3', ""); // Set kolom A1 dengan tulisan "DATA SISWA"
+        $endColumn3 = chr(ord('A') + ($jumlahJenisPotongan + 4) - 1) . '3'; // Kolom akhir
+        $sheet->mergeCells("A3:$endColumn3"); // Merge cells dari M4 hingga kolom akhir
+        $sheet->getStyle("A3:$endColumn3")->applyFromArray($style_col_head);
+
+        $sheet->mergeCells('A4:A5');
+        $sheet->mergeCells('B4:B5');
+        $sheet->mergeCells('C4:C5');
+        $sheet->mergeCells('D4:D5');
+
+        // Hitung jumlah jenis potongan
+        // Tentukan kolom awal dan akhir untuk merge cells
+        $startColumn = 'E4'; // Kolom awal
+        $endColumn = chr(ord('E') + $jumlahJenisPotongan - 1) . '4'; // Kolom akhir
+        // Merge cells secara dinamis
+        $sheet->setCellValue('E4', "DAFTAR POTONGAN"); // Set nilai di sel M4
+        $sheet->mergeCells("$startColumn:$endColumn"); // Merge cells dari M4 hingga kolom akhir
+        $sheet->getStyle("$startColumn:$endColumn")->applyFromArray($style_col);
+
+        // Buat header tabel nya pada baris ke 3
+        $sheet->setCellValue('A4', "NO");
+        $sheet->setCellValue('B4', "BULAN");
+        $sheet->setCellValue('C4', "NAMA");
+        $sheet->setCellValue('D4', "LEMBAGA");
+        $columnLetter = 'E'; // Mulai dari kolom D
+        foreach ($jenispotongan as $header) {
+            $sheet->setCellValue($columnLetter . '5', $header->ket); // Contoh: D1, E1, F1, dst.
+            $columnLetter++; // Increment kolom (D -> E -> F -> dst.)
+        }
+
+        // Apply style header yang telah kita buat tadi ke masing-masing kolom header
+        $sheet->getStyle('A4')->applyFromArray($style_col);
+        $sheet->getStyle('B4')->applyFromArray($style_col);
+        $sheet->getStyle('C4')->applyFromArray($style_col);
+        $sheet->getStyle('D4')->applyFromArray($style_col);
+        $columnLetter1 = 'E'; // Mulai dari kolom D
+        foreach ($jenispotongan as $header) {
+            $sheet->getStyle($columnLetter1 . '5')->applyFromArray($style_col);
+            $columnLetter1++; // Increment kolom (D -> E -> F -> dst.)
+        }
+        $sheet->getStyle('A5')->applyFromArray($style_col);
+        $sheet->getStyle('B5')->applyFromArray($style_col);
+        $sheet->getStyle('C5')->applyFromArray($style_col);
+        $sheet->getStyle('D5')->applyFromArray($style_col);
+
+        // Panggil function view yang ada di SiswaModel untuk menampilkan semua data siswanya
+
+
+        $no = 1; // Untuk penomoran tabel, di awal set dengan 1
+        $numrow = 6; // Set baris pertama untuk isi tabel adalah baris ke 4
+        $datas = $this->db->query("SELECT potongan.*, guru.nama, satminkal.nama as lembaga FROM potongan JOIN guru ON potongan.guru_id=guru.guru_id JOIN satminkal ON guru.satminkal=satminkal.id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ORDER BY satminkal.nama ASC, guru.nama ASC")->result();
+        foreach ($datas as $hasil) { // Lakukan looping pada variabel siswa
+
+
+            $sheet->setCellValue('A' . $numrow, $no)->getStyle('A' . $numrow)->applyFromArray($style_row);
+            $sheet->setCellValue('B' . $numrow, bulan($hasil->bulan) . ' ' . $hasil->tahun)->getStyle('B' . $numrow)->applyFromArray($style_row);
+            $sheet->setCellValue('C' . $numrow, $hasil->nama)->getStyle('C' . $numrow)->applyFromArray($style_row);
+            $sheet->setCellValue('D' . $numrow, $hasil->lembaga)->getStyle('D' . $numrow)->applyFromArray($style_row);
+            $columnLetter2 = 'E'; // Mulai dari kolom D
+            foreach ($jenispotongan as $header) {
+                $nomPotongan = $this->db->query("SELECT nominal FROM potongan WHERE potongan_id = '$id' AND guru_id = '$hasil->guru_id' AND ket = '$header->ket' ")->row();
+                $sheet->setCellValue($columnLetter2 . $numrow, $nomPotongan ? $nomPotongan->nominal : 0)->getStyle($columnLetter2 . $numrow)->applyFromArray($style_row);
+                $columnLetter2++; // Increment kolom (D -> E -> F -> dst.)
+            }
+
+            $no++; // Tambah 1 setiap kali looping
+            $numrow++; // Tambah 1 setiap kali looping
+        }
+
+        // $sheet = $spreadsheet->getActiveSheet();
+        foreach ($sheet->getColumnIterator() as $column) {
+            $sheet->getColumnDimension($column->getColumnIndex())->setAutoSize(true);
+        }
+
+        // Set height semua kolom menjadi auto (mengikuti height isi dari kolommnya, jadi otomatis)
+        $sheet->getDefaultRowDimension()->setRowHeight(-1);
+
+        // Set orientasi kertas jadi LANDSCAPE
+        $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+
+        // Set judul file excel nya
+        // $sheet->setTitle("$satminkal->satminkal");
+
+
+
+        // Proteksi
+        // $protection = $sheet->getProtection();
+        // $protection->setPassword('psb2023');
+        // $protection->setSheet(true);
+        // $protection->setSort(true);
+        // $protection->setInsertRows(true);
+        // $protection->setFormatCells(true);
+
+        // Proses file excel
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="Data Potongan Guru dan Karyawan (' . bulan($detail->bulan) . '_' . $detail->tahun . ').xlsx"'); // Set nama file excel nya
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+    }
 
     public function reloadGaji()
     {

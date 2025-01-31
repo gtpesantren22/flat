@@ -3,13 +3,34 @@
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
-            <div class="col-lg-12 mb-4 order-0">
+            <div class="col-lg-4 mb-4 order-0">
                 <div class="card">
                     <h5 class="card-header">
-                        Data Potongan Gaji
+                        Total Potongan
                     </h5>
+
+                    <div class="card-body">
+                        <ul class="p-0 m-0">
+                            <table class="table table-striped table-sm">
+                                <tbody>
+                                    <?php foreach ($datapotongan as $potong): ?>
+                                        <tr>
+                                            <th><?= $potong['ket'] ?></th>
+                                            <th><?= rupiah($potong['nominal']) ?></th>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </tbody>
+                            </table>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Bootstrap Table with Caption -->
+
+            </div>
+            <div class="col-lg-8 mb-4 order-0">
+                <div class="card">
                     <div class="table-responsive card-datatable">
-                        <table class="table mb-10" id="table1">
+                        <table class="table mb-10 table-sm" id="table1">
                             <thead>
                                 <tr>
                                     <th>No</th>

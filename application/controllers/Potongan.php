@@ -120,6 +120,19 @@ class Potongan extends CI_Controller
         $data['user'] = $this->Auth_model->current_user();
 
         $data['data'] = $this->db->query("SELECT potongan.*, guru.nama, SUM(potongan.nominal) as total FROM potongan JOIN guru  ON guru.guru_id=potongan.guru_id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ")->result();
+
+        $jenispotongan =  $this->db->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
+        $datapotongan = [];
+        foreach ($jenispotongan as $jenispotonganhasil) {
+            $nomPotongan = $this->db->query("SELECT SUM(nominal) AS nominal FROM potongan WHERE potongan_id = '$id' AND ket = '$jenispotonganhasil->ket' ")->row();
+            $datapotongan[] = [
+                'ket' => $jenispotonganhasil->ket,
+                'nominal' => $nomPotongan ? $nomPotongan->nominal : 0,
+                'bulan' => $jenispotonganhasil->bulan,
+                'tahun' => $jenispotonganhasil->tahun
+            ];
+        }
+        $data['datapotongan'] = $datapotongan;
         $this->load->view('potongandtl', $data);
     }
 
