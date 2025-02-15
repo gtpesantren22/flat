@@ -59,7 +59,7 @@
     <body class="flex justify-center items-center min-h-screen">
         <div class="struk-container">
             <!-- Gambar Latar Belakang -->
-            <img src="<?= base_url('assets/img/backgrounds/watermark3.jpg') ?>" alt="Background" class="background-image">
+            <img src="<?= base_url('assets/img/backgrounds/Watermark6.jpeg') ?>" alt="Background" class="background-image">
 
             <!-- Overlay untuk memudahkan membaca teks -->
             <div class="overlay"></div>
@@ -76,7 +76,7 @@
 
                 <!-- Informasi Transaksi -->
                 <div class="border-b border-gray-300 pb-3 mb-4">
-                    <h3 class="font-semibold text-gray-800 mb-2">Kpd.Yth</h3>
+                    <h3 class="font-semibold text-gray-800 mb-2">Kpd. Yth.</h3>
                     <table class="w-full">
                         <tr>
                             <td class="text-sm font-medium text-gray-700">Nama</td>
@@ -87,11 +87,11 @@
                             <td class="text-sm">: <?= $data->email ?></td>
                         </tr>
                         <tr>
-                            <td class="text-sm font-medium text-gray-700">No. Rekening</td>
+                            <td class="text-sm font-medium text-gray-700">No. Rek.</td>
                             <td class="text-sm">: <?= $data->rekening ?></td>
                         </tr>
                         <tr>
-                            <td class="text-sm font-medium text-gray-700">Nominal</td>
+                            <td class="text-sm font-medium text-gray-700">Diterima</td>
                             <td class="text-sm">: <?= rupiah(0) ?></td>
                         </tr>
                         <tr>
@@ -106,7 +106,7 @@
                     <h3 class="font-semibold text-gray-800 mb-2">Rincian Honor</h3>
                     <table class="w-full">
                         <tr>
-                            <td class="text-sm font-medium text-gray-700">Gaji Pokok</td>
+                            <td class="text-sm font-medium text-gray-700">Gaji Pokok/Honor Insentif</td>
                             <td class="text-sm">: <?= rupiah($data->gapok) ?></td>
                         </tr>
                         <tr>
@@ -122,16 +122,20 @@
                             <td class="text-sm">: <?= rupiah($data->bpjs) ?></td>
                         </tr>
                         <tr>
-                            <td class="text-sm font-medium text-gray-700">T. STRUKTURAL</td>
+                            <td class="text-sm font-medium text-gray-700">T. Struktural</td>
                             <td class="text-sm">: <?= rupiah($data->struktural) ?></td>
                         </tr>
                         <tr>
-                            <td class="text-sm font-medium text-gray-700">T. WALI KELAS</td>
+                            <td class="text-sm font-medium text-gray-700">T. Wali Kelas</td>
                             <td class="text-sm">: <?= rupiah($data->walas) ?></td>
                         </tr>
                         <tr>
-                            <td class="text-sm font-medium text-gray-700">T. PENYESUAIAN</td>
+                            <td class="text-sm font-medium text-gray-700">T. Penyesuaian</td>
                             <td class="text-sm">: <?= rupiah($data->penyesuaian) ?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-sm font-bold underline text-gray-700">TOTAL HONOR</td>
+                            <td class="text-sm font-bold">: <?= rupiah(0) ?></td>
                         </tr>
                     </table>
                 </div>
@@ -191,6 +195,10 @@
                         <tr>
                             <td class="text-sm font-medium text-gray-700">Verval TPP</td>
                             <td class="text-sm">: </td>
+                        </tr>
+                        <tr>
+                            <td class="text-sm font-bold underline text-gray-700">TOTAL POTONGAN</td>
+                            <td class="text-sm font-bold">: <?= rupiah(0) ?></td>
                         </tr>
                     </table>
                 </div>
