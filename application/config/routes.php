@@ -55,3 +55,5 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['api/list_gaji'] = 'api/gaji/listgaji';
 $route['api/gaji_detail'] = 'api/gaji/gajidetail';
+$route['api/gaji_rinci'] = 'api/gaji/gajirinci';
+$route['api/potong_rinci'] = 'api/gaji/potongrinci';

@@ -114,7 +114,7 @@
                                             <?php if ($datagaji->status != 'kunci'): ?>
                                                 <input type="checkbox" class="form-check-input" value="Y" id="cek_gapok"></input>
                                             <?php endif ?>
-                                            Gapok/Honor
+                                            <label for="" id="nama_gaji"></label>
                                         </div>
                                     </td>
                                     <td><b id="gapok"></b></td>
@@ -295,7 +295,7 @@
                     {
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-total="${formatRupiah(row[16])}" data-cek_gapok="${row[26]}" data-cek_fungsional="${row[19]}" data-cek_kinerja="${row[20]}" data-cek_bpjs="${row[21]}" data-cek_struktural="${row[22]}" data-cek_walas="${row[23]}" data-cek_penyesuaian="${row[24]}" data-guru_id="${row[25]}">Rincian</button>
+                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-sik="${row[6]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-total="${formatRupiah(row[16])}" data-cek_gapok="${row[26]}" data-cek_fungsional="${row[19]}" data-cek_kinerja="${row[20]}" data-cek_bpjs="${row[22]}" data-cek_struktural="${row[21]}" data-cek_walas="${row[23]}" data-cek_penyesuaian="${row[24]}" data-guru_id="${row[25]}">Rincian</button>
                             `;
                         }
 
@@ -311,6 +311,8 @@
 
                 var form = $(this); // Form yang dikirim
                 var formData = form.serialize(); // Serialize data form
+                var button = $(this).find("button[type='submit']");
+                button.prop("disabled", true).text("Memproses...");
 
                 // Eksekusi AJAX
                 $.ajax({
@@ -321,6 +323,8 @@
                     success: function(response) {
                         if (response) {
                             // console.log(response)
+                            button.prop("disabled", false).text("Refresh Data");
+
                             var total = response.total;
                             $('#gapok').text(formatRupiah(response.gapok));
                             $('#fungsional').text(formatRupiah(response.fungsional));
@@ -386,6 +390,8 @@
             var total = $(this).data('total');
             var guru_id = $(this).data('guru_id');
             var id = $(this).data('id');
+            var sik = $(this).data('sik');
+            var info = sik == 'PTY' ? 'Gaji Pokok' : 'Honor Insentif';
 
             var cek_gapok = $(this).data('cek_gapok');
             var cek_fungsional = $(this).data('cek_fungsional');
@@ -405,6 +411,7 @@
             $('#penyesuaian').text(penyesuaian);
             $('#total').text(total);
             $('#guru_id').val(guru_id);
+            $('#nama_gaji').text(info);
 
             $('#cek_gapok').prop('checked', cek_gapok === 'Y').attr('onchange', `updateCheckbox2('${guru_id}', 'gapok', this.checked)`);
             $('#cek_fungsional').prop('checked', cek_fungsional === 'Y').attr('onchange', `updateCheckbox2('${guru_id}', 'fungsional', this.checked)`);

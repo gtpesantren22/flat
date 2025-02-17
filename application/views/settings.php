@@ -48,6 +48,43 @@
                 <!-- Bootstrap Table with Caption -->
 
             </div>
+            <div class="col-lg-8 mb-4 order-0">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            Setting Nominal Honor Insentif
+                        </h5>
+                        <p class="card-text">
+                        <form action="<?= base_url('settings/updateInsentif') ?>" method="post">
+                            <div class="form-group row mb-2">
+                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                    <label for="honor_non" class="form-label">Honor Non-Santri</label>
+                                    <input type="text" class="form-control uang" id="honor_non" name="honor_non" required value="<?= $honor_non ?>">
+                                </div>
+                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                    <label for="honor_santri" class="form-label">Honor Santri</label>
+                                    <input type="text" class="form-control uang" id="honor_santri" name="honor_santri" required value="<?= $honor_santri ?>">
+                                </div>
+                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                    <label for="honor_rami" class="form-label">Honor RA-MI</label>
+                                    <input type="text" class="form-control uang" id="honor_rami" name="honor_rami" required value="<?= $honor_rami ?>">
+                                </div>
+                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                    <label for="honor_rami" class="form-label">Gunakan untuk honor bulan</label>
+                                    <select name="honor_id" id="" class="form-select" required>
+                                        <option value="">Pilih</option>
+                                        <?php foreach ($honordata as $row): ?>
+                                            <option value="<?= $row->honor_id ?>"><?= bulan($row->bulan) . ' ' . $row->tahun ?></option>
+                                        <?php endforeach ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-sm" type="submit">Simpan</button>
+                        </form>
+                        </p>
+                    </div>
+                </div>
+            </div>
             <!-- HAK -->
             <div class="col-lg-12 mb-4 order-0">
                 <div class="card">
@@ -68,6 +105,7 @@
                                         <th>Satminkal</th>
                                         <th>Jabatan</th>
                                         <th>Gapok</th>
+                                        <th>Insentif</th>
                                         <th>T.Fu</th>
                                         <th>T.Ki</th>
                                         <th>T.Str</th>
@@ -86,7 +124,12 @@
                                             <td><?= $hak->jabatan ?></td>
                                             <td>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="Y" <?= $hak->gapok != null ? 'checked' : '' ?> onchange="updateCheckbox2('<?= $hak->guru_id ?>', 'gapok', this.checked)" />
+                                                    <input class="form-check-input" type="checkbox" value="Y" <?= $hak->gapok != null && $hak->sik == 'PTY' ? 'checked' : '' ?> onchange="updateCheckbox2('<?= $hak->guru_id ?>', 'gapok', this.checked)" <?= $hak->sik != 'PTY' ? 'disabled' : '' ?> />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" value="Y" <?= $hak->gapok != null && $hak->sik == 'PTTY' ? 'checked' : '' ?> onchange="updateCheckbox2('<?= $hak->guru_id ?>', 'gapok', this.checked)" <?= $hak->sik != 'PTTY' ? 'disabled' : '' ?> />
                                                 </div>
                                             </td>
                                             <td>
@@ -132,45 +175,6 @@
 
             </div>
 
-            <div class="col-lg-12 mb-4 order-0">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            Setting Nominal Honor Insentif
-                        </h5>
-                        <p class="card-text">
-                        <form action="<?= base_url('settings/updateInsentif') ?>" method="post">
-                            <div class="form-group row mb-2">
-                                <div class="col-sm-3 col-md-3 col-lg-3">
-                                    <label for="honor_non" class="form-label">Honor Non-Santri</label>
-                                    <input type="text" class="form-control uang" id="honor_non" name="honor_non" required value="<?= $honor_non ?>">
-                                </div>
-                                <div class="col-sm-3 col-md-3 col-lg-3">
-                                    <label for="honor_santri" class="form-label">Honor Santri</label>
-                                    <input type="text" class="form-control uang" id="honor_santri" name="honor_santri" required value="<?= $honor_santri ?>">
-                                </div>
-                                <div class="col-sm-3 col-md-3 col-lg-3">
-                                    <label for="honor_rami" class="form-label">Honor RA-MI</label>
-                                    <input type="text" class="form-control uang" id="honor_rami" name="honor_rami" required value="<?= $honor_rami ?>">
-                                </div>
-                                <div class="col-sm-3 col-md-3 col-lg-3">
-                                    <label for="honor_rami" class="form-label">Gunakan nominal untuk honor bulan</label>
-                                    <select name="honor_id" id="" class="form-select" required>
-                                        <option value="">Pilih</option>
-                                        <?php foreach ($honordata as $row): ?>
-                                            <option value="<?= $row->honor_id ?>"><?= bulan($row->bulan) . ' ' . $row->tahun ?></option>
-                                        <?php endforeach ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <button class="btn btn-success btn-sm" type="submit">Simpan</button>
-                        </form>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-
         </div>
 
     </div>
@@ -194,7 +198,7 @@
                                 <label for="nameBasic" class="form-label">Jenis Hak</label>
                                 <select name="payment" id="nameBasic" class="form-select" required>
                                     <option value=""> -pilih jenis- </option>
-                                    <option value="gapok">Gaji Pokok</option>
+                                    <option value="gapok">Gaji Pokok/Insentif</option>
                                     <option value="fungsional">Tunjangan Fungsional</option>
                                     <option value="kinerja">Tunjangan Kinerja</option>
                                     <option value="struktural">Tunjangan Struktural</option>
