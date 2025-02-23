@@ -28,6 +28,13 @@ class Modeldata extends CI_Model
         $this->db->where($where2, $dtwhere2);
         $this->db->delete($table);
     }
+    public function hapus3($table, $where, $dtwhere, $where2, $dtwhere2, $where3, $dtwhere3)
+    {
+        $this->db->where($where, $dtwhere);
+        $this->db->where($where2, $dtwhere2);
+        $this->db->where($where3, $dtwhere3);
+        $this->db->delete($table);
+    }
     public function edit($table, $where, $dtwhere, $data)
     {
         $this->db->where($where, $dtwhere);
@@ -37,6 +44,13 @@ class Modeldata extends CI_Model
     {
         $this->db->where($where, $dtwhere);
         $this->db->where($where2, $dtwhere2);
+        $this->db->update($table, $data);
+    }
+    public function edit3($table, $where, $dtwhere, $where2, $dtwhere2, $where3, $dtwhere3, $data)
+    {
+        $this->db->where($where, $dtwhere);
+        $this->db->where($where2, $dtwhere2);
+        $this->db->where($where3, $dtwhere3);
         $this->db->update($table, $data);
     }
     public function getBy($table, $where, $dtwhere)

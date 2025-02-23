@@ -46,7 +46,7 @@ class Gaji extends CI_Controller
                 $totalawal = 0;
                 $potongawal = 0;
 
-                $total = $this->db->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
+                $total = $this->db->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
                 $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = '$value->bulan' AND tahun = '$value->tahun'")->row();
                 $datakirim[] = [
                     'gaji_id' => $value->gaji_id,  // 1
@@ -89,6 +89,7 @@ class Gaji extends CI_Controller
                         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
                         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
                         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+                        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$value->gaji_id' ")->row();
 
                         // Hitung total potongan
                         $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
@@ -108,7 +109,8 @@ class Gaji extends CI_Controller
                             ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                             ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                             ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
-                            ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0);
+                            ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                            $tambahan->total;
 
                         $potongawal += $potong ? $potong->total : 0;
                     }
@@ -321,6 +323,8 @@ class Gaji extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
             $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
+
             $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
             $payments = array_column($cek, 'payment');
 
@@ -348,7 +352,7 @@ class Gaji extends CI_Controller
                     ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                     ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                     ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
-                    ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0)
+                    ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
                 ), // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
@@ -360,6 +364,7 @@ class Gaji extends CI_Controller
                 in_array('penyesuaian', $payments) ? 'Y' : 'N', // 24
                 $row->guru_id, // 25
                 in_array('gapok', $payments) ? 'Y' : 'N', // 26
+                $tambahan->total, // 27
             ];
         }
 
@@ -434,10 +439,20 @@ class Gaji extends CI_Controller
                     ($row->struktural) +
                     ($row->bpjs) +
                     ($row->walas) +
-                    ($row->penyesuaian)
+                    ($row->penyesuaian) +
+                    ($row->tambahan)
                 ), // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
+                '', //19
+                '', //20
+                '', //21
+                '', //22
+                '', //23
+                '', //24
+                '', //25
+                '', //26
+                $row->tambahan, // 27
             ];
         }
 
@@ -454,7 +469,7 @@ class Gaji extends CI_Controller
         // var_dump($output);
     }
 
-    public  function kunci($id)
+    public function kunci($id)
     {
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci data honor C: Gaji');
 
@@ -889,7 +904,6 @@ class Gaji extends CI_Controller
         $sheet->mergeCells('J4:J5');
         $sheet->mergeCells('K4:K5');
         $sheet->mergeCells('L4:L5');
-        $sheet->mergeCells('T4:T5');
         $sheet->mergeCells('U4:U5');
         $sheet->mergeCells('V4:V5');
         $sheet->mergeCells('W4:W5');
@@ -897,6 +911,7 @@ class Gaji extends CI_Controller
         $sheet->mergeCells('Y4:Y5');
         $sheet->mergeCells('Z4:Z5');
         $sheet->mergeCells('AA4:AA5');
+        $sheet->mergeCells('AB4:AB5');
 
         $sheet->getStyle('A4:A5')->applyFromArray($style_col);
         $sheet->getStyle('B4:B5')->applyFromArray($style_col);
@@ -925,6 +940,7 @@ class Gaji extends CI_Controller
         $sheet->getStyle('Y4:Y5')->applyFromArray($style_col);
         $sheet->getStyle('Z4:Z5')->applyFromArray($style_col);
         $sheet->getStyle('AA4:AA5')->applyFromArray($style_col);
+        $sheet->getStyle('AB4:AB5')->applyFromArray($style_col);
 
         // Buat header tabel nya pada baris ke 3
         $sheet->setCellValue('A4', "NO");
@@ -946,14 +962,15 @@ class Gaji extends CI_Controller
         $sheet->setCellValue('Q5', "T. STRUKTURAL");
         $sheet->setCellValue('R5', "T. WALI KELAS");
         $sheet->setCellValue('S5', "T. PENYESUAIAN");
-        $sheet->setCellValue('T4', "TOTAL GAJI");
-        $sheet->setCellValue('U4', "TOTAL POTONGAN");
-        $sheet->setCellValue('V4', "JAM MENGAJAR");
-        $sheet->setCellValue('W4', "KEHADIRAN");
-        $sheet->setCellValue('X4', "NO. REKENING");
-        $sheet->setCellValue('Y4', "NO. HP");
-        $sheet->setCellValue('Z4', "EMAIL");
-        $sheet->setCellValue('AA4', "GAJI SEBELUMNYA");
+        $sheet->setCellValue('T5', "T. TAMBAHAN");
+        $sheet->setCellValue('U4', "TOTAL GAJI");
+        $sheet->setCellValue('V4', "TOTAL POTONGAN");
+        $sheet->setCellValue('W4', "JAM MENGAJAR");
+        $sheet->setCellValue('X4', "KEHADIRAN");
+        $sheet->setCellValue('Y4', "NO. REKENING");
+        $sheet->setCellValue('Z4', "NO. HP");
+        $sheet->setCellValue('AA4', "EMAIL");
+        $sheet->setCellValue('AB4', "GAJI SEBELUMNYA");
 
 
         // Apply style header yang telah kita buat tadi ke masing-masing kolom header
@@ -985,7 +1002,7 @@ class Gaji extends CI_Controller
         $no = 1; // Untuk penomoran tabel, di awal set dengan 1
         $numrow = 6; // Set baris pertama untuk isi tabel adalah baris ke 4
         foreach ($datagaji2 as $hasil) { // Lakukan looping pada variabel siswa
-            $totalgaji = $hasil->gapok + $hasil->fungsional + $hasil->kinerja + $hasil->bpjs + $hasil->struktural + $hasil->walas + $hasil->penyesuaian;
+            $totalgaji = $hasil->gapok + $hasil->fungsional + $hasil->kinerja + $hasil->bpjs + $hasil->struktural + $hasil->walas + $hasil->penyesuaian + $hasil->tambahan;
             $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
             $jam = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
             $hadir = $this->db->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
@@ -1010,14 +1027,15 @@ class Gaji extends CI_Controller
             $sheet->setCellValue('Q' . $numrow, $hasil->struktural);
             $sheet->setCellValue('R' . $numrow, $hasil->walas);
             $sheet->setCellValue('S' . $numrow, $hasil->penyesuaian);
-            $sheet->setCellValue('T' . $numrow, $totalgaji);
-            $sheet->setCellValue('U' . $numrow, $potong->total);
-            $sheet->setCellValue('V' . $numrow, $jam ? $jam->total : 0);
-            $sheet->setCellValue('W' . $numrow, $hadir ? $hadir->total : 0);
-            $sheet->setCellValueExplicit('X' . $numrow, $hasil->rekening, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $sheet->setCellValue('Y' . $numrow, $hasil->hp);
-            $sheet->setCellValue('Z' . $numrow, $hasil->email);
-            $sheet->setCellValue('AA' . $numrow, $sebelum ? $sebelum->nominal : 0);
+            $sheet->setCellValue('T' . $numrow, $hasil->tambahan);
+            $sheet->setCellValue('U' . $numrow, $totalgaji);
+            $sheet->setCellValue('V' . $numrow, $potong->total);
+            $sheet->setCellValue('W' . $numrow, $jam ? $jam->total : 0);
+            $sheet->setCellValue('X' . $numrow, $hadir ? $hadir->total : 0);
+            $sheet->setCellValueExplicit('Y' . $numrow, $hasil->rekening, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('Z' . $numrow, $hasil->hp);
+            $sheet->setCellValue('AA' . $numrow, $hasil->email);
+            $sheet->setCellValue('AB' . $numrow, $sebelum ? $sebelum->nominal : 0);
 
             // Apply style row yang telah kita buat tadi ke masing-masing baris (isi tabel)
             $sheet->getStyle('A' . $numrow)->applyFromArray($style_row);
@@ -1047,6 +1065,7 @@ class Gaji extends CI_Controller
             $sheet->getStyle('Y' . $numrow)->applyFromArray($style_row);
             $sheet->getStyle('Z' . $numrow)->applyFromArray($style_row);
             $sheet->getStyle('AA' . $numrow)->applyFromArray($style_row);
+            $sheet->getStyle('AB' . $numrow)->applyFromArray($style_row);
 
             $no++; // Tambah 1 setiap kali looping
             $numrow++; // Tambah 1 setiap kali looping
@@ -1275,6 +1294,8 @@ class Gaji extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+
         $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
         $payments = array_column($cek, 'payment');
 
@@ -1294,7 +1315,7 @@ class Gaji extends CI_Controller
                 ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                 ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) +
                 ($walas && in_array('walas', $payments) ? $walas->nominal : 0) +
-                ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0)
+                ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
             ), // 16
             'cek_gapok' => in_array('gapok', $payments) ? 'Y' : 'N', // 18
             'cek_fungsional' => in_array('fungsional', $payments) ? 'Y' : 'N', // 19
@@ -1381,6 +1402,10 @@ class Gaji extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+
+        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $data_tambahan = $this->model->getBy('tambahan_detail',  'guru_id', $guru_id, 'gaji_id', $gaji_id)->result();
+
         $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
         $payments = array_column($cek, 'payment');
 
@@ -1392,7 +1417,14 @@ class Gaji extends CI_Controller
             'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : '0', // 13
             'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : '0', // 14
             'penyesuaian' => $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : '0', // 15
+            'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : '0' // 16
         ];
+        if ($data_tambahan) {
+            foreach ($data_tambahan as $tmb) {
+                $nomAdd = $this->model->getBy('tambahan', 'id_tambahan', $tmb->id_tambahan)->row();
+                $this->model->edit3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $tmb->id_tambahan, ['nominal' => $nomAdd->nominal]);
+            }
+        }
 
         $this->model->edit2('gaji_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, $data);
 

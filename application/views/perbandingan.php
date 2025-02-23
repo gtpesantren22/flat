@@ -170,6 +170,10 @@
                                                             <td>T. Penyesuaian</td>
                                                             <td>${formatRupiah(data.penyesuaian)}</td>
                                                         </tr>
+                                                        <tr>
+                                                            <td>T. Tambahan</td>
+                                                            <td>${formatRupiah(data.tambahan)}</td>
+                                                        </tr>
                                                     </table>
                                                 </div>
                                             </div>

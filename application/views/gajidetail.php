@@ -186,6 +186,12 @@
                                     <td><b id="penyesuaian"></b></td>
                                 </tr>
                                 <tr>
+                                    <td>
+                                        Tunjangan Tambahan
+                                    </td>
+                                    <td><b id="tambahan"></b></td>
+                                </tr>
+                                <tr>
                                     <th class="text-bold text-primary">TOTAL GAJI</th>
                                     <th class="text-bold text-primary"><b id="total"></b></th>
                                 </tr>
@@ -295,7 +301,7 @@
                     {
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-sik="${row[6]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-total="${formatRupiah(row[16])}" data-cek_gapok="${row[26]}" data-cek_fungsional="${row[19]}" data-cek_kinerja="${row[20]}" data-cek_bpjs="${row[22]}" data-cek_struktural="${row[21]}" data-cek_walas="${row[23]}" data-cek_penyesuaian="${row[24]}" data-guru_id="${row[25]}">Rincian</button>
+                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-sik="${row[6]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-tambahan="${formatRupiah(row[27])}" data-total="${formatRupiah(row[16])}" data-cek_gapok="${row[26]}" data-cek_fungsional="${row[19]}" data-cek_kinerja="${row[20]}" data-cek_bpjs="${row[22]}" data-cek_struktural="${row[21]}" data-cek_walas="${row[23]}" data-cek_penyesuaian="${row[24]}" data-guru_id="${row[25]}">Rincian</button>
                             `;
                         }
 
@@ -387,6 +393,7 @@
             var walas = $(this).data('walas');
             var struktural = $(this).data('struktural');
             var penyesuaian = $(this).data('penyesuaian');
+            var tambahan = $(this).data('tambahan');
             var total = $(this).data('total');
             var guru_id = $(this).data('guru_id');
             var id = $(this).data('id');
@@ -409,6 +416,7 @@
             $('#walas').text(walas);
             $('#struktural').text(struktural);
             $('#penyesuaian').text(penyesuaian);
+            $('#tambahan').text(tambahan);
             $('#total').text(total);
             $('#guru_id').val(guru_id);
             $('#nama_gaji').text(info);
@@ -544,7 +552,7 @@
                                     },
                                     complete: resolve // Menandai bahwa AJAX request selesai
                                 });
-                            }, index * 500); // Menambah jeda 500ms per request
+                            }, index * 750); // Menambah jeda 500ms per request
                         });
                     });
 

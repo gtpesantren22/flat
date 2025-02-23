@@ -235,6 +235,12 @@
                                     <div data-i18n="Fluid">Tunjangan Penyesuaian</div>
                                 </a>
                             </li>
+                            <li class="menu-item <?= $judul == 'Tunjangan Tambahan' ? 'active' : '' ?>">
+                                <a href="<?= base_url('tambahan') ?>" class="menu-link">
+                                    <!-- <i class="menu-icon tf-icons bx bx-chalkboard"></i> -->
+                                    <div data-i18n="Fluid">Tunjangan Tambahan</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 

@@ -29,6 +29,7 @@ class Perbandingan extends CI_Controller
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Perbandingan');
         $bulan = date('m');
         $tahun = date('Y');
+        $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
 
         $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
         $kirim = [];
@@ -58,6 +59,8 @@ class Perbandingan extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
             $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+
             $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
             $payments = array_column($cek, 'payment');
 
@@ -75,7 +78,7 @@ class Perbandingan extends CI_Controller
                     ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0) +
                     ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0) + // 13
                     ($walas && in_array('walas', $payments) ? $walas->nominal : 0) + // 14
-                    ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) // 15
+                    ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total // 15
             ];
         }
         $data['hasil'] = $kirim;
@@ -89,6 +92,7 @@ class Perbandingan extends CI_Controller
         $data = $this->model->getBy('perbandingan', 'id', $id)->row();
         $bulan = date('m');
         $tahun = date('Y');
+        $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
         $this->Auth_model->log_activity($this->userID, 'Akses detail C: Perbandingan');
 
         $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id WHERE a.guru_id = '$data->guru_id' ")->row();
@@ -118,6 +122,8 @@ class Perbandingan extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
+        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+
         $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
         $payments = array_column($cek, 'payment');
 
@@ -139,7 +145,8 @@ class Perbandingan extends CI_Controller
             'struktural' => ($struktural && in_array('struktural', $payments) ? $struktural->nominal : 0),
             'bpjs' => ($bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : 0), // 13
             'walas' => ($walas && in_array('walas', $payments) ? $walas->nominal : 0), // 14
-            'penyesuaian' => ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) // 15
+            'penyesuaian' => ($penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0), // 15
+            'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : 0 // 16
         ]);
     }
 
