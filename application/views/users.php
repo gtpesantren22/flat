@@ -128,7 +128,7 @@
     <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form action="<?= base_url('settings/updateUser') ?>" method="post">
-                <input type="hidden" name="id" id="id">
+                <input type="hidden" name="id" id="id_user">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel1">Edit Data User</h5>
@@ -204,7 +204,7 @@
                 var level = $(this).data('level');
                 var aktif = $(this).data('aktif');
 
-                $('#id').val(id);
+                $('#id_user').val(id);
                 $('#nama').val(nama);
                 $('#username').val(username);
                 $('#level').val(level).change();

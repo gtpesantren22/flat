@@ -199,6 +199,37 @@ GROUP BY
             }
         }
     }
+    public function updateUser()
+    {
+        $this->Auth_model->log_activity($this->userID, 'Akses tambah user C; Settings');
+        $id = $this->input->post('id', true);
+        $nama = $this->input->post('nama', true);
+        $username = $this->input->post('username', true);
+        $level = $this->input->post('level', true);
+        $aktif = $this->input->post('aktif', true);
+
+        $cek = $this->model->getBy2('user', 'username', $username, 'id_user !=', $id)->row();
+        if ($cek) {
+            $this->session->set_flashdata('error', 'Maaf username sudah terpakai');
+            redirect('settings/user');
+        } else {
+            $data = [
+                'nama' => $nama,
+                'username' => $username,
+                'level' => $level,
+                'aktif' => $aktif
+            ];
+            $this->model->edit('user', 'id_user', $id, $data);
+
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('ok', 'User berhasil diperbarui');
+                redirect('settings/user');
+            } else {
+                $this->session->set_flashdata('error', 'User gagal diperbarui');
+                redirect('settings/user');
+            }
+        }
+    }
 
     public function delUser($id)
     {

@@ -71,14 +71,22 @@
                     <div class="modal-body">
 
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="a_satminkal">Lembaga</label>
+                            <label class="col-sm-2 col-form-label" for="">Satminkal</label>
                             <div class="col-sm-10">
-                                <select class="form-control" id="a_satminkal" name="satminkal" required>
+                                <!-- <select class="form-control" id="a_satminkal" name="satminkal" required>
                                     <option value=""> -pilih- </option>
                                     <?php foreach ($satminkalOpt as $satminkal): ?>
                                         <option value="<?= $satminkal->id ?>"><?= $satminkal->nama ?></option>
-                                    <?php endforeach ?>
-                                </select>
+                                        <?php endforeach ?>
+                                    </select> -->
+                                <?php foreach ($satminkalOpt as $satminkal): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="satminkal[]" value="<?= $satminkal->id ?>" id="ck_<?= $satminkal->id ?>" />
+                                        <label class="form-check-label" for="ck_<?= $satminkal->id ?>">
+                                            <?= $satminkal->nama ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach ?>
                             </div>
                         </div>
                         <div class="row mb-2">
@@ -95,13 +103,13 @@
                         <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="a_masa_kerja">Masa kerja</label>
                             <div class="col-sm-10">
-                                <input type="number" class="form-control" id="a_masa_kerja" name="masa_kerja" placeholder="Masa Kerja Karyawan" required />
+                                <input type="number" class="form-control" id="a_masa_kerja" name="masa_kerja" value="0" placeholder="Masa Kerja Karyawan" required />
                             </div>
                         </div>
                         <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="a_jam_kerja">Jam kerja</label>
                             <div class="col-sm-10">
-                                <input type="number" class="form-control" id="a_jam_kerja" name="jam_kerja" placeholder="Jam Kerja Karyawan" required />
+                                <input type="number" class="form-control" id="a_jam_kerja" name="jam_kerja" value="0" placeholder="Jam Kerja Karyawan" required />
                             </div>
                         </div>
                         <div class="row mb-2">

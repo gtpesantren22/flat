@@ -37,21 +37,33 @@ class Struktural extends CI_Controller
 
     public function tambah()
     {
-        $data = [
-            'satminkal_id' => $this->input->post('satminkal', true),
-            'jabatan_id' => $this->input->post('jabatan', true),
-            'masa_kerja' => $this->input->post('masa_kerja', true),
-            'jam_kerja' => $this->input->post('jam_kerja', true),
-            'nominal' => rmRp($this->input->post('nominal', true)),
-        ];
+        $satminkal = $this->input->post('satminkal');
+        $jabatan_id = $this->input->post('jabatan', true);
+        $masa_kerja = $this->input->post('masa_kerja', true);
+        $jam_kerja = $this->input->post('jam_kerja', true);
+        $nominal = rmRp($this->input->post('nominal', true));
 
-        $this->model->tambah('struktural', $data);
-        if ($this->db->affected_rows() > 0) {
-            $this->session->set_flashdata('ok', 'struktural berhasil ditambahkan');
-            redirect('struktural');
-        } else {
-            $this->session->set_flashdata('error', 'struktural gagal ditambahkan');
-            redirect('struktural');
+        if (!empty($satminkal)) {
+            foreach ($satminkal as $satminkal_id) {
+                $cek = $this->model->getBy2('struktural', 'satminkal_id', $satminkal_id, 'jabatan_id', $jabatan_id)->row();
+                if (!$cek) {
+                    $data = [
+                        'satminkal_id' => $satminkal_id,
+                        'jabatan_id' => $jabatan_id,
+                        'nominal' => $nominal,
+                        'masa_kerja' => $masa_kerja,
+                        'jam_kerja' => $jam_kerja,
+                    ];
+                    $this->model->tambah('struktural', $data);
+                }
+            }
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('ok', 'struktural berhasil ditambahkan');
+                redirect('struktural');
+            } else {
+                $this->session->set_flashdata('error', 'struktural gagal ditambahkan');
+                redirect('struktural');
+            }
         }
     }
 
