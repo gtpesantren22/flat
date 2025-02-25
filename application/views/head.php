@@ -265,11 +265,30 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">AddOn & Others</span>
                     </li>
-                    <li class="menu-item <?= $judul == 'Settings' ? 'active' : '' ?>">
+                    <!-- <li class="menu-item <?= $judul == 'Settings' ? 'active' : '' ?>">
                         <a href="<?= base_url('settings') ?>" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-cog"></i>
                             <div data-i18n="Analytics">Settings</div>
                         </a>
+                    </li> -->
+                    <li class="menu-item <?= isset($sub) && $sub == 'settings'  ? 'active open' : '' ?>">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-cog"></i>
+                            <div data-i18n="Layouts">Settings</div>
+                        </a>
+
+                        <ul class="menu-sub">
+                            <li class="menu-item <?= $judul == 'Settings' ? 'active' : '' ?>">
+                                <a href="<?= base_url('settings') ?>" class="menu-link">
+                                    <div data-i18n="Without menu">Umum</div>
+                                </a>
+                            </li>
+                            <li class="menu-item <?= $judul == 'Data User' ? 'active' : '' ?>">
+                                <a href="<?= base_url('settings/user') ?>" class="menu-link">
+                                    <div data-i18n="Without navbar">User Set</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="menu-item">
                         <a href="<?= base_url('login/logout') ?>" class="menu-link text-danger tbl-confirm" value="Anda akan keluar dari aplikasi">

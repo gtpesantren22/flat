@@ -15,6 +15,7 @@
                         <table class="table mb-10" id="table1">
                             <thead>
                                 <tr>
+                                    <th>No</th>
                                     <th>Nama</th>
                                     <th>Lembaga</th>
                                     <th>Jabatan</th>
@@ -27,8 +28,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($data as $data): ?>
+                                <?php $no = 1;
+                                foreach ($data as $data): ?>
                                     <tr>
+                                        <td><?= $no++ ?></td>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nama ?></strong></td>
                                         <td><?= $data->nmlembaga ?></td>
                                         <td><?= $data->nmjabatan ?></td>

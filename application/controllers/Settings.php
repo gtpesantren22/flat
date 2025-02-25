@@ -21,6 +21,7 @@ class Settings extends CI_Controller
     public function index()
     {
         $data['judul'] = 'Settings';
+        $data['sub'] = 'settings';
         $data['user'] = $this->Auth_model->current_user();
 
         $data['sik'] = $this->model->getData('sik_setting')->result();
@@ -152,6 +153,63 @@ GROUP BY
         } else {
             // $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
             redirect('honor/updateNominal/' . $honor_id);
+        }
+    }
+
+    public function user()
+    {
+        $data['judul'] = 'Data User';
+        $data['sub'] = 'settings';
+        $data['user'] = $this->Auth_model->current_user();
+
+        $data['data'] = $this->model->getData('user')->result();
+
+        $this->load->view('users', $data);
+    }
+
+    public function addUser()
+    {
+        $this->Auth_model->log_activity($this->userID, 'Akses tambah user C; Settings');
+        $nama = $this->input->post('nama', true);
+        $username = $this->input->post('username', true);
+        $password = $this->input->post('password', true);
+        $level = $this->input->post('level', true);
+        $aktif = $this->input->post('aktif', true);
+
+        $cek = $this->model->getBy('user', 'username', $username)->row();
+        if ($cek) {
+            $this->session->set_flashdata('error', 'Maaf username sudah terpakai');
+            redirect('settings/user');
+        } else {
+            $data = [
+                'nama' => $nama,
+                'username' => $username,
+                'password' => password_hash($password, PASSWORD_BCRYPT),
+                'level' => $level,
+                'aktif' => $aktif
+            ];
+            $this->model->tambah('user', $data);
+
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('ok', 'User berhasil ditambahkan');
+                redirect('settings/user');
+            } else {
+                $this->session->set_flashdata('error', 'User gagal ditambahkan');
+                redirect('settings/user');
+            }
+        }
+    }
+
+    public function delUser($id)
+    {
+        $this->model->hapus('user', 'id_user', $id);
+
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'User berhasil dihapus');
+            redirect('settings/user');
+        } else {
+            $this->session->set_flashdata('error', 'User gagal dihapus');
+            redirect('settings/user');
         }
     }
 }
