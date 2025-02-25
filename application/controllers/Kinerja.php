@@ -129,11 +129,13 @@ class Kinerja extends CI_Controller
             $this->db->from('kehadiran');
             $this->db->join('guru', 'kehadiran.guru_id=guru.guru_id');
             $this->db->where('kehadiran_id', $kehadiranID);
+            $this->db->where('guru.kategori', 5);
         } else {
             $kehadiranID = $this->db->query("SELECT kehadiran_id FROM kehadiran GROUP BY kehadiran_id ORDER BY created_at DESC LIMIT 1")->row('kehadiran_id');
             $this->db->from('kehadiran');
             $this->db->join('guru', 'kehadiran.guru_id=guru.guru_id');
             $this->db->where('kehadiran.kehadiran_id', $kehadiranID);
+            $this->db->where('guru.kategori', 5);
         }
 
 
