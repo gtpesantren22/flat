@@ -89,7 +89,7 @@ class Gaji extends CI_Controller
                         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
                         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
                         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-                        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$value->gaji_id' ")->row();
+                        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$value->gaji_id' ")->row();
 
                         // Hitung total potongan
                         $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
@@ -323,7 +323,7 @@ class Gaji extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
             $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
+            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
 
             $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
             $payments = array_column($cek, 'payment');
@@ -1294,7 +1294,7 @@ class Gaji extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
 
         $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
         $payments = array_column($cek, 'payment');
@@ -1403,7 +1403,7 @@ class Gaji extends CI_Controller
         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
 
-        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
         $data_tambahan = $this->model->getBy('tambahan_detail',  'guru_id', $guru_id, 'gaji_id', $gaji_id)->result();
 
         $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
@@ -1422,7 +1422,7 @@ class Gaji extends CI_Controller
         if ($data_tambahan) {
             foreach ($data_tambahan as $tmb) {
                 $nomAdd = $this->model->getBy('tambahan', 'id_tambahan', $tmb->id_tambahan)->row();
-                $this->model->edit3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $tmb->id_tambahan, ['nominal' => $nomAdd->nominal]);
+                $this->model->edit3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $tmb->id_tambahan, ['nominal' => $nomAdd->nominal * $tmb->jumlah]);
             }
         }
 

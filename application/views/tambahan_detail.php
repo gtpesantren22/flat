@@ -28,12 +28,10 @@
                                 $tambahan_data = $tambahan;
 
                                 foreach ($data as $data):
-                                    $gajiIds = array_map(
-                                        function ($gaji) {
-                                            return $gaji->id_tambahan;
-                                        },
-                                        $data['listGaji']
-                                    );
+                                    $gajiIds = array_map(function ($gaji) {
+                                        return ['id' => $gaji->id_tambahan, 'nominal' => $gaji->jumlah];
+                                    }, $data['listGaji']);
+
                                 ?>
                                     <tr>
                                         <td><?= $a++ ?></td>
@@ -42,13 +40,14 @@
                                         <td><?= $data['sik'] ?></td>
                                         <td>
                                             <?php foreach ($tambahan_data as $item) {
-                                                $checked = in_array($item->id_tambahan, $gajiIds) ? 'checked' : '';
+                                                $index = array_search($item->id_tambahan, array_column($gajiIds, 'id'));
+                                                $hasil = ($index !== false) ? $gajiIds[$index]['nominal'] : 0;
                                             ?>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="<?= $item->id_tambahan ?>" id="<?= $data['guru_id'] . $item->id_tambahan ?>" onchange="updateCheckbox2('<?= $data['guru_id'] ?>','<?= $data['gaji_id'] ?>', '<?= $item->id_tambahan ?>', this.checked)" <?= $checked ?> <?= $gaji->status == 'kunci' ? 'disabled' : '' ?> />
-                                                    <label class="form-check-label" for="<?= $data['guru_id'] . $item->id_tambahan ?>">
-                                                        <?= $item->nama . ' - ' . rupiah($item->nominal) ?>
-                                                    </label>
+                                                <div class="row">
+                                                    <label for="html5-text-input" class="col-md-8 col-form-label"><?= $item->nama . ' - ' . number_format($item->nominal) ?></label>
+                                                    <div class="col-md-4">
+                                                        <input class="form-control form-control-sm kehadiran" data-guru_id="<?= $data['guru_id'] ?>" data-gaji_id="<?= $data['gaji_id'] ?>" data-id="<?= $item->id_tambahan ?>" value="<?= $hasil ?>" type="number" placeholder="Jml Kehadiran" />
+                                                    </div>
                                                 </div>
                                             <?php } ?>
                                         </td>
@@ -74,7 +73,7 @@
     <script>
         $(document).ready(function() {
 
-            $('.edit-btn').on('click', function() {
+            $(' .edit-btn').on('click', function() {
 
                 var id = $(this).data('id');
                 var nama = $(this).data('nama');
@@ -89,7 +88,12 @@
 
         });
 
-        function updateCheckbox2(guru_id, gaji_id, itemId, isChecked) {
+        $(document).on('change', '.kehadiran', function() {
+            var id = $(this).data('id');
+            var guru_id = $(this).data('guru_id');
+            var gaji_id = $(this).data('gaji_id');
+            var value = $(this).val();
+
             $.ajax({
                 url: '<?= base_url("tambahan/addAdds") ?>',
                 type: 'POST',
@@ -97,8 +101,8 @@
                 data: {
                     guru_id: guru_id,
                     gaji_id: gaji_id,
-                    itemId: itemId,
-                    value: isChecked ? 'Y' : 'N'
+                    itemId: id,
+                    value: value
                 },
                 success: function(response) {
                     if (response.status == 'success') {
@@ -112,7 +116,7 @@
                     console.error('Failed to update data');
                 }
             });
-        }
+        })
 
         $('#table1').DataTable({
             pageLength: 5,

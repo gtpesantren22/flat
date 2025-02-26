@@ -59,7 +59,7 @@ class Perbandingan extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
             $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
 
             $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
             $payments = array_column($cek, 'payment');
@@ -122,7 +122,7 @@ class Perbandingan extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
 
         $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
         $payments = array_column($cek, 'payment');

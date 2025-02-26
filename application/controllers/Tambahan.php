@@ -95,7 +95,7 @@ class Tambahan extends CI_Controller
         $dataguru = $this->db->query("SELECT guru.guru_id, guru.nama, guru.sik, satminkal.nama as lembaga FROM guru JOIN satminkal ON guru.satminkal=satminkal.id ORDER BY nama ASC")->result();
         foreach ($dataguru as $key) {
             $tunjGuru = $this->model->getBy2('tambahan_detail', 'guru_id', $key->guru_id, 'gaji_id', $id)->result();
-            $total = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$key->guru_id' AND gaji_id = '$id' ")->row();
+            $total = $this->db->query("SELECT SUM(tambahan.nominal*jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$key->guru_id' AND gaji_id = '$id' ")->row();
             $datakirim[] = [
                 'guru_id' => $key->guru_id,
                 'gaji_id' => $id,
@@ -120,15 +120,16 @@ class Tambahan extends CI_Controller
         $itemId = $this->input->post('itemId');
         $value = $this->input->post('value');
 
-        if ($value === 'Y') {
-            $this->model->tambah('tambahan_detail', ['guru_id' => $guru_id, 'gaji_id' => $gaji_id, 'id_tambahan' => $itemId]);
+        $cek = $this->model->getBy3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $itemId)->row();
+        if ($cek) {
+            $this->model->edit3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $itemId, ['jumlah' => $value]);
         } else {
-            $this->model->hapus3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $itemId);
+            $this->model->tambah('tambahan_detail', ['guru_id' => $guru_id, 'gaji_id' => $gaji_id, 'id_tambahan' => $itemId, 'jumlah' => $value]);
         }
 
         $this->Auth_model->log_activity($this->userID, 'Akses add/delete Item tambahan guru C: Tambahan');
 
-        $total = $this->db->query("SELECT SUM(tambahan.nominal) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $total = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
 
         if ($this->db->affected_rows() > 0) {
             echo json_encode(['status' => 'success', 'total' => $total->total]);
