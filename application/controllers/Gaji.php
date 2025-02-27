@@ -1422,7 +1422,7 @@ class Gaji extends CI_Controller
         if ($data_tambahan) {
             foreach ($data_tambahan as $tmb) {
                 $nomAdd = $this->model->getBy('tambahan', 'id_tambahan', $tmb->id_tambahan)->row();
-                $this->model->edit3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $tmb->id_tambahan, ['nominal' => $nomAdd->nominal * $tmb->jumlah]);
+                $this->model->edit3('tambahan_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, 'id_tambahan', $tmb->id_tambahan, ['nominal' => $nomAdd->nominal * $tmb->jumlah, 'nama' => $nomAdd->nama]);
             }
         }
 
