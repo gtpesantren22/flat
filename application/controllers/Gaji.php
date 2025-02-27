@@ -293,6 +293,7 @@ class Gaji extends CI_Controller
             $this->db->like('nama', $search_value);
             $this->db->or_like('satminkal', $search_value);
             $this->db->or_like('sik', $search_value);
+            $this->db->or_like('jabatan', $search_value);
             $this->db->group_end();
         }
 
