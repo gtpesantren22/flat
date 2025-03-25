@@ -70,7 +70,7 @@ class Welcome extends CI_Controller
 						$kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
 						$struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row();
 						$bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
-						$walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
+						$walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
 						$penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
 
 						// Hitung total potongan

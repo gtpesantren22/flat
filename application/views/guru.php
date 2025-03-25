@@ -19,6 +19,7 @@
                                     <th>Nama</th>
                                     <th>Lembaga</th>
                                     <th>Jabatan</th>
+                                    <th>Krit</th>
                                     <th>SIK</th>
                                     <th>Ijzah</th>
                                     <th>TMT</th>
@@ -35,6 +36,7 @@
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nama ?></strong></td>
                                         <td><?= $data->nmlembaga ?></td>
                                         <td><?= $data->nmjabatan ?></td>
+                                        <td><?= $data->kriteria ?></td>
                                         <td><?= $data->sik ?></td>
                                         <td><?= $data->nmijazah ?></td>
                                         <td><?= $data->tmt ?> <span class="badge bg-secondary"><?= selisihTahun($data->tmt) ?> thn</span></td>
@@ -46,7 +48,7 @@
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-kategori="<?= $data->kategori ?>" data-email="<?= $data->email ?>" data-hp="<?= $data->hp ?>" data-rekening="<?= $data->rekening ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-kriteria="<?= $data->kriteria ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-kategori="<?= $data->kategori ?>" data-email="<?= $data->email ?>" data-hp="<?= $data->hp ?>" data-rekening="<?= $data->rekening ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('guru/hapus/' . $data->guru_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
                                                 </div>
                                             </div>
@@ -134,6 +136,17 @@
                                     <?php foreach ($jabatanOpt as $jabatan): ?>
                                         <option value="<?= $jabatan->jabatan_id ?>"><?= $jabatan->nama ?></option>
                                     <?php endforeach ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="a_kriteria">Kriteria</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="a_kriteria" name="kriteria" required>
+                                    <option value=""> -pilih- </option>
+                                    <option value="Guru"> Guru </option>
+                                    <option value="Karyawan"> Karyawan </option>
+                                    <option value="Pengabdian"> Pengabdian </option>
                                 </select>
                             </div>
                         </div>
@@ -280,6 +293,17 @@
                             </div>
                         </div>
                         <div class="row mb-2">
+                            <label class="col-sm-2 col-form-label" for="kriteria">Kriteria</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="kriteria" name="kriteria" required>
+                                    <option value=""> -pilih- </option>
+                                    <option value="Guru"> Guru </option>
+                                    <option value="Karyawan"> Karyawan </option>
+                                    <option value="Pengabdian"> Pengabdian </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="sik">SIK</label>
                             <div class="col-sm-10">
                                 <select class="form-control" id="sik" name="sik" required>
@@ -365,6 +389,7 @@
                 var nama = $(this).data('nama');
                 var satminkal = $(this).data('satminkal');
                 var jabatan = $(this).data('jabatan');
+                var kriteria = $(this).data('kriteria');
                 var sik = $(this).data('sik');
                 var ijazah = $(this).data('ijazah');
                 var tmt = $(this).data('tmt');
@@ -381,6 +406,7 @@
                 $('#nik').val(nik);
                 $('#satminkal').val(satminkal).change();
                 $('#jabatan').val(jabatan).change();
+                $('#kriteria').val(kriteria).change();
                 $('#sik').val(sik);
                 $('#ijazah').val(ijazah).change();
                 $('#tmt').val(tmt);

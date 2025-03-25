@@ -28,7 +28,7 @@
                                                 </button>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->id ?>" data-nama="<?= $data->nama ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
-                                                    <a class="dropdown-item tombol-hapus" href="<?= base_url('ijazah/hapus/' . $data->id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
+                                                    <!-- <a class="dropdown-item tombol-hapus" href="<?= base_url('ijazah/hapus/' . $data->id) ?>"><i class="bx bx-trash me-1"></i> Delete</a> -->
                                                 </div>
                                             </div>
                                         </td>
@@ -115,16 +115,16 @@
 
     <script>
         $(document).ready(function() {
-            
+
             $('.edit-btn').on('click', function() {
                 var id = $(this).data('id');
                 var nama = $(this).data('nama');
-                
+
                 $('#nama').val(nama);
                 $('#id').val(id);
                 $('#editModal').modal('show');
             });
-            
+
             $('#table1').DataTable();
         });
     </script>
