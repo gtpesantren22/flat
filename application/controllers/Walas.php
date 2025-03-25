@@ -24,7 +24,7 @@ class Walas extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT walas.*, guru.nama as nmguru FROM walas JOIN guru ON guru.guru_id=walas.guru_id ")->result();
+        $data['data'] = $this->db->query("SELECT walas.*, guru.nama as nmguru, satminkal.nama as lembaga FROM walas JOIN guru ON guru.guru_id=walas.guru_id JOIN satminkal ON satminkal.id=guru.satminkal ")->result();
 
         $data['guruOpt'] = $this->model->getData('guru')->result();
         $this->load->view('walas', $data);

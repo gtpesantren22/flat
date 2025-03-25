@@ -16,6 +16,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Guru</th>
+                                    <th>Satminkal</th>
                                     <th>Nominal</th>
                                     <th>#</th>
                                 </tr>
@@ -26,6 +27,7 @@
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $no++ ?></strong></td>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmguru ?></strong></td>
+                                        <td><?= $data->lembaga ?></td>
                                         <td><?= rupiah($data->nominal) ?></td>
                                         <td>
                                             <div class="dropdown">
