@@ -1,4 +1,5 @@
     <?php include 'head.php' ?>
+    <link rel="stylesheet" href="<?= base_url('assets/vendor/libs/select2/select2.css') ?>">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
@@ -13,15 +14,18 @@
                         <table class="table " id="table1">
                             <thead>
                                 <tr>
-                                    <th>Satminkal/Lembaga</th>
+                                    <th>No</th>
+                                    <th>Nama Guru</th>
                                     <th>Nominal</th>
                                     <th>#</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($data as $data): ?>
+                                <?php $no = 1;
+                                foreach ($data as $data): ?>
                                     <tr>
-                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmsatminkal ?></strong></td>
+                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $no++ ?></strong></td>
+                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmguru ?></strong></td>
                                         <td><?= rupiah($data->nominal) ?></td>
                                         <td>
                                             <div class="dropdown">
@@ -29,7 +33,7 @@
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->walas_id ?>" data-satminkal="<?= $data->satminkal_id ?>" data-nominal="<?= $data->nominal ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->walas_id ?>" data-guru="<?= $data->guru_id ?>" data-nominal="<?= $data->nominal ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
 
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('walas/hapus/' . $data->walas_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
                                                 </div>
@@ -65,12 +69,12 @@
                     <div class="modal-body">
 
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="a_satminkal">Lembaga</label>
+                            <label class="col-sm-2 col-form-label" for="a_guru">Guru</label>
                             <div class="col-sm-10">
-                                <select class="form-select" data-allow-clear="true" id="a_satminkal" name="satminkal" required>
+                                <select class="select2 form-select form-select-lg" id="a_guru" name="guru" required>
                                     <option value=""> -pilih- </option>
-                                    <?php foreach ($satminkalOpt as $satminkal): ?>
-                                        <option value="<?= $satminkal->id ?>"><?= $satminkal->nama ?></option>
+                                    <?php foreach ($guruOpt as $guru): ?>
+                                        <option value="<?= $guru->guru_id ?>"><?= $guru->nama ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>
@@ -107,12 +111,12 @@
                     </div>
                     <div class="modal-body">
                         <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="satminkal">Lembaga</label>
+                            <label class="col-sm-2 col-form-label" for="guru">Guru</label>
                             <div class="col-sm-10">
-                                <select class="select2 form-select form-select-lg" id="satminkal" name="satminkal" required>
+                                <select class="select2 form-select form-select-lg" id="guru" name="guru" required>
                                     <option value=""> -pilih- </option>
-                                    <?php foreach ($satminkalOpt as $satminkal): ?>
-                                        <option value="<?= $satminkal->id ?>"><?= $satminkal->nama ?></option>
+                                    <?php foreach ($guruOpt as $guru): ?>
+                                        <option value="<?= $guru->guru_id ?>"><?= $guru->nama ?></option>
                                     <?php endforeach ?>
                                 </select>
                             </div>
@@ -139,18 +143,19 @@
     <?php include 'foot.php' ?>
 
     <script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
+    <script src="<?= base_url(); ?>assets/vendor/libs/select2/select2.js"></script>
+    <script src="<?= base_url(); ?>assets/vendor/libs/select2/forms-selects.js"></script>
     <script>
         $(document).ready(function() {
 
             $('.edit-btn').on('click', function() {
 
                 var id = $(this).data('id');
-                var satminkal = $(this).data('satminkal');
+                var guru = $(this).data('guru');
                 var nominal = $(this).data('nominal');
 
                 $('#id').val(id);
-                $('#satminkal').val(satminkal).change();
-                $('#nominal').val(nominal);
+                $('#guru').val(guru).change();
                 $('#nominal').val(nominal);
 
                 $('#editModal').modal('show');
