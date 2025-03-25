@@ -1387,26 +1387,27 @@ class Gaji extends CI_Controller
 
         $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
-
-        $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row();
+        if ($guru->kriteria == 'Pengabdian') {
+            $struktural = $this->pengabdian;
+        } else {
+            $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
+        }
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
-        $walas = $this->model->getBy('walas', 'satminkal_id', $guru->satminkal)->row();
+        $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
 
         $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
         $data_tambahan = $this->model->getBy('tambahan_detail',  'guru_id', $guru_id, 'gaji_id', $gaji_id)->result();
 
-        $cek = $this->model->getBy('hak_setting', 'guru_id', $guru->guru_id)->result_array();
-        $payments = array_column($cek, 'payment');
 
         $data = [
-            'gapok' =>  in_array('gapok', $payments) ? $gapok : '0', // 9
-            'fungsional' => $fungsional && in_array('fungsional', $payments) ? $fungsional->nominal : '0', // 10
-            'kinerja' => $kinerja && in_array('kinerja', $payments) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : '0', // 11
-            'struktural' => $struktural && in_array('struktural', $payments) ? $struktural->nominal : '0', // 12
-            'bpjs' => $bpjs && in_array('bpjs', $payments) ? $bpjs->nominal : '0', // 13
-            'walas' => $walas && in_array('walas', $payments) ? $walas->nominal : '0', // 14
-            'penyesuaian' => $penyesuaian && in_array('penyesuaian', $payments) ? $penyesuaian->sebelum - $penyesuaian->sesudah : '0', // 15
+            'gapok' =>  $gapok ? $gapok : '0', // 9
+            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
+            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
+            'struktural' => $struktural ? $struktural : 0, // 12
+            'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
+            'walas' => $walas ? $walas->nominal : 0, // 14
+            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0,
             'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : '0' // 16
         ];
         if ($data_tambahan) {
