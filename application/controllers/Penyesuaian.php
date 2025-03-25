@@ -20,6 +20,10 @@ class Penyesuaian extends CI_Controller
         $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
         $this->honor_rami = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
+
+        $this->pengabdian = $this->model->getBy('settings', 'nama', 'pengabdian')->row('isi');
+        $ijazah = $this->model->getBy('settings', 'nama', 'ijazah')->row('isi');
+        $this->minimum = explode(',', $ijazah);
     }
 
     public function index()
@@ -29,10 +33,114 @@ class Penyesuaian extends CI_Controller
         $data['user'] = $this->Auth_model->current_user();
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Penyesuaian');
 
-        $data['data'] = $this->db->query("SELECT penyesuaian.*, guru.nama as nmguru, guru.sik as sik FROM penyesuaian JOIN guru ON guru.guru_id=penyesuaian.guru_id ")->result();
+        $dataGru = $this->db->query("SELECT * FROM guru WHERE sik = 'PTY' ")->result();
+        $gajis = $this->model->getBy2('gaji', 'bulan', date('m'), 'tahun', date('Y'))->row();
+        $dataKirim = [];
+        foreach ($dataGru as $row) {
+            $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+            $perbandingan = $this->model->getBy('perbandingan', 'guru_id', $row->guru_id)->row();
 
-        $data['guruOpt'] = $this->model->getData('guru')->result();
+            if ($row->sik === 'PTY') {
+                $gapok = $this->model->getBy2('gapok', 'golongan_id', $row->golongan, 'masa_kerja', selisihTahun($row->tmt))->row();
+                $gapok = $gapok ? $gapok->nominal : 0;
+            } else {
+                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
+                $gapok = $gapok1 ? $gapok1->nominal : 0;
+            }
+
+            $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
+            $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($row->tmt))->row();
+            if ($row->kriteria == 'Pengabdian') {
+                $struktural = $this->pengabdian;
+            } else {
+                $struktural = $this->model->getBy2('struktural', 'jabatan_id', $row->jabatan, 'satminkal_id', $row->satminkal)->row('nominal');
+            }
+            $bpjs = $this->model->getBy('bpjs', 'guru_id', $row->guru_id)->row();
+            $walas = $this->model->getBy('walas', 'guru_id', $row->guru_id)->row();
+            $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $row->guru_id)->row();
+            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$row->guru_id' AND gaji_id = '$gajis->gaji_id' ")->row();
+
+            $totalFlat =
+                ($gapok) +
+                ($fungsional && $row->kriteria == 'Guru' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($kinerja && $row->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                ($struktural ? $struktural : 0) +
+                ($bpjs ? $bpjs->nominal : 0) +
+                ($walas ? $walas->nominal : 0) +
+                ($penyesuaian && $row->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                $tambahan->total;
+
+            $dataKirim[] = [
+                'guru_id' => $row->guru_id,
+                'nama' => $row->nama,
+                'sik' => $row->sik,
+                'sebelum' => $perbandingan->nominal,
+                'sesudah' => $totalFlat,
+            ];
+        }
+
+        $data['data'] = $dataKirim;
+
         $this->load->view('penyesuaian', $data);
+    }
+    public function sesuaikan()
+    {
+        $data['user'] = $this->Auth_model->current_user();
+        $this->Auth_model->log_activity($this->userID, 'Sesuaikan data. C: Penyesuaian');
+
+        $dataGru = $this->db->query("SELECT * FROM guru WHERE sik = 'PTY' ")->result();
+        $gajis = $this->model->getBy2('gaji', 'bulan', date('m'), 'tahun', date('Y'))->row();
+
+        foreach ($dataGru as $row) {
+            $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+            $perbandingan = $this->model->getBy('perbandingan', 'guru_id', $row->guru_id)->row();
+
+            if ($row->sik === 'PTY') {
+                $gapok = $this->model->getBy2('gapok', 'golongan_id', $row->golongan, 'masa_kerja', selisihTahun($row->tmt))->row();
+                $gapok = $gapok ? $gapok->nominal : 0;
+            } else {
+                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
+                $gapok = $gapok1 ? $gapok1->nominal : 0;
+            }
+
+            $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
+            $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($row->tmt))->row();
+            if ($row->kriteria == 'Pengabdian') {
+                $struktural = $this->pengabdian;
+            } else {
+                $struktural = $this->model->getBy2('struktural', 'jabatan_id', $row->jabatan, 'satminkal_id', $row->satminkal)->row('nominal');
+            }
+            $bpjs = $this->model->getBy('bpjs', 'guru_id', $row->guru_id)->row();
+            $walas = $this->model->getBy('walas', 'guru_id', $row->guru_id)->row();
+            $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $row->guru_id)->row();
+            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$row->guru_id' AND gaji_id = '$gajis->gaji_id' ")->row();
+
+            $totalFlat =
+                ($gapok) +
+                ($fungsional && $row->kriteria == 'Guru' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($kinerja && $row->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                ($struktural ? $struktural : 0) +
+                ($bpjs ? $bpjs->nominal : 0) +
+                ($walas ? $walas->nominal : 0) +
+                ($penyesuaian && $row->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                $tambahan->total;
+
+            if ($totalFlat < $perbandingan->nominal) {
+                $dataSave = [
+                    'guru_id' => $row->guru_id,
+                    'sebelum' => $perbandingan->nominal,
+                    'sesudah' => $totalFlat,
+                ];
+                $this->model->tambah('penyesuaian', $dataSave);
+            }
+        }
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'Proses penyesuaian berhasil');
+            redirect('penyesuaian');
+        } else {
+            $this->session->set_flashdata('error', 'Proses penyesuaian gagal');
+            redirect('penyesuaian');
+        }
     }
 
     public function getGajis()
@@ -231,6 +339,22 @@ class Penyesuaian extends CI_Controller
             redirect('penyesuaian');
         } else {
             $this->session->set_flashdata('error', 'penyesuaian gagal diupdate');
+            redirect('penyesuaian');
+        }
+    }
+    public function reset()
+    {
+        $this->Auth_model->log_activity($this->userID, 'Akses Reset data C: Penyesuaian');
+
+        $dataGuru = $this->model->getBy('guru', 'sik', 'PTY')->result();
+        foreach ($dataGuru as $row) {
+            $this->model->hapus('penyesuaian', 'guru_id', $row->guru_id);
+        }
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'Reset data berhasil');
+            redirect('penyesuaian');
+        } else {
+            $this->session->set_flashdata('error', 'Reset data gagal');
             redirect('penyesuaian');
         }
     }

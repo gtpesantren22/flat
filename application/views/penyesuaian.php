@@ -3,12 +3,13 @@
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
-            <div class="col-lg-12 mb-4 order-0">
+            <div class="col-lg-12 mb-2 order-0">
                 <div class="card">
                     <h5 class="card-header">
                         Tunjangan Penyesuaian
-                        <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal"
-                            data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button>
+                        <!-- <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button> -->
+                        <a href="<?= base_url('penyesuaian/reset') ?>" class="btn btn-sm btn-danger float-end tbl-confirm" value="Data akan direset/dikosongkan"><i class='bx bx-reset'></i> Reset Data</a>
+                        <a href="<?= base_url('penyesuaian/sesuaikan') ?>" class="btn btn-sm btn-primary float-end tbl-confirm" value="Data akan direset/dikosongkan"><i class='bx bxs-pin'></i> Sesuaikan data</a>
                     </h5>
                     <div class="table-responsive card-datatable">
                         <table class="table mb-10" id="table1">
@@ -18,7 +19,7 @@
                                     <th>SIK</th>
                                     <th>Sebelum Flat</th>
                                     <th>Sesudah Flat</th>
-                                    <th>Besaran Penyesuaian</th>
+                                    <th>Selisih</th>
                                     <th>#</th>
                                 </tr>
                             </thead>
@@ -26,25 +27,32 @@
                                 <?php
                                 $total = 0;
                                 foreach ($data as $data):
-                                    $selisih = $data->sebelum - $data->sesudah;
+                                    $selisih = $data['sesudah'] - $data['sebelum'];
                                     $total += $selisih;
                                 ?>
                                     <tr>
-                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmguru ?></strong></td>
-                                        <td><?= $data->sik ?></td>
-                                        <td><?= rupiah($data->sebelum) ?></td>
-                                        <td><?= rupiah($data->sesudah) ?></td>
-                                        <td><?= rupiah($selisih) ?></td>
+                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data['nama'] ?></strong></td>
+                                        <td><?= $data['sik'] ?></td>
+                                        <td><?= rupiah($data['sebelum']) ?></td>
+                                        <td> <?= rupiah($data['sesudah']) ?></td>
+                                        <td><?php
+                                            if ($selisih > 0) {
+                                                echo "<b class='text-success'>" . rupiah($selisih) . "</b>";
+                                            } elseif ($selisih < 0) {
+                                                echo "<b class='text-danger'>" . rupiah($selisih) . "</b>";
+                                            } else {
+                                                echo rupiah($selisih);
+                                            }
+                                            ?></td>
                                         <td>
                                             <div class="dropdown">
                                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                                                     <i class="bx bx-dots-vertical-rounded"></i>
                                                 </button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item edit-btn" href="javascript:void(0);" data-id="<?= $data->penyesuaian_id ?>"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                                    <!-- <a class="dropdown-item edit-btn" href="javascript:void(0);" data-id="<?= $data['penyesuaian_id'] ?>"><i class="bx bx-edit-alt me-1"></i> Edit</a> -->
 
-                                                    <a class="dropdown-item tombol-hapus" href="<?= base_url('penyesuaian/hapus/' . $data->penyesuaian_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
-
+                                                    <!-- <a class="dropdown-item tombol-hapus" href="<?= base_url('penyesuaian/hapus/' . $data['penyesuaian_id']) ?>"><i class="bx bx-trash me-1"></i> Delete</a> -->
                                                 </div>
                                             </div>
                                         </td>
@@ -53,7 +61,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="3">TOTAL</th>
+                                    <th colspan="4">TOTAL</th>
                                     <th><?= rupiah($total) ?></th>
                                     <th></th>
                                 </tr>
