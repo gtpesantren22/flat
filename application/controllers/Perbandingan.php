@@ -40,7 +40,7 @@ class Perbandingan extends CI_Controller
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $satminkal = $this->model->getBy('satminkal', 'id', $guru->satminkal)->row();
             $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
-            $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row('kehadiran');
+            $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
 
             if ($guru->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
@@ -102,7 +102,7 @@ class Perbandingan extends CI_Controller
         $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
         $golongan = $this->model->getBy('golongan', 'id', $guru->golongan)->row();
         $ijazah = $this->model->getBy('ijazah', 'id', $guru->ijazah)->row();
-        $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row('kehadiran');
+        $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
 
         if ($guru->sik === 'PTY') {
             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
