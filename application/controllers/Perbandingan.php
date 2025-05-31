@@ -71,7 +71,7 @@ class Perbandingan extends CI_Controller
                 'jabatan' =>  $jabatan->nama,
                 'sebelum' =>  $row->nominal,
                 'total' => ($gapok) +
-                    ($fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                    ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                     ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
                     ($struktural ? $struktural : 0) +
                     ($bpjs ? $bpjs->nominal : 0) +
@@ -137,7 +137,7 @@ class Perbandingan extends CI_Controller
             'ket' =>  $guru->santri,
             'sebelum' =>  $row->nominal,
             'gapok' =>  $gapok ? $gapok : '0', // 9
-            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
+            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
             'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13

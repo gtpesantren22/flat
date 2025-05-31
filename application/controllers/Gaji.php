@@ -107,7 +107,7 @@ class Gaji extends CI_Controller
 
                         // Hitung total awal
                         $totalawal += ($gapok) +
-                            ($fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                            ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                             ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                             ($struktural ? $struktural : 0) +
                             ($bpjs ? $bpjs->nominal : 0) +
@@ -342,7 +342,7 @@ class Gaji extends CI_Controller
                 $row->ijazah, // 7
                 $row->tmt, // 8
                 $gapok, // 9
-                $fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
+                $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
                 $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 $struktural ? $struktural : 0, // 12
                 $bpjs ? $bpjs->nominal : 0, // 13
@@ -350,7 +350,7 @@ class Gaji extends CI_Controller
                 $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
                 (
                     ($gapok) +
-                    ($fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                    ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                     ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                     ($struktural ? $struktural : 0) +
                     ($bpjs ? $bpjs->nominal : 0) +
@@ -502,7 +502,7 @@ class Gaji extends CI_Controller
 
             $data = [
                 'gapok' =>  $gapok ? $gapok : '0', // 9
-                'fungsional' => $fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
+                'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
                 'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 'struktural' => $struktural ? $struktural : 0, // 12
                 'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
@@ -1299,7 +1299,7 @@ class Gaji extends CI_Controller
         echo json_encode([
             'guru_id' => $guru_id, // 9
             'gapok' =>  $gapok ? $gapok : '0', // 9
-            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
+            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
             'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
@@ -1307,7 +1307,7 @@ class Gaji extends CI_Controller
             'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
             'total' => (
                 ($gapok) +
-                ($fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                 ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
@@ -1402,7 +1402,7 @@ class Gaji extends CI_Controller
 
         $data = [
             'gapok' =>  $gapok ? $gapok : '0', // 9
-            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
+            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
             'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13

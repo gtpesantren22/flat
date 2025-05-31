@@ -62,7 +62,7 @@ class Penyesuaian extends CI_Controller
 
             $totalFlat =
                 ($gapok) +
-                ($fungsional && $row->kriteria == 'Guru' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($fungsional && $row->kriteria == 'Guru' && $row->sik == 'PTY' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                 ($kinerja && $row->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
@@ -117,7 +117,7 @@ class Penyesuaian extends CI_Controller
 
             $totalFlat =
                 ($gapok) +
-                ($fungsional && $row->kriteria == 'Guru' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($fungsional && $row->kriteria == 'Guru' && $row->sik == 'PTY' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                 ($kinerja && $row->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
