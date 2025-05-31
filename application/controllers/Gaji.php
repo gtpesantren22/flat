@@ -111,7 +111,7 @@ class Gaji extends CI_Controller
                             ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                             ($struktural ? $struktural : 0) +
                             ($bpjs ? $bpjs->nominal : 0) +
-                            ($walas ? $walas->nominal : 0) +
+                            ($walas && !$struktural ? $walas->nominal : 0) +
                             ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
 
                         $potongawal += $potong ? $potong->total : 0;
@@ -346,7 +346,7 @@ class Gaji extends CI_Controller
                 $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 $struktural ? $struktural : 0, // 12
                 $bpjs ? $bpjs->nominal : 0, // 13
-                $walas ? $walas->nominal : 0, // 14
+                $walas && !$struktural ? $walas->nominal : 0, // 14
                 $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
                 (
                     ($gapok) +
@@ -354,7 +354,7 @@ class Gaji extends CI_Controller
                     ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                     ($struktural ? $struktural : 0) +
                     ($bpjs ? $bpjs->nominal : 0) +
-                    ($walas ? $walas->nominal : 0) +
+                    ($walas && !$struktural ? $walas->nominal : 0) +
                     ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
                 ), // 16
                 $row->kategori, // 17
@@ -506,7 +506,7 @@ class Gaji extends CI_Controller
                 'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 'struktural' => $struktural ? $struktural : 0, // 12
                 'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
-                'walas' => $walas ? $walas->nominal : 0, // 14
+                'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
                 'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
             ];
             $this->model->edit('gaji_detail', 'id_detail', $row->id_detail, $data);
@@ -1303,7 +1303,7 @@ class Gaji extends CI_Controller
             'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
-            'walas' => $walas ? $walas->nominal : 0, // 14
+            'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
             'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
             'total' => (
                 ($gapok) +
@@ -1311,7 +1311,7 @@ class Gaji extends CI_Controller
                 ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
-                ($walas ? $walas->nominal : 0) +
+                ($walas && !$struktural ? $walas->nominal : 0) +
                 ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
             ), // 16
         ]);
@@ -1406,7 +1406,7 @@ class Gaji extends CI_Controller
             'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
-            'walas' => $walas ? $walas->nominal : 0, // 14
+            'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
             'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0,
             'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : '0' // 16
         ];

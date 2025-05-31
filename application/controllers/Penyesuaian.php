@@ -66,7 +66,7 @@ class Penyesuaian extends CI_Controller
                 ($kinerja && $row->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
-                ($walas ? $walas->nominal : 0) +
+                ($walas && !$struktural ? $walas->nominal : 0) +
                 ($penyesuaian && $row->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
                 $tambahan->total;
 
@@ -121,7 +121,7 @@ class Penyesuaian extends CI_Controller
                 ($kinerja && $row->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
-                ($walas ? $walas->nominal : 0) +
+                ($walas && !$struktural ? $walas->nominal : 0) +
                 ($penyesuaian && $row->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
                 $tambahan->total;
 
