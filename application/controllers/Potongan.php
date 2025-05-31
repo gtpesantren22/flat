@@ -138,19 +138,69 @@ class Potongan extends CI_Controller
 
     public function get_data()
     {
-        $id = $this->input->post('id', 'true');
+        $id = $this->input->post('id', true);
         $data = $this->model->getBy('potongan', 'id', $id)->row();
-        $rinci = $this->model->getBy2('potongan', 'potongan_id', $data->potongan_id, 'guru_id', $data->guru_id)->result();
-
-        $hasil = "<table class='table table-sm'>";
-        foreach ($rinci as $value) {
-            $hasil .= '<tr>';
-            $hasil .= '<td>' . $value->ket . '</td>';
-            $hasil .= '<td>' . rupiah($value->nominal) . '</td>';
-            $hasil .= '</tr>';
+        $jml = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->num_rows();
+        if ($jml < 2) {
+            $jenis = ['Tabungan Wajib', 'SIMPOK', 'SIMWA', 'Koperasi/Cicilan', 'BPJS', 'Insijam', 'Infaq TPP', 'Pulsa', 'Verval TPP', 'Verval SIMPATIKA', 'Pinjaman Bank'];
+            foreach ($jenis as $jns) {
+                $simpandata = [
+                    'potongan_id' => $data->potongan_id,
+                    'guru_id' => $data->guru_id,
+                    'bulan' => $data->bulan,
+                    'tahun' => $data->tahun,
+                    'ket' => $jns,
+                    'nominal' => 0,
+                ];
+                $simpan = $this->model->tambah('potongan', $simpandata);
+            }
+            if ($simpan > 0) {
+                $this->model->edit('potongan', 'id', $id, ['ket' => 'Lain-lain']);
+                $hasil = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->result();
+                echo json_encode(['status' => 'success', 'data' => $hasil]);
+            } else {
+                echo '<b>Gagal ambil data</b>';
+            }
+        } else {
+            $hasil = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->result();
+            echo json_encode(['status' => 'success', 'data' => $hasil]);
         }
-        $hasil .= '</table>';
+    }
 
-        echo json_encode($hasil);
+    public function updatePotongan()
+    {
+        $id = $this->input->post('id', true);
+        $value = $this->input->post('value', true);
+        $varname = $this->input->post('inputName', true);
+        if ($varname == 'nominal') {
+            $valueOk = rmRp($value);
+        } else {
+            $valueOk = $value;
+        }
+
+
+        $this->model->edit('potongan', 'id', $id, [$varname => $valueOk]);
+        if ($this->db->affected_rows() > 0) {
+            $data = $this->model->getBy('potongan', 'id', $id)->row();
+            $hasil = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->result();
+            echo json_encode(['status' => 'success', 'data' => $hasil]);
+        } else {
+            echo json_encode(['status' => 'gagal']);
+        }
+        // echo json_encode(['status' => 'success', 'hasil' => $id]);
+    }
+
+    public function del_row()
+    {
+        $id = $this->input->post('id', true);
+        $data = $this->model->getBy('potongan', 'id', $id)->row();
+
+        $this->model->hapus('potongan', 'id', $id);
+        if ($this->db->affected_rows() > 0) {
+            $hasil = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->result();
+            echo json_encode(['status' => 'success', 'data' => $hasil]);
+        } else {
+            echo json_encode(['status' => 'gagal']);
+        }
     }
 }
