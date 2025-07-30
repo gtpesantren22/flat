@@ -23,11 +23,12 @@ class Guru extends CI_Controller
         $data['judul'] = 'Guru';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT guru.*, satminkal.nama as nmlembaga, ijazah.nama as nmijazah, golongan.nama as nmgolongan, jabatan.nama as nmjabatan, kategori.nama as nmkategori FROM guru JOIN satminkal ON satminkal.id=guru.satminkal
-        JOIN ijazah ON ijazah.id=guru.ijazah
-        JOIN golongan ON golongan.id=guru.golongan
-        JOIN jabatan ON jabatan.jabatan_id=guru.jabatan
-        JOIN kategori ON kategori.id=guru.kategori
+        $data['data'] = $this->db->query("SELECT guru.*, satminkal.nama as nmlembaga, ijazah.nama as nmijazah, golongan.nama as nmgolongan, jabatan.nama as nmjabatan, kategori.nama as nmkategori FROM guru 
+        LEFT JOIN satminkal ON satminkal.id=guru.satminkal
+        LEFT JOIN ijazah ON ijazah.id=guru.ijazah
+        LEFT JOIN golongan ON golongan.id=guru.golongan
+        LEFT JOIN jabatan ON jabatan.jabatan_id=guru.jabatan
+        LEFT JOIN kategori ON kategori.id=guru.kategori
         ")->result();
         $data['lembagaOpt'] = $this->model->getData('satminkal')->result();
         $data['jabatanOpt'] = $this->model->getData('jabatan')->result();
