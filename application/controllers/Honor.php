@@ -121,7 +121,7 @@ class Honor extends CI_Controller
         $row_number = $start + 1;
 
         foreach ($query->result() as $row) {
-            $gruru ? $gruru = $this : ''->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $lembaga = $this->model->getBy('satminkal', 'id', $row->lembaga)->row();
             // $total = $this->db->query("SELECT kehadiran FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
             // $hasil_hadir = $row->kehadiran;
