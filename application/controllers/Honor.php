@@ -121,7 +121,7 @@ class Honor extends CI_Controller
         $row_number = $start + 1;
 
         foreach ($query->result() as $row) {
-            $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
+            $gruru ? $gruru = $this : ''->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $lembaga = $this->model->getBy('satminkal', 'id', $row->lembaga)->row();
             // $total = $this->db->query("SELECT kehadiran FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
             // $hasil_hadir = $row->kehadiran;
@@ -135,13 +135,13 @@ class Honor extends CI_Controller
 
             $data[] = [
                 $row_number++, // 0
-                $gruru->nama,  // 1
-                $gruru->santri, // 2
-                $row->kehadiran, // 3
+                $gruru ? $gruru->nama : '',  // 1
+                $gruru ? $gruru->santri : '', // 2
+                $row->kehadiran ? $row->kehadiran : '', // 3
                 $row->nominal ? $row->nominal : 0, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
-                $lembaga->nama, // 7
+                $lembaga->nama ? $lembaga->nama : '', // 7
                 // $row->nominal, // 8
                 0, // 8
             ];
