@@ -141,7 +141,7 @@ class Honor extends CI_Controller
                 $row->nominal ? $row->nominal : 0, // 4 
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
-                $lembaga->nama ? $lembaga->nama : '', // 7
+                $lembaga ? $lembaga->nama : '', // 7
                 // $row->nominal, // 8
                 0, // 8
             ];
