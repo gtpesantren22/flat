@@ -80,10 +80,6 @@ $db['default'] = array(
 	'password' => '',
 	'database' => 'gaji_flat',
 
-	// 'username' => 'u9048253_dwk',
-	// 'password' => 'PesantrenDWKIT2021',
-	// 'database' => 'u9048253_flat',
-
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
