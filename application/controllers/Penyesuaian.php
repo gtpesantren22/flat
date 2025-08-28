@@ -44,10 +44,10 @@ class Penyesuaian extends CI_Controller
 
             if ($row->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $row->golongan, 'masa_kerja', selisihTahun($row->tmt))->row();
-                $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
+                $gapok = $gapok &&  !in_array($row->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) ? $gapok1->nominal : 0;
+                $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
@@ -99,10 +99,10 @@ class Penyesuaian extends CI_Controller
 
             if ($row->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $row->golongan, 'masa_kerja', selisihTahun($row->tmt))->row();
-                $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
+                $gapok = $gapok &&  !in_array($row->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) ? $gapok1->nominal : 0;
+                $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();

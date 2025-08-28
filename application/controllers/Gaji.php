@@ -84,7 +84,7 @@ class Gaji extends CI_Controller
                             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                             $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
                         } else {
-                            $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row('nominal');
+                            $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row();
                             $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
                         }
 
