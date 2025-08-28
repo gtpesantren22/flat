@@ -29,6 +29,8 @@ class Gaji extends CI_Controller
         $this->pengabdian = $this->model->getBy('settings', 'nama', 'pengabdian')->row('isi');
         $ijazah = $this->model->getBy('settings', 'nama', 'ijazah')->row('isi');
         $this->minimum = explode(',', $ijazah);
+        $str = $this->model->getBy('settings', 'nama', 'struktural')->row('isi');
+        $this->struktural = explode(',', $str);
     }
 
     public function index()
@@ -80,9 +82,10 @@ class Gaji extends CI_Controller
                         // Hitung gaji pokok (gapok)
                         if ($guru->sik === 'PTY') {
                             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-                            $gapok = $gapok ? $gapok->nominal : 0;
+                            $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
                         } else {
                             $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row('nominal');
+                            $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
                         }
 
                         // Data tunjangan lainnya
@@ -108,11 +111,11 @@ class Gaji extends CI_Controller
                         // Hitung total awal
                         $totalawal += ($gapok) +
                             ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                            ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                            ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                             ($struktural ? $struktural : 0) +
                             ($bpjs ? $bpjs->nominal : 0) +
                             ($walas && !$struktural ? $walas->nominal : 0) +
-                            ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
+                            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
 
                         $potongawal += $potong ? $potong->total : 0;
                     }
@@ -313,10 +316,10 @@ class Gaji extends CI_Controller
 
             if ($guru->sik === 'PTY') {
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-                $gapok = $gapok ? $gapok->nominal : 0;
+                $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 ? $gapok1->nominal : 0;
+                $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -343,19 +346,19 @@ class Gaji extends CI_Controller
                 $row->tmt, // 8
                 $gapok, // 9
                 $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-                $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
+                $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 $struktural ? $struktural : 0, // 12
                 $bpjs ? $bpjs->nominal : 0, // 13
                 $walas && !$struktural ? $walas->nominal : 0, // 14
-                $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+                $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
                 (
                     ($gapok) +
                     ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                    ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                    ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                     ($struktural ? $struktural : 0) +
                     ($bpjs ? $bpjs->nominal : 0) +
                     ($walas && !$struktural ? $walas->nominal : 0) +
-                    ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
+                    ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
                 ), // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
@@ -501,13 +504,13 @@ class Gaji extends CI_Controller
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
 
             $data = [
-                'gapok' =>  $gapok ? $gapok : '0', // 9
+                'gapok' =>  $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok : '0', // 9
                 'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-                'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
+                'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
                 'struktural' => $struktural ? $struktural : 0, // 12
                 'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
                 'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-                'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+                'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
             ];
             $this->model->edit('gaji_detail', 'id_detail', $row->id_detail, $data);
             // echo '<pre>';
@@ -1277,11 +1280,11 @@ class Gaji extends CI_Controller
 
         if ($guru->sik === 'PTY') {
             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-            $gapok = $gapok ? $gapok->nominal : 0;
+            $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
         } else {
             $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
             $gapok = $gapok ? ($gapok->kehadiran) : 0;
-            $gapok = $guru->santri == 'santri' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
+            $gapok = $guru->santri == 'santri' &&  !in_array($guru->jabatan, $this->struktural) ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }
 
         $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -1298,21 +1301,21 @@ class Gaji extends CI_Controller
 
         echo json_encode([
             'guru_id' => $guru_id, // 9
-            'gapok' =>  $gapok ? $gapok : '0', // 9
+            'gapok' =>  $gapok  ? $gapok : '0', // 9
             'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
+            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
             'total' => (
                 ($gapok) +
                 ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
+                ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
                 ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
+                ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
             ), // 16
         ]);
     }
@@ -1401,13 +1404,13 @@ class Gaji extends CI_Controller
 
 
         $data = [
-            'gapok' =>  $gapok ? $gapok : '0', // 9
+            'gapok' =>  $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok : '0', // 9
             'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
+            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0,
+            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0,
             'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : '0' // 16
         ];
         if ($data_tambahan) {
