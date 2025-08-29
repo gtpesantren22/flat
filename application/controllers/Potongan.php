@@ -133,6 +133,7 @@ class Potongan extends CI_Controller
             ];
         }
         $data['datapotongan'] = $datapotongan;
+        $data['id'] = $id;
         $this->load->view('potongandtl', $data);
     }
 
@@ -201,6 +202,36 @@ class Potongan extends CI_Controller
             echo json_encode(['status' => 'success', 'data' => $hasil]);
         } else {
             echo json_encode(['status' => 'gagal']);
+        }
+    }
+
+    public function refresh($id)
+    {
+        $potongan = $this->model->getBy('potongan', 'potongan_id', $id)->row();
+
+        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM potongan WHERE potongan_id = '$id' AND potongan.guru_id = guru.guru_id) ");
+        if ($guru->row()) {
+            foreach ($guru->result() as $value) {
+                $data = [
+                    'guru_id' => $value->guru_id,
+                    'potongan_id' => $potongan->potongan_id,
+                    'bulan' => $potongan->bulan,
+                    'tahun' => $potongan->tahun,
+                    'ket' => '',
+                    'nominal' => 0,
+                ];
+                $this->model->tambah('potongan', $data);
+            }
+            if ($this->db->affected_rows() > 0) {
+                $this->session->set_flashdata('ok', 'Data potongan diperbarui');
+                redirect('potongan/detail/' . $id);
+            } else {
+                $this->session->set_flashdata('error', 'Data potongan gagal');
+                redirect('potongan/detail/' . $id);
+            }
+        } else {
+            $this->session->set_flashdata('ok', 'Data potongan diperbarui');
+            redirect('potongan/detail/' . $id);
         }
     }
 }

@@ -29,32 +29,37 @@
             </div>
             <div class="col-lg-8 mb-4 order-0">
                 <div class="card">
-                    <div class="table-responsive card-datatable">
-                        <table class="table mb-10 table-sm" id="table1">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Bulan</th>
-                                    <th>Nama</th>
-                                    <th>Jumlah Potongan</th>
-                                    <th>#</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($data as $data): ?>
+                    <h5 class="card-header">
+                        <button onclick="window.location='<?= base_url('potongan/refresh/' . $id) ?>'" class="btn btn-primary btn-sm">re-generate</button>
+                    </h5>
+                    <div class="card-body">
+                        <div class="table-responsive card-datatable">
+                            <table class="table mb-10 table-sm" id="table1">
+                                <thead>
                                     <tr>
-                                        <td><?= $no++ ?></td>
-                                        <td><?= bulan($data->bulan) . ' ' . $data->tahun ?></td>
-                                        <td><?= $data->nama ?></td>
-                                        <td><?= rupiah($data->total) ?></td>
-                                        <td>
-                                            <button class="btn btn-primary btn-xs btn-detail" data-id="<?= $data->id ?>">Detail</button>
-                                        </td>
+                                        <th>No</th>
+                                        <th>Bulan</th>
+                                        <th>Nama</th>
+                                        <th>Jumlah Potongan</th>
+                                        <th>#</th>
                                     </tr>
-                                <?php endforeach ?>
-                            </tbody>
-                        </table>
-                        <br>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($data as $data): ?>
+                                        <tr>
+                                            <td><?= $no++ ?></td>
+                                            <td><?= bulan($data->bulan) . ' ' . $data->tahun ?></td>
+                                            <td><?= $data->nama ?></td>
+                                            <td><?= rupiah($data->total) ?></td>
+                                            <td>
+                                                <button class="btn btn-primary btn-xs btn-detail" data-id="<?= $data->id ?>">Detail</button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach ?>
+                                </tbody>
+                            </table>
+                            <br>
+                        </div>
                     </div>
                 </div>
                 <!-- Bootstrap Table with Caption -->
