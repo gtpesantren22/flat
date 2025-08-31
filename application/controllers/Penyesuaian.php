@@ -76,7 +76,7 @@ class Penyesuaian extends CI_Controller
                 'guru_id' => $row->guru_id,
                 'nama' => $row->nama,
                 'sik' => $row->sik,
-                'sebelum' => $perbandingan->nominal,
+                'sebelum' => $perbandingan ? $perbandingan->nominal : 0,
                 'sesudah' => $totalFlat,
             ];
         }
