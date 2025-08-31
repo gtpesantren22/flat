@@ -49,7 +49,7 @@ class Perbandingan extends CI_Controller
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
+                $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
