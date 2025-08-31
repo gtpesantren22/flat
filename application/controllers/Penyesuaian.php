@@ -47,7 +47,7 @@ class Penyesuaian extends CI_Controller
                 $gapok = $gapok &&  !in_array($row->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) ? $gapok1->nominal : 0;
+                $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
@@ -65,11 +65,11 @@ class Penyesuaian extends CI_Controller
             $totalFlat =
                 ($gapok) +
                 ($fungsional && $row->kriteria == 'Guru' && $row->sik == 'PTY' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                ($kinerja && $row->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                ($kinerja && $row->kriteria == 'Karyawan' &&  !in_array($row->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
                 ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $row->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                ($penyesuaian && $row->kriteria != 'Pengabdian' &&  !in_array($row->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
                 $tambahan->total;
 
             $dataKirim[] = [
@@ -102,7 +102,7 @@ class Penyesuaian extends CI_Controller
                 $gapok = $gapok &&  !in_array($row->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) ? $gapok1->nominal : 0;
+                $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
@@ -120,11 +120,11 @@ class Penyesuaian extends CI_Controller
             $totalFlat =
                 ($gapok) +
                 ($fungsional && $row->kriteria == 'Guru' && $row->sik == 'PTY' && in_array($row->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                ($kinerja && $row->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                ($kinerja && $row->kriteria == 'Karyawan' &&  !in_array($row->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
                 ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $row->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                ($penyesuaian && $row->kriteria != 'Pengabdian' &&  !in_array($row->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
                 $tambahan->total;
 
             if ($totalFlat < $perbandingan->nominal) {
