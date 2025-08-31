@@ -22,6 +22,8 @@ class Perbandingan extends CI_Controller
         $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
         $ijazah = $this->model->getBy('settings', 'nama', 'ijazah')->row('isi');
         $this->minimum = explode(',', $ijazah);
+        $str = $this->model->getBy('settings', 'nama', 'struktural')->row('isi');
+        $this->struktural = explode(',', $str);
     }
 
     public function index()
@@ -47,7 +49,7 @@ class Perbandingan extends CI_Controller
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 ? $gapok1->nominal : 0;
+                $gapok = $gapok1 && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -72,7 +74,7 @@ class Perbandingan extends CI_Controller
                 'sebelum' =>  $row->nominal,
                 'total' => ($gapok) +
                     ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                    ($kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
+                    ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
                     ($struktural ? $struktural : 0) +
                     ($bpjs ? $bpjs->nominal : 0) +
                     ($walas && !$struktural ? $walas->nominal : 0) +
@@ -109,7 +111,7 @@ class Perbandingan extends CI_Controller
             $gapok = $gapok ? $gapok->nominal : 0;
         } else {
             $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
-            $gapok = $gapok1 ? $gapok1->nominal : 0;
+            $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
         }
 
         $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -138,7 +140,7 @@ class Perbandingan extends CI_Controller
             'sebelum' =>  $row->nominal,
             'gapok' =>  $gapok ? $gapok : '0', // 9
             'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
+            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($row->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
