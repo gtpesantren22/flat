@@ -85,7 +85,7 @@ class Gaji extends CI_Controller
                             $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
                         } else {
                             $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row();
-                            $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
+                            $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok->nominal : 0;
                         }
 
                         // Data tunjangan lainnya
@@ -319,7 +319,7 @@ class Gaji extends CI_Controller
                 $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
                 $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) ? $gapok1->nominal : 0;
+                $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -490,6 +490,7 @@ class Gaji extends CI_Controller
                 $gapok = $gapok1 ? $gapok1->nominal : 0;
             } else {
                 $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = '$thnpak' GROUP BY honor.guru_id")->row('nominal');
+                $gapok = $guru->kriteria != 'Karyawan' ? $gapok : 0;
             }
 
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -1284,7 +1285,7 @@ class Gaji extends CI_Controller
         } else {
             $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
             $gapok = $gapok ? ($gapok->kehadiran) : 0;
-            $gapok = $guru->santri == 'santri' &&  !in_array($guru->jabatan, $this->struktural) ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
+            $gapok = $guru->santri == 'santri' &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }
 
         $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
@@ -1385,7 +1386,7 @@ class Gaji extends CI_Controller
             $gapok = $gapok1 ? $gapok1->nominal : 0;
         } else {
             $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajidtl->bulan AND tahun = '$gajidtl->tahun' GROUP BY honor.guru_id")->row();
-            $gapok = $gapok1 ? $gapok1->nominal : 0;
+            $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
         }
 
         $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
