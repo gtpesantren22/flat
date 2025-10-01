@@ -25,7 +25,12 @@ class Welcome extends CI_Controller
 	{
 		$data['judul'] = 'Dashboard';
 		$data['user'] = $this->Auth_model->current_user();
-		$data['pagu'] = 3500000000;
+
+		$this->load->view('index', $data);
+	}
+
+	public function loadNominal()
+	{
 
 		$totalakhir = 0;
 		$potongakhir = 0;
@@ -101,10 +106,14 @@ class Welcome extends CI_Controller
 			$totalakhir += $totalawal;
 			$potongakhir += $potongawal;
 		}
-		// $data['gaji'] = $datakirim;
-		$data['pakai'] = $totalakhir - $potongakhir;
-
-		$this->load->view('index', $data);
+		$pagu = 3500000000;
+		$pakai = $totalakhir - $potongakhir;
+		$sisa = $pagu - $pakai;
+		echo json_encode([
+			'all' => formatUangSingkat($pagu),
+			'pakai' => formatUangSingkat($pakai),
+			'sisa' => formatUangSingkat($sisa),
+		]);
 	}
 
 	public function sendNota()

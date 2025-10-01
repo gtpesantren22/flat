@@ -40,7 +40,7 @@
                             <div class="avatar me-4">
                                 <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-money bx-lg"></i></span>
                             </div>
-                            <h4 class="mb-0"><?= formatUangSingkat($pagu) ?></h4>
+                            <h4 class="mb-0" id="all">......</h4>
                         </div>
                         <p class="mb-2">Budged 1 tahun honor</p>
                         <!-- <p class="mb-0">
@@ -57,7 +57,7 @@
                             <div class="avatar me-4">
                                 <span class="avatar-initial rounded bg-label-danger"><i class='bx bx-money bx-lg'></i></span>
                             </div>
-                            <h4 class="mb-0"><?= formatUangSingkat($pakai) ?></h4>
+                            <h4 class="mb-0" id="pakai">......</h4>
                         </div>
                         <p class="mb-2">Jumlah terpakai</p>
                         <!-- <p class="mb-0">
@@ -74,7 +74,7 @@
                             <div class="avatar me-4">
                                 <span class="avatar-initial rounded bg-label-success"><i class='bx bx-money bx-lg'></i></span>
                             </div>
-                            <h4 class="mb-0"><?= formatUangSingkat($pagu - $pakai) ?></h4>
+                            <h4 class="mb-0" id="sisa">......</h4>
                         </div>
                         <p class="mb-2">Sisa pemakaian</p>
                         <!-- <p class="mb-0">
@@ -90,3 +90,20 @@
     </div>
     <!-- / Content -->
     <?php include 'foot.php' ?>
+    <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: "<?= base_url('welcome/loadNominal') ?>",
+                type: "GET",
+                dataType: "json",
+                success: function(res) {
+                    $('#all').text(res.all)
+                    $('#pakai').text(res.pakai)
+                    $('#sisa').text(res.sisa)
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
+                }
+            })
+        })
+    </script>

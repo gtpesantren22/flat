@@ -444,7 +444,7 @@ class Gaji extends CI_Controller
                 ), // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
-                '', //19
+                $row->guru_id, //19
                 '', //20
                 '', //21
                 '', //22

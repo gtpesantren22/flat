@@ -72,7 +72,7 @@ function kirim_person($key, $no_hp, $pesan)
     curl_setopt_array(
         $curl2,
         array(
-            CURLOPT_URL => 'http://191.101.3.115:3000/api/sendMessage',
+            CURLOPT_URL => 'http://31.97.179.141/:3000/api/sendMessage',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -95,7 +95,7 @@ function kirim_group($key, $id_group, $pesan)
     curl_setopt_array(
         $curl2,
         array(
-            CURLOPT_URL => 'http://191.101.3.115:3000/api/sendMessageGroup',
+            CURLOPT_URL => 'http://31.97.179.141/:3000/api/sendMessageGroup',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -116,7 +116,7 @@ function kirim_media($key, $hp, $nama_file, $as_doc, $capt)
     curl_setopt_array(
         $curl2,
         array(
-            CURLOPT_URL => 'http://191.101.3.115:3000/api/sendMediaFromUrl',
+            CURLOPT_URL => 'http://31.97.179.141/:3000/api/sendMediaFromUrl',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -130,4 +130,29 @@ function kirim_media($key, $hp, $nama_file, $as_doc, $capt)
     $response = curl_exec($curl2);
     curl_close($curl2);
     return $response;
+}
+
+function fetchApiGet($url, $token)
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: Bearer " . $token,
+        "Accept: application/json"
+    ]);
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo json_encode([
+            'status' => 'error',
+            'message' => curl_error($ch)
+        ]);
+        curl_close($ch);
+        return;
+    }
+    curl_close($ch);
+
+    $decoded = json_decode($result, true);
+    return $decoded;
 }

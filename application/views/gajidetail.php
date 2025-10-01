@@ -271,7 +271,7 @@
                     {
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-sik="${row[6]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-tambahan="${formatRupiah(row[20])}" data-total="${formatRupiah(row[16])}" data-guru_id="${row[19]}" data-kriteria="${row[21]}">Rincian</button>
+                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-satminkal="${row[3]}" data-sik="${row[6]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-tambahan="${formatRupiah(row[20])}" data-total="${formatRupiah(row[16])}" data-guru_id="${row[19]}" data-kriteria="${row[21]}">Rincian</button>
                             `;
                         }
 

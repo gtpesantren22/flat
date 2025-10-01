@@ -288,6 +288,11 @@
                                     <div data-i18n="Without navbar">User Set</div>
                                 </a>
                             </li>
+                            <li class="menu-item <?= $judul == 'Sinkronisasi Data' ? 'active' : '' ?>">
+                                <a href="<?= base_url('settings/sinkron') ?>" class="menu-link">
+                                    <div data-i18n="Without navbar">Sinkronisasi Data</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="menu-item">

@@ -11,6 +11,7 @@ class Settings extends CI_Controller
         $this->load->model('Auth_model');
 
         $user = $this->Auth_model->current_user();
+        $this->token = $this->model->getBy('settings', 'nama', 'token')->row('isi');
 
         $this->userID = $user->id_user;
         if (!$this->Auth_model->current_user()) {
@@ -242,5 +243,162 @@ GROUP BY
             $this->session->set_flashdata('error', 'User gagal dihapus');
             redirect('settings/user');
         }
+    }
+
+    public function sinkron()
+    {
+        $data['judul'] = 'Sinkronisasi Data';
+        $data['sub'] = 'settings';
+        $data['user'] = $this->Auth_model->current_user();
+
+        $data['data'] = $this->model->getData('sinkron')->result();
+
+        $this->load->view('sinkron', $data);
+    }
+
+    public function sinc_satminkal()
+    {
+        $id = $this->input->post('id', TRUE);
+        $cekdata = $this->model->getBy('sinkron', 'id', $id)->row();
+        $url = $cekdata->url;
+        $token = $this->token;
+
+        $decoded = fetchApiGet($url, $token);
+        $items = $decoded['data']['data'] ?? [];
+
+        $saved = 0;
+        foreach ($items as $item) {
+            // cek apakah lembaga_id sudah ada
+            $exists = $this->model->getBy('satminkal', 'id', $item['lembaga_id'])->row();
+
+            $data = [
+                'id' => $item['lembaga_id'],
+                'nama'       => $item['nama'],
+            ];
+
+            if ($exists) {
+                $this->db->where('id', $item['lembaga_id'])
+                    ->update('satminkal', ['nama' => $item['nama']]);
+            } else {
+                $this->db->insert('satminkal', $data);
+            }
+
+            $saved++;
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'total'  => count($items),
+            'saved'  => $saved
+        ]);
+    }
+    public function sinc_golongan()
+    {
+        $id = $this->input->post('id', TRUE);
+        $cekdata = $this->model->getBy('sinkron', 'id', $id)->row();
+        $url = $cekdata->url;
+        $token = $this->token;
+
+        $decoded = fetchApiGet($url, $token);
+        $items = $decoded['data']['data'] ?? [];
+
+        $saved = 0;
+        foreach ($items as $item) {
+            // cek apakah lembaga_id sudah ada
+            $exists = $this->model->getBy('golongan', 'id', $item['jenis_golongan_id'])->row();
+
+            $data = [
+                'id' => $item['jenis_golongan_id'],
+                'nama'       => $item['nama'],
+            ];
+
+            if ($exists) {
+                $this->db->where('id', $item['jenis_golongan_id'])
+                    ->update('golongan', ['nama' => $item['nama']]);
+            } else {
+                $this->db->insert('golongan', $data);
+            }
+
+            $saved++;
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'total'  => count($items),
+            'saved'  => $saved
+        ]);
+    }
+    public function sinc_jabatan()
+    {
+        $id = $this->input->post('id', TRUE);
+        $cekdata = $this->model->getBy('sinkron', 'id', $id)->row();
+        $url = $cekdata->url;
+        $token = $this->token;
+
+        $decoded = fetchApiGet($url, $token);
+        $items = $decoded['data']['data'] ?? [];
+
+        $saved = 0;
+        foreach ($items as $item) {
+            // cek apakah lembaga_id sudah ada
+            $exists = $this->model->getBy('jabatan', 'jabatan_id', $item['jenis_jabatan_id'])->row();
+
+            $data = [
+                'jabatan_id' => $item['jenis_jabatan_id'],
+                'nama'       => $item['nama'],
+            ];
+
+            if ($exists) {
+                $this->db->where('jabatan_id', $item['jenis_jabatan_id'])
+                    ->update('jabatan', ['nama' => $item['nama']]);
+            } else {
+                $this->db->insert('jabatan', $data);
+            }
+
+            $saved++;
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'total'  => count($items),
+            'saved'  => $saved
+        ]);
+    }
+    public function sinc_guru()
+    {
+        $id = $this->input->post('id', TRUE);
+        $cekdata = $this->model->getBy('sinkron', 'id', $id)->row();
+        $url = $cekdata->url;
+        $token = $this->token;
+
+        $datas = fetchApiGet($url, $token);
+        $items = $datas['data']['data'] ?? [];
+
+        $saved = 0;
+        foreach ($items as $item) {
+            // cek apakah lembaga_id sudah ada
+            $exists = $this->model->getBy('guru', 'nik', $item['nik'])->row();
+
+            $data = [
+                'nama' => $item['nama'],
+                'nipy' => $item['niy'],
+                'satminkal' => $item['niy'],
+            ];
+
+            if ($exists) {
+                $this->db->where('jabatan_id', $item['ptk_id'])
+                    ->update('jabatan', ['nama' => $item['nama']]);
+            } else {
+                $this->db->insert('jabatan', $data);
+            }
+
+            $saved++;
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'total'  => count($items),
+            'saved'  => $saved
+        ]);
     }
 }
