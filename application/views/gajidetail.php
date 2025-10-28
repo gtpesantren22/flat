@@ -475,7 +475,7 @@
                                         guru_id: item.guru_id,
                                     },
                                     dataType: 'json',
-                                    success: function(response) {
+                                    success: function(res) {
                                         if (res.status === 'success') {
                                             berhasil++;
                                         } else {
