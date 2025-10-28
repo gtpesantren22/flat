@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Fungsional extends CI_Controller
+class Fungsional extends MY_Controller
 {
     public function __construct()
     {
@@ -24,7 +24,7 @@ class Fungsional extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT fungsional.*, golongan.nama as nmgolongan, kategori.nama as nmkategori FROM fungsional 
+        $data['data'] = $this->db_active->query("SELECT fungsional.*, golongan.nama as nmgolongan, kategori.nama as nmkategori FROM fungsional 
         JOIN golongan ON golongan.id=fungsional.golongan_id
         JOIN kategori ON kategori.id=fungsional.kategori
         ")->result();
@@ -44,7 +44,7 @@ class Fungsional extends CI_Controller
         ];
 
         $this->model->tambah('fungsional', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Fungsional berhasil ditambahkan');
             redirect('fungsional');
         } else {
@@ -57,7 +57,7 @@ class Fungsional extends CI_Controller
     {
         $this->model->hapus('fungsional', 'fungsional_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Fungsional berhasil dihapus');
             redirect('fungsional');
         } else {
@@ -77,7 +77,7 @@ class Fungsional extends CI_Controller
         ];
 
         $this->model->edit('fungsional', 'fungsional_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Fungsional berhasil diupdate');
             redirect('fungsional');
         } else {

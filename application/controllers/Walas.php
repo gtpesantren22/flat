@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Walas extends CI_Controller
+class Walas extends MY_Controller
 {
     public function __construct()
     {
@@ -24,7 +24,7 @@ class Walas extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT walas.*, guru.nama as nmguru, satminkal.nama as lembaga FROM walas JOIN guru ON guru.guru_id=walas.guru_id JOIN satminkal ON satminkal.id=guru.satminkal ")->result();
+        $data['data'] = $this->db_active->query("SELECT walas.*, guru.nama as nmguru, satminkal.nama as lembaga FROM walas JOIN guru ON guru.guru_id=walas.guru_id JOIN satminkal ON satminkal.id=guru.satminkal ")->result();
 
         $data['guruOpt'] = $this->model->getData('guru')->result();
         $this->load->view('walas', $data);
@@ -38,7 +38,7 @@ class Walas extends CI_Controller
         ];
 
         $this->model->tambah('walas', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'walas berhasil ditambahkan');
             redirect('walas');
         } else {
@@ -51,7 +51,7 @@ class Walas extends CI_Controller
     {
         $this->model->hapus('walas', 'walas_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Walas berhasil dihapus');
             redirect('walas');
         } else {
@@ -69,7 +69,7 @@ class Walas extends CI_Controller
         ];
 
         $this->model->edit('walas', 'walas_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Walas berhasil diupdate');
             redirect('walas');
         } else {

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Perbandingan extends CI_Controller
+class Perbandingan extends MY_Controller
 {
     public function __construct()
     {
@@ -36,7 +36,7 @@ class Perbandingan extends CI_Controller
         $tahun = date('Y');
         $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
 
-        $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
+        $dataguru = $this->db_active->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
         $kirim = [];
         foreach ($dataguru as $row) {
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
@@ -48,7 +48,7 @@ class Perbandingan extends CI_Controller
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok ? $gapok->nominal : 0;
             } else {
-                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
+                $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
                 $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
@@ -62,7 +62,7 @@ class Perbandingan extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
             $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+            $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
 
             $kirim[] = [
                 'id' =>  $row->id,
@@ -96,7 +96,7 @@ class Perbandingan extends CI_Controller
         $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
         $this->Auth_model->log_activity($this->userID, 'Akses detail C: Perbandingan');
 
-        $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id WHERE a.guru_id = '$data->guru_id' ")->row();
+        $dataguru = $this->db_active->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id WHERE a.guru_id = '$data->guru_id' ")->row();
 
         $row = $dataguru;
         $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
@@ -110,7 +110,7 @@ class Perbandingan extends CI_Controller
             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $gapok = $gapok ? $gapok->nominal : 0;
         } else {
-            $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
+            $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
             $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
         }
 
@@ -124,7 +124,7 @@ class Perbandingan extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+        $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
 
         echo json_encode([
             'id' =>  $row->id,
@@ -159,7 +159,7 @@ class Perbandingan extends CI_Controller
         $cek = $this->model->getBy('penyesuaian', 'guru_id', $guru_id)->row();
         if ($cek) {
             $this->model->edit('penyesuaian', 'guru_id', $guru_id, ['sebelum' => $sebelum, 'sesudah' => $flat]);
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'Data berhasil disesuaikan');
                 redirect('perbandingan');
             } else {
@@ -168,7 +168,7 @@ class Perbandingan extends CI_Controller
             }
         } else {
             $this->model->tambah('penyesuaian', ['guru_id' => $guru_id, 'sebelum' => $sebelum, 'sesudah' => $flat]);
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'Data berhasil disesuaikan');
                 redirect('perbandingan');
             } else {

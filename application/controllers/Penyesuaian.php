@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Penyesuaian extends CI_Controller
+class Penyesuaian extends MY_Controller
 {
     public function __construct()
     {
@@ -35,7 +35,7 @@ class Penyesuaian extends CI_Controller
         $data['user'] = $this->Auth_model->current_user();
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Penyesuaian');
 
-        $dataGru = $this->db->query("SELECT * FROM guru WHERE sik = 'PTY' ")->result();
+        $dataGru = $this->db_active->query("SELECT * FROM guru WHERE sik = 'PTY' ")->result();
         $gajis = $this->model->getBy2('gaji', 'bulan', date('m'), 'tahun', date('Y'))->row();
         $dataKirim = [];
         foreach ($dataGru as $row) {
@@ -46,7 +46,7 @@ class Penyesuaian extends CI_Controller
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $row->golongan, 'masa_kerja', selisihTahun($row->tmt))->row();
                 $gapok = $gapok &&  !in_array($row->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
-                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
+                $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
                 $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
@@ -60,7 +60,7 @@ class Penyesuaian extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $row->guru_id)->row();
             $walas = $this->model->getBy('walas', 'guru_id', $row->guru_id)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $row->guru_id)->row();
-            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$row->guru_id' AND gaji_id = '$gajis->gaji_id' ")->row();
+            $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$row->guru_id' AND gaji_id = '$gajis->gaji_id' ")->row();
 
             $totalFlat =
                 ($gapok) +
@@ -90,7 +90,7 @@ class Penyesuaian extends CI_Controller
         $data['user'] = $this->Auth_model->current_user();
         $this->Auth_model->log_activity($this->userID, 'Sesuaikan data. C: Penyesuaian');
 
-        $dataGru = $this->db->query("SELECT * FROM guru WHERE sik = 'PTY' ")->result();
+        $dataGru = $this->db_active->query("SELECT * FROM guru WHERE sik = 'PTY' ")->result();
         $gajis = $this->model->getBy2('gaji', 'bulan', date('m'), 'tahun', date('Y'))->row();
 
         foreach ($dataGru as $row) {
@@ -101,7 +101,7 @@ class Penyesuaian extends CI_Controller
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $row->golongan, 'masa_kerja', selisihTahun($row->tmt))->row();
                 $gapok = $gapok &&  !in_array($row->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
-                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
+                $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$row->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
                 $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
@@ -115,7 +115,7 @@ class Penyesuaian extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $row->guru_id)->row();
             $walas = $this->model->getBy('walas', 'guru_id', $row->guru_id)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $row->guru_id)->row();
-            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$row->guru_id' AND gaji_id = '$gajis->gaji_id' ")->row();
+            $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$row->guru_id' AND gaji_id = '$gajis->gaji_id' ")->row();
 
             $totalFlat =
                 ($gapok) +
@@ -136,7 +136,7 @@ class Penyesuaian extends CI_Controller
                 $this->model->tambah('penyesuaian', $dataSave);
             }
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Proses penyesuaian berhasil');
             redirect('penyesuaian');
         } else {
@@ -152,7 +152,7 @@ class Penyesuaian extends CI_Controller
         $sik = $guru->sik;
         $this->Auth_model->log_activity($this->userID, 'Akses getGajis C: Penyesuaian');
 
-        $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
+        $hak = $this->db_active->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
 
         $bulanini = date('m');
         $tahunini = date('Y');
@@ -168,7 +168,7 @@ class Penyesuaian extends CI_Controller
                 if ($sik == 'PTY') {
                     $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
                 } else {
-                    // $query = $this->db->query("SELECT honor.*, guru.santri AS santri
+                    // $query = $this->db_active->query("SELECT honor.*, guru.santri AS santri
                     // CASE 
                     //     WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
                     //     ELSE SUM(kehadiran) * $this->honor_non
@@ -179,14 +179,14 @@ class Penyesuaian extends CI_Controller
                     // } else {
                     //     $isi = $query->santri == 'santri' ? $query->kehadiran * $this->honor_santri : $query->kehadiran * $this->honor_non;
                     // }
-                    $isi = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id")->row('nominal');
+                    $isi = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id")->row('nominal');
                 }
             } elseif ($hakhasil->payment == 'fungsional') {
                 $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row('nominal');
             } elseif ($hakhasil->payment == 'kinerja') {
                 $masa = selisihTahun($guru->tmt);
-                $besaran = $this->db->query("SELECT nominal FROM kinerja WHERE masa_kerja = $masa ")->row('nominal');
-                $hadir = $this->db->query("SELECT kehadiran FROM kehadiran JOIN guru ON guru.guru_id=kehadiran.guru_id WHERE kehadiran.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini'")->row('kehadiran');
+                $besaran = $this->db_active->query("SELECT nominal FROM kinerja WHERE masa_kerja = $masa ")->row('nominal');
+                $hadir = $this->db_active->query("SELECT kehadiran FROM kehadiran JOIN guru ON guru.guru_id=kehadiran.guru_id WHERE kehadiran.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini'")->row('kehadiran');
                 $isi = $besaran * $hadir;
             } elseif ($hakhasil->payment == 'struktural') {
                 $isi = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
@@ -224,7 +224,7 @@ class Penyesuaian extends CI_Controller
         $datas = $this->model->getBy('penyesuaian', 'penyesuaian_id', $id)->row();
         $guru_id =  $datas->guru_id;
         $guru = $this->model->getBy('guru', 'guru_id', $guru_id)->row();
-        $hak = $this->db->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
+        $hak = $this->db_active->query("SELECT a.*, b.adds FROM hak_setting a JOIN sik_setting b ON a.payment=b.col WHERE guru_id = '$guru_id' and payment != 'penyesuaian'");
         $bulanini = date('m');
         $tahunini = date('Y');
         $no = 1;
@@ -237,7 +237,7 @@ class Penyesuaian extends CI_Controller
                 if ($guru->sik == 'PTY') {
                     $isi = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
                 } else {
-                    // $query = $this->db->query("SELECT honor.*, guru.santri AS santri
+                    // $query = $this->db_active->query("SELECT honor.*, guru.santri AS santri
                     // CASE 
                     //     WHEN guru.santri = 'santri' THEN SUM(kehadiran) * $this->honor_santri
                     //     ELSE SUM(kehadiran) * $this->honor_non
@@ -248,14 +248,14 @@ class Penyesuaian extends CI_Controller
                     // } else {
                     //     $isi = $query->santri == 'santri' ? $query->kehadiran * $this->honor_santri : $query->kehadiran * $this->honor_non;
                     // }
-                    $isi = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id")->row('nominal');
+                    $isi = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini' GROUP BY honor.guru_id")->row('nominal');
                 }
             } elseif ($hakhasil->payment == 'fungsional') {
                 $isi = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
             } elseif ($hakhasil->payment == 'kinerja') {
                 $masa = selisihTahun($guru->tmt);
-                $besaran = $this->db->query("SELECT nominal FROM kinerja WHERE masa_kerja = $masa ")->row('nominal');
-                $hadir = $this->db->query("SELECT kehadiran FROM kehadiran JOIN guru ON guru.guru_id=kehadiran.guru_id WHERE kehadiran.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini'")->row('kehadiran');
+                $besaran = $this->db_active->query("SELECT nominal FROM kinerja WHERE masa_kerja = $masa ")->row('nominal');
+                $hadir = $this->db_active->query("SELECT kehadiran FROM kehadiran JOIN guru ON guru.guru_id=kehadiran.guru_id WHERE kehadiran.guru_id = '$guru->guru_id' AND bulan = $bulanini AND tahun = '$tahunini'")->row('kehadiran');
                 $isi = $besaran * $hadir;
             } elseif ($hakhasil->payment == 'struktural') {
                 $isi = $this->model->getBy3('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal, 'masa_kerja', selisihTahun($guru->tmt))->row('nominal');
@@ -302,7 +302,7 @@ class Penyesuaian extends CI_Controller
             redirect('penyesuaian');
         } else {
             $this->model->tambah('penyesuaian', $data);
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'penyesuaian berhasil ditambahkan');
                 redirect('penyesuaian');
             } else {
@@ -317,7 +317,7 @@ class Penyesuaian extends CI_Controller
         $this->Auth_model->log_activity($this->userID, 'Akses hapus data C: Penyesuaian');
         $this->model->hapus('penyesuaian', 'penyesuaian_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'penyesuaian berhasil dihapus');
             redirect('penyesuaian');
         } else {
@@ -336,7 +336,7 @@ class Penyesuaian extends CI_Controller
         ];
 
         $this->model->edit('penyesuaian', 'penyesuaian_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'penyesuaian berhasil diupdate');
             redirect('penyesuaian');
         } else {
@@ -352,7 +352,7 @@ class Penyesuaian extends CI_Controller
         foreach ($dataGuru as $row) {
             $this->model->hapus('penyesuaian', 'guru_id', $row->guru_id);
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Reset data berhasil');
             redirect('penyesuaian');
         } else {

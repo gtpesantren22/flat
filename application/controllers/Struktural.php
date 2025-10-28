@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Struktural extends CI_Controller
+class Struktural extends MY_Controller
 {
     public function __construct()
     {
@@ -25,7 +25,7 @@ class Struktural extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT struktural.*, satminkal.nama as nmsatminkal, jabatan.nama as nmjabatan FROM struktural 
+        $data['data'] = $this->db_active->query("SELECT struktural.*, satminkal.nama as nmsatminkal, jabatan.nama as nmjabatan FROM struktural 
         JOIN satminkal ON satminkal.id=struktural.satminkal_id
         JOIN jabatan ON jabatan.jabatan_id=struktural.jabatan_id
         ")->result();
@@ -57,7 +57,7 @@ class Struktural extends CI_Controller
                     $this->model->tambah('struktural', $data);
                 }
             }
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'struktural berhasil ditambahkan');
                 redirect('struktural');
             } else {
@@ -71,7 +71,7 @@ class Struktural extends CI_Controller
     {
         $this->model->hapus('struktural', 'struktural_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'struktural berhasil dihapus');
             redirect('struktural');
         } else {
@@ -92,7 +92,7 @@ class Struktural extends CI_Controller
         ];
 
         $this->model->edit('struktural', 'struktural_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'struktural berhasil diupdate');
             redirect('struktural');
         } else {

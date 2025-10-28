@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Tambahan extends CI_Controller
+class Tambahan extends MY_Controller
 {
     public function __construct()
     {
@@ -40,7 +40,7 @@ class Tambahan extends CI_Controller
         ];
 
         $this->model->tambah('tambahan', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Tunjangan tambahan berhasil ditambahkan');
             redirect('tambahan');
         } else {
@@ -60,7 +60,7 @@ class Tambahan extends CI_Controller
         ];
 
         $this->model->edit('tambahan', 'id_tambahan', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'tambahan berhasil diupdate');
             redirect('tambahan');
         } else {
@@ -75,7 +75,7 @@ class Tambahan extends CI_Controller
 
         $this->model->hapus('tambahan', 'id_tambahan', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'tambahan berhasil dihapus');
             redirect('tambahan');
         } else {
@@ -92,10 +92,10 @@ class Tambahan extends CI_Controller
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Tambahan');
 
         $datakirim = [];
-        $dataguru = $this->db->query("SELECT guru.guru_id, guru.nama, guru.sik, satminkal.nama as lembaga FROM guru JOIN satminkal ON guru.satminkal=satminkal.id ORDER BY nama ASC")->result();
+        $dataguru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, satminkal.nama as lembaga FROM guru JOIN satminkal ON guru.satminkal=satminkal.id ORDER BY nama ASC")->result();
         foreach ($dataguru as $key) {
             $tunjGuru = $this->model->getBy2('tambahan_detail', 'guru_id', $key->guru_id, 'gaji_id', $id)->result();
-            $total = $this->db->query("SELECT SUM(tambahan.nominal*jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$key->guru_id' AND gaji_id = '$id' ")->row();
+            $total = $this->db_active->query("SELECT SUM(tambahan.nominal*jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$key->guru_id' AND gaji_id = '$id' ")->row();
             $datakirim[] = [
                 'guru_id' => $key->guru_id,
                 'gaji_id' => $id,
@@ -129,9 +129,9 @@ class Tambahan extends CI_Controller
 
         $this->Auth_model->log_activity($this->userID, 'Akses add/delete Item tambahan guru C: Tambahan');
 
-        $total = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $total = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'success', 'total' => $total->total]);
         } else {
             echo json_encode(['status' => 'error']);

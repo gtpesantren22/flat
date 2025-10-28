@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Welcome extends CI_Controller
+class Welcome extends MY_Controller
 {
 	public function __construct()
 	{
@@ -41,8 +41,8 @@ class Welcome extends CI_Controller
 			$totalawal = 0;
 			$potongawal = 0;
 			if ($value->status == 'kunci') {
-				$datatotal = $this->db->query("SELECT SUM(fungsional) AS fungsional, SUM(kinerja) AS kinerja, SUM(bpjs) AS bpjs, SUM(struktural) AS struktural, SUM(penyesuaian) AS penyesuaian, SUM(walas) AS walas, SUM(gapok) AS gapok FROM gaji_detail WHERE gaji_id = '$value->gaji_id' ")->row();
-				$potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = ? AND tahun = ?", [
+				$datatotal = $this->db_active->query("SELECT SUM(fungsional) AS fungsional, SUM(kinerja) AS kinerja, SUM(bpjs) AS bpjs, SUM(struktural) AS struktural, SUM(penyesuaian) AS penyesuaian, SUM(walas) AS walas, SUM(gapok) AS gapok FROM gaji_detail WHERE gaji_id = '$value->gaji_id' ")->row();
+				$potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = ? AND tahun = ?", [
 					$value->bulan,
 					$value->tahun
 				])->row();
@@ -79,7 +79,7 @@ class Welcome extends CI_Controller
 						$penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
 
 						// Hitung total potongan
-						$potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
+						$potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
 							$row->guru_id,
 							$value->bulan,
 							$value->tahun
@@ -127,7 +127,7 @@ class Welcome extends CI_Controller
 
 	public function converImage()
 	{
-		$data['data'] = $this->db->query("SELECT * FROM gaji_detail WHERE gaji_id = 'e613c73e-308f-490a-8981-277f91fc1d20' LIMiT 1 ")->row();
+		$data['data'] = $this->db_active->query("SELECT * FROM gaji_detail WHERE gaji_id = 'e613c73e-308f-490a-8981-277f91fc1d20' LIMiT 1 ")->row();
 		$this->load->view('example_view', $data);
 	}
 

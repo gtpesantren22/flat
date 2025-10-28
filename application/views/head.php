@@ -327,7 +327,7 @@
                                 <input
                                     type="text"
                                     class="form-control border-0 shadow-none"
-                                    placeholder="Tapel 2024/2025"
+                                    placeholder="Databse Aktif : <?= $_SESSION['db_name'] ?? 'Tidak ada' ?>"
                                     aria-label="Search..." />
                             </div>
                         </div>

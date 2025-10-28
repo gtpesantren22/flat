@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Kinerja extends CI_Controller
+class Kinerja extends MY_Controller
 {
     public function __construct()
     {
@@ -42,7 +42,7 @@ class Kinerja extends CI_Controller
         ];
 
         $this->model->tambah('kinerja', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'kinerja berhasil ditambahkan');
             redirect('kinerja');
         } else {
@@ -57,7 +57,7 @@ class Kinerja extends CI_Controller
 
         $this->model->hapus('kinerja', 'kinerja_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'kinerja berhasil dihapus');
             redirect('kinerja');
         } else {
@@ -77,7 +77,7 @@ class Kinerja extends CI_Controller
         ];
 
         $this->model->edit('kinerja', 'kinerja_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'kinerja berhasil diupdate');
             redirect('kinerja');
         } else {
@@ -91,7 +91,7 @@ class Kinerja extends CI_Controller
 
         $bulan = $this->input->post('bulan', true);
         $tahun = $this->input->post('tahun', true);
-        $guru = $this->db->query("SELECT guru_id FROM guru JOIN kategori ON guru.kategori=kategori.id WHERE kategori.nama = 'Karyawan' ")->result();
+        $guru = $this->db_active->query("SELECT guru_id FROM guru JOIN kategori ON guru.kategori=kategori.id WHERE kategori.nama = 'Karyawan' ")->result();
         $at = date('Y-m-d H:i');
         $id = $this->uuid->v4('');
         foreach ($guru as $value) {
@@ -104,7 +104,7 @@ class Kinerja extends CI_Controller
             ];
             $this->model->tambah('kehadiran', $data);
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'kehadiran berhasil dibuat');
             redirect('kinerja');
         }
@@ -126,31 +126,31 @@ class Kinerja extends CI_Controller
         // $bulanIni = date('m');
         if ($id != 0) {
             $kehadiranID = $this->model->getBy('kehadiran', 'id', $id)->row('kehadiran_id');
-            $this->db->from('kehadiran');
-            $this->db->join('guru', 'kehadiran.guru_id=guru.guru_id');
-            $this->db->where('kehadiran_id', $kehadiranID);
-            $this->db->where('guru.kategori', 5);
+            $this->db_active->from('kehadiran');
+            $this->db_active->join('guru', 'kehadiran.guru_id=guru.guru_id');
+            $this->db_active->where('kehadiran_id', $kehadiranID);
+            $this->db_active->where('guru.kategori', 5);
         } else {
-            $kehadiranID = $this->db->query("SELECT kehadiran_id FROM kehadiran GROUP BY kehadiran_id ORDER BY created_at DESC LIMIT 1")->row('kehadiran_id');
-            $this->db->from('kehadiran');
-            $this->db->join('guru', 'kehadiran.guru_id=guru.guru_id');
-            $this->db->where('kehadiran.kehadiran_id', $kehadiranID);
-            $this->db->where('guru.kategori', 5);
+            $kehadiranID = $this->db_active->query("SELECT kehadiran_id FROM kehadiran GROUP BY kehadiran_id ORDER BY created_at DESC LIMIT 1")->row('kehadiran_id');
+            $this->db_active->from('kehadiran');
+            $this->db_active->join('guru', 'kehadiran.guru_id=guru.guru_id');
+            $this->db_active->where('kehadiran.kehadiran_id', $kehadiranID);
+            $this->db_active->where('guru.kategori', 5);
         }
 
 
         // Filter search
         if (!empty($search_value)) {
-            $this->db->group_start();
-            $this->db->like('guru.nama', $search_value);
-            $this->db->or_like('guru.santri', $search_value);
-            $this->db->group_end();
+            $this->db_active->group_start();
+            $this->db_active->like('guru.nama', $search_value);
+            $this->db_active->or_like('guru.santri', $search_value);
+            $this->db_active->group_end();
         }
 
-        $total_records = $this->db->count_all_results('', false); // Count total records without limit
+        $total_records = $this->db_active->count_all_results('', false); // Count total records without limit
 
-        $this->db->limit($length, $start);
-        $query = $this->db->get();
+        $this->db_active->limit($length, $start);
+        $query = $this->db_active->get();
         $data = [];
         $row_number = $start + 1;
 
@@ -198,7 +198,7 @@ class Kinerja extends CI_Controller
         $nomBesaran = $kinerja ? $kinerja->nominal : 0;
 
         $this->model->edit('kehadiran', 'id', $id, ['kehadiran' => $jam]);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'ok', 'besaran' => $nomBesaran]);
         } else {
             echo json_encode(['status' => 'gagal']);
@@ -211,7 +211,7 @@ class Kinerja extends CI_Controller
         $id = $this->input->post('id', true);
         $kehadiran = $this->model->getBy('kehadiran', 'id', $id)->row();
 
-        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM kehadiran WHERE kehadiran_id = '$kehadiran->kehadiran_id' AND kehadiran.guru_id = guru.guru_id) AND kategori = 5 ");
+        $guru = $this->db_active->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM kehadiran WHERE kehadiran_id = '$kehadiran->kehadiran_id' AND kehadiran.guru_id = guru.guru_id) AND kategori = 5 ");
         if ($guru->row()) {
             foreach ($guru->result() as $value) {
                 $data = [
@@ -223,7 +223,7 @@ class Kinerja extends CI_Controller
                 ];
                 $this->model->tambah('kehadiran', $data);
             }
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 echo json_encode(['status' => 'ok']);
             } else {
                 echo json_encode(['status' => 'gagal']);

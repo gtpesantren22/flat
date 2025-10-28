@@ -7,8 +7,7 @@ class Login extends CI_Controller
     {
         parent::__construct();
 
-        $this->load->model('Modeldata', 'model');
-        $this->load->model('Auth_model');
+        $this->load->model('Auth_model', 'model');
     }
 
     public function index()
@@ -26,7 +25,7 @@ class Login extends CI_Controller
         $this->form_validation->set_rules('username', 'Username', 'required');
         $this->form_validation->set_rules('password', 'Password', 'required');
 
-        // $rules = $this->Auth_model->rules();
+        // $rules = $this->model->rules();
         // $this->form_validation->set_rules($rules);
 
         if ($this->form_validation->run() == FALSE) {
@@ -37,8 +36,8 @@ class Login extends CI_Controller
         $password = $this->input->post('password', true);
         // $tujuan = $this->input->post('tujuan', true);
 
-        if ($this->Auth_model->login($username, $password)) {
-            // $user = $this->Auth_model->current_user();
+        if ($this->model->login($username, $password)) {
+            // $user = $this->model->current_user();
             $this->session->set_flashdata('ok', 'Login Berhasil');
 
             redirect('welcome');
@@ -110,7 +109,7 @@ class Login extends CI_Controller
     public function logout()
     {
         // $this->load->model('Auth_model');
-        if ($this->Auth_model->logout()) {
+        if ($this->model->logout()) {
             // $this->session->set_flashdata('ok', 'Anda Berhasil Keluar');
             redirect('login');
         }

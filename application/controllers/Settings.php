@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Settings extends CI_Controller
+class Settings extends MY_Controller
 {
     public function __construct()
     {
@@ -25,27 +25,28 @@ class Settings extends CI_Controller
         $data['sub'] = 'settings';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['sik'] = $this->model->getData('sik_setting')->result();
-        $data['hak'] = $this->db->query("SELECT guru.nama, hak_setting.id, satminkal.nama as lembaga, jabatan.nama as jabatan, guru.sik,
-    guru.guru_id,
-    MAX(CASE WHEN payment = 'gapok' THEN hak_setting.id END) AS gapok,
-    MAX(CASE WHEN payment = 'fungsional' THEN hak_setting.id END) AS fungsional,
-    MAX(CASE WHEN payment = 'kinerja' THEN hak_setting.id END) AS kinerja,
-    MAX(CASE WHEN payment = 'struktural' THEN hak_setting.id END) AS struktural,
-    MAX(CASE WHEN payment = 'bpjs' THEN hak_setting.id END) AS bpjs,
-    MAX(CASE WHEN payment = 'walas' THEN hak_setting.id END) AS walas,
-    MAX(CASE WHEN payment = 'penyesuaian' THEN hak_setting.id END) AS penyesuaian
-FROM hak_setting 
-JOIN guru ON guru.guru_id=hak_setting.guru_id
-JOIN satminkal ON guru.satminkal=satminkal.id
-JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
-GROUP BY 
-    hak_setting.guru_id")->result();
+        // $data['sik'] = $this->model->getData('sik_setting')->result();
+        //         $data['hak'] = $this->db->query("SELECT guru.nama, hak_setting.id, satminkal.nama as lembaga, jabatan.nama as jabatan, guru.sik,
+        //     guru.guru_id,
+        //     MAX(CASE WHEN payment = 'gapok' THEN hak_setting.id END) AS gapok,
+        //     MAX(CASE WHEN payment = 'fungsional' THEN hak_setting.id END) AS fungsional,
+        //     MAX(CASE WHEN payment = 'kinerja' THEN hak_setting.id END) AS kinerja,
+        //     MAX(CASE WHEN payment = 'struktural' THEN hak_setting.id END) AS struktural,
+        //     MAX(CASE WHEN payment = 'bpjs' THEN hak_setting.id END) AS bpjs,
+        //     MAX(CASE WHEN payment = 'walas' THEN hak_setting.id END) AS walas,
+        //     MAX(CASE WHEN payment = 'penyesuaian' THEN hak_setting.id END) AS penyesuaian
+        // FROM hak_setting 
+        // JOIN guru ON guru.guru_id=hak_setting.guru_id
+        // JOIN satminkal ON guru.satminkal=satminkal.id
+        // JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
+        // GROUP BY 
+        //     hak_setting.guru_id")->result();
 
         $data['honor_non'] = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
         $data['honor_santri'] = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $data['honor_rami'] = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
-        $data['honordata'] = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC")->result();
+        $data['honordata'] = $this->db_active->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC")->result();
+        $data['db_list'] = $this->db->query("SELECT * FROM list_db")->result();
 
         $this->Auth_model->log_activity($this->userID, 'Akses index Settings');
         $this->load->view('settings', $data);
@@ -60,7 +61,7 @@ GROUP BY
         $this->model->edit('sik_setting', 'id', $id, [$field => $value]);
         $this->Auth_model->log_activity($this->userID, 'Akses update SIK C: Settings');
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error']);
@@ -81,7 +82,7 @@ GROUP BY
 
         $this->Auth_model->log_activity($this->userID, 'Akses update Hak per-guru C: Settings');
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error']);
@@ -90,7 +91,7 @@ GROUP BY
 
     public function generateAllHak()
     {
-        $this->db->query("TRUNCATE hak_setting");
+        $this->db_active->query("TRUNCATE hak_setting");
         $this->Auth_model->log_activity($this->userID, 'Akses generate All hak C: Settings');
 
         $guru = $this->model->getData('guru')->result();
@@ -120,12 +121,12 @@ GROUP BY
         $ket = $this->input->post('ket');
         if ($ket === 'Y') {
             $this->model->hapus('hak_setting', 'payment', $payment);
-            $this->db->query("INSERT INTO hak_setting(guru_id, payment) SELECT guru_id, '$payment' FROM hak_setting WHERE guru_id IS NOT NULL GROUP BY guru_id");
+            $this->db_active->query("INSERT INTO hak_setting(guru_id, payment) SELECT guru_id, '$payment' FROM hak_setting WHERE guru_id IS NOT NULL GROUP BY guru_id");
         } else {
             $this->model->hapus('hak_setting', 'payment', $payment);
         }
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'settings berhasil diupdate');
             redirect('settings');
         } else {
@@ -148,7 +149,7 @@ GROUP BY
         $this->model->edit('settings', 'nama', 'honor_santri', ['isi' => $honor_santri]);
         $this->model->edit('settings', 'nama', 'honor_rami', ['isi' => $honor_rami]);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             // $this->session->set_flashdata('ok', 'settings nominal selesai diupdate');
             redirect('honor/updateNominal/' . $honor_id);
         } else {
@@ -191,7 +192,7 @@ GROUP BY
             ];
             $this->model->tambah('user', $data);
 
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'User berhasil ditambahkan');
                 redirect('settings/user');
             } else {
@@ -222,7 +223,7 @@ GROUP BY
             ];
             $this->model->edit('user', 'id_user', $id, $data);
 
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'User berhasil diperbarui');
                 redirect('settings/user');
             } else {
@@ -236,7 +237,7 @@ GROUP BY
     {
         $this->model->hapus('user', 'id_user', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'User berhasil dihapus');
             redirect('settings/user');
         } else {
@@ -277,10 +278,10 @@ GROUP BY
             ];
 
             if ($exists) {
-                $this->db->where('id', $item['lembaga_id'])
+                $this->db_active->where('id', $item['lembaga_id'])
                     ->update('satminkal', ['nama' => $item['nama']]);
             } else {
-                $this->db->insert('satminkal', $data);
+                $this->db_active->insert('satminkal', $data);
             }
 
             $saved++;
@@ -313,10 +314,10 @@ GROUP BY
             ];
 
             if ($exists) {
-                $this->db->where('id', $item['jenis_golongan_id'])
+                $this->db_active->where('id', $item['jenis_golongan_id'])
                     ->update('golongan', ['nama' => $item['nama']]);
             } else {
-                $this->db->insert('golongan', $data);
+                $this->db_active->insert('golongan', $data);
             }
 
             $saved++;
@@ -349,10 +350,10 @@ GROUP BY
             ];
 
             if ($exists) {
-                $this->db->where('jabatan_id', $item['jenis_jabatan_id'])
+                $this->db_active->where('jabatan_id', $item['jenis_jabatan_id'])
                     ->update('jabatan', ['nama' => $item['nama']]);
             } else {
-                $this->db->insert('jabatan', $data);
+                $this->db_active->insert('jabatan', $data);
             }
 
             $saved++;
@@ -386,10 +387,10 @@ GROUP BY
             ];
 
             if ($exists) {
-                $this->db->where('jabatan_id', $item['ptk_id'])
+                $this->db_active->where('jabatan_id', $item['ptk_id'])
                     ->update('jabatan', ['nama' => $item['nama']]);
             } else {
-                $this->db->insert('jabatan', $data);
+                $this->db_active->insert('jabatan', $data);
             }
 
             $saved++;
@@ -400,5 +401,25 @@ GROUP BY
             'total'  => count($items),
             'saved'  => $saved
         ]);
+    }
+
+    public function setDb()
+    {
+        $db_id = $this->input->post('db_id', TRUE);
+        $dbhasil = $this->db->query("SELECT * FROM list_db WHERE id = $db_id ")->row();
+
+        $this->db->update('list_db', ['aktif' => 0]);
+        if ($this->db->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'Pindah Database berhasi');
+            $this->db->where('id', $db_id);
+            $this->db->update('list_db', ['aktif' => 1]);
+
+            $this->session->set_userdata('db_selected', $dbhasil->db_name);
+            $this->session->set_userdata('db_name', $dbhasil->name);
+            redirect('settings');
+        } else {
+            $this->session->set_flashdata('error', 'Pindah Database gagal');
+            redirect('settings');
+        }
     }
 }

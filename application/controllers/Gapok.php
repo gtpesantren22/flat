@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Gapok extends CI_Controller
+class Gapok extends MY_Controller
 {
     public function __construct()
     {
@@ -23,7 +23,7 @@ class Gapok extends CI_Controller
         $data['judul'] = 'Gaji Pokok';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT gapok.*, ijazah.nama as nmijazah, golongan.nama as nmgolongan FROM gapok 
+        $data['data'] = $this->db_active->query("SELECT gapok.*, ijazah.nama as nmijazah, golongan.nama as nmgolongan FROM gapok 
         JOIN ijazah ON ijazah.id=gapok.ijazah_id
         JOIN golongan ON golongan.id=gapok.golongan_id
         ")->result();
@@ -43,7 +43,7 @@ class Gapok extends CI_Controller
         ];
 
         $this->model->tambah('gapok', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Gapok berhasil ditambahkan');
             redirect('gapok');
         } else {
@@ -56,7 +56,7 @@ class Gapok extends CI_Controller
     {
         $this->model->hapus('gapok', 'gapok_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Gapok berhasil dihapus');
             redirect('gapok');
         } else {
@@ -76,7 +76,7 @@ class Gapok extends CI_Controller
         ];
 
         $this->model->edit('gapok', 'gapok_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Gapok berhasil diupdate');
             redirect('gapok');
         } else {

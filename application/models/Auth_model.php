@@ -26,6 +26,7 @@ class Auth_model extends CI_Model
         $this->db->where('username', $username);
         $query = $this->db->get($this->_table);
         $user = $query->row();
+        $db_act = $this->db->query("SELECT * FROM list_db WHERE aktif = 1 ")->row();
 
         // cek apakah user sudah terdaftar?
         if (!$user) {
@@ -44,6 +45,7 @@ class Auth_model extends CI_Model
         $this->log_activity($user->id_user, 'User logged in');
         // bikin session
         $this->session->set_userdata([self::SESSION_KEY => $user->id_user]);
+        $this->session->set_userdata(['db_selected' => $db_act->database, 'db_name' => $db_act->name]);
         // $this->_update_last_login($user->id_user);
 
         return $this->session->has_userdata(self::SESSION_KEY);
@@ -64,6 +66,8 @@ class Auth_model extends CI_Model
     {
         $this->log_activity($this->session->userdata(self::SESSION_KEY), 'User Logout');
         $this->session->unset_userdata(self::SESSION_KEY);
+        $this->session->unset_userdata('db_selected');
+        $this->session->unset_userdata('db_name');
         return !$this->session->has_userdata(self::SESSION_KEY);
     }
 
@@ -95,5 +99,11 @@ class Auth_model extends CI_Model
             'activity' => $activity
         );
         $this->db->insert('activity_logs', $data);
+    }
+
+    public function getBy($table, $where, $dtwhere)
+    {
+        $this->db->where($where, $dtwhere);
+        return $this->db->get($table);
     }
 }

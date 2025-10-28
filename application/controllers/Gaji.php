@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class Gaji extends CI_Controller
+class Gaji extends MY_Controller
 {
     public function __construct()
     {
@@ -51,8 +51,8 @@ class Gaji extends CI_Controller
                 $totalawal = 0;
                 $potongawal = 0;
 
-                $total = $this->db->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
-                $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = '$value->bulan' AND tahun = '$value->tahun'")->row();
+                $total = $this->db_active->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
+                $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = '$value->bulan' AND tahun = '$value->tahun'")->row();
                 $datakirim[] = [
                     'gaji_id' => $value->gaji_id,  // 1
                     'status' => $value->status,  // 1
@@ -84,7 +84,7 @@ class Gaji extends CI_Controller
                             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                             $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
                         } else {
-                            $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row();
+                            $gapok = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row();
                             $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok->nominal : 0;
                         }
 
@@ -99,10 +99,10 @@ class Gaji extends CI_Controller
                         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
                         $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
                         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-                        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$value->gaji_id' ")->row();
+                        $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$value->gaji_id' ")->row();
 
                         // Hitung total potongan
-                        $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
+                        $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
                             $row->guru_id,
                             $value->bulan,
                             $value->tahun
@@ -170,7 +170,7 @@ class Gaji extends CI_Controller
 
         $this->model->tambah('gaji', ['gaji_id' => $id, 'bulan' => $bulan, 'tahun' => $tahun, 'tapel' => $this->tahun, 'created_at' => date('Y-m-d H:i:s')]);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Gaji berhasil ditambahkan');
             redirect('gaji');
         } else {
@@ -193,7 +193,7 @@ class Gaji extends CI_Controller
             $this->session->set_flashdata('error', 'Gaji sudah digenerate');
             redirect('gaji');
         } else {
-            $guru = $this->db->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan, kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
+            $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan, kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
         LEFT JOIN satminkal ON guru.satminkal=satminkal.id
         LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
         LEFT JOIN ijazah ON guru.ijazah=ijazah.id
@@ -219,7 +219,7 @@ class Gaji extends CI_Controller
                 ];
                 $this->model->tambah('gaji_detail', $data);
             }
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'Gaji berhasil di generate');
                 redirect('gaji/detail/' . $id);
             } else {
@@ -240,7 +240,7 @@ class Gaji extends CI_Controller
             die();
         }
         $this->model->hapus('gaji_detail', 'gaji_id', $id);
-        $guru = $this->db->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
+        $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
         LEFT JOIN satminkal ON guru.satminkal=satminkal.id
         LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
         LEFT JOIN ijazah ON guru.ijazah=ijazah.id
@@ -266,7 +266,7 @@ class Gaji extends CI_Controller
             ];
             $this->model->tambah('gaji_detail', $data);
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Gaji berhasil di generate');
             redirect('gaji/detail/' . $id);
         } else {
@@ -288,29 +288,29 @@ class Gaji extends CI_Controller
         $start = $start >= 0 ? $start : 0;
         // $bulanIni = date('m');
 
-        $this->db->from('gaji_detail');
-        $this->db->where('gaji_id', $id);
+        $this->db_active->from('gaji_detail');
+        $this->db_active->where('gaji_id', $id);
 
         // Filter search
         if (!empty($search_value)) {
-            $this->db->group_start();
-            $this->db->like('nama', $search_value);
-            $this->db->or_like('satminkal', $search_value);
-            $this->db->or_like('sik', $search_value);
-            $this->db->or_like('jabatan', $search_value);
-            $this->db->group_end();
+            $this->db_active->group_start();
+            $this->db_active->like('nama', $search_value);
+            $this->db_active->or_like('satminkal', $search_value);
+            $this->db_active->or_like('sik', $search_value);
+            $this->db_active->or_like('jabatan', $search_value);
+            $this->db_active->group_end();
         }
 
-        $total_records = $this->db->count_all_results('', false); // Count total records without limit
+        $total_records = $this->db_active->count_all_results('', false); // Count total records without limit
 
-        $this->db->limit($length, $start);
-        $query = $this->db->get();
+        $this->db_active->limit($length, $start);
+        $query = $this->db_active->get();
         $data = [];
         $row_number = $start + 1;
         $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
 
         foreach ($query->result() as $row) {
-            $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
+            $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
 
@@ -318,7 +318,7 @@ class Gaji extends CI_Controller
                 $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
             } else {
-                $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
+                $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
                 $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
@@ -332,7 +332,7 @@ class Gaji extends CI_Controller
             $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
             $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-            $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
+            $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
 
             $data[] = [
                 $row_number++, // 0
@@ -394,27 +394,27 @@ class Gaji extends CI_Controller
         $start = $start >= 0 ? $start : 0;
         // $bulanIni = date('m');
 
-        $this->db->from('gaji_detail');
-        $this->db->where('gaji_id', $id);
+        $this->db_active->from('gaji_detail');
+        $this->db_active->where('gaji_id', $id);
 
         // Filter search
         if (!empty($search_value)) {
-            $this->db->group_start();
-            $this->db->like('nama', $search_value);
-            $this->db->or_like('satminkal', $search_value);
-            $this->db->group_end();
+            $this->db_active->group_start();
+            $this->db_active->like('nama', $search_value);
+            $this->db_active->or_like('satminkal', $search_value);
+            $this->db_active->group_end();
         }
 
-        $total_records = $this->db->count_all_results('', false); // Count total records without limit
+        $total_records = $this->db_active->count_all_results('', false); // Count total records without limit
 
-        $this->db->limit($length, $start);
-        $query = $this->db->get();
+        $this->db_active->limit($length, $start);
+        $query = $this->db_active->get();
         $data = [];
         $row_number = $start + 1;
 
         $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
         foreach ($query->result() as $row) {
-            $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
+            $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
             $data[] = [
                 $row_number++, // 0
                 $row->gaji_id,  // 1
@@ -489,7 +489,7 @@ class Gaji extends CI_Controller
                 $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
                 $gapok = $gapok1 ? $gapok1->nominal : 0;
             } else {
-                $gapok = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = '$thnpak' GROUP BY honor.guru_id")->row('nominal');
+                $gapok = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $blnpak AND tahun = '$thnpak' GROUP BY honor.guru_id")->row('nominal');
                 $gapok = $guru->kriteria != 'Karyawan' ? $gapok : 0;
             }
 
@@ -518,7 +518,7 @@ class Gaji extends CI_Controller
             // var_dump($data);
             // echo '</pre>';
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->model->edit('gaji', 'gaji_id', $id, ['status' => 'kunci']);
             $this->session->set_flashdata('ok', 'Data Gaji berhasil dikunci');
             redirect('gaji/detail/' . $id);
@@ -543,7 +543,7 @@ class Gaji extends CI_Controller
             }
             $this->model->hapus('gaji', 'gaji_id', $id);
 
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'gaji berhasil dihapus');
                 redirect('gaji');
             } else {
@@ -587,7 +587,7 @@ class Gaji extends CI_Controller
             ]
         ];
 
-        $jmlsatminkal = $this->db->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' GROUP BY satminkal")->result();
+        $jmlsatminkal = $this->db_active->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' GROUP BY satminkal")->result();
         $sheetIndex = 0;
         foreach ($jmlsatminkal as $satminkal) {
             if ($sheetIndex > 0) {
@@ -595,7 +595,7 @@ class Gaji extends CI_Controller
             }
             $spreadsheet->setActiveSheetIndex($sheetIndex);
             $sheet = $spreadsheet->getActiveSheet();
-            $datagaji2 =  $this->db->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' AND satminkal = '$satminkal->satminkal' ORDER BY nama ASC ")->result();
+            $datagaji2 =  $this->db_active->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' AND satminkal = '$satminkal->satminkal' ORDER BY nama ASC ")->result();
 
             $sheet->setCellValue('A1', "DAFTAR GAJI GURU & KARYAWAN"); // Set kolom A1 dengan tulisan "DATA SISWA"
             $sheet->mergeCells('A1:AA1'); // Set Merge Cell pada kolom A1 sampai E1
@@ -732,10 +732,10 @@ class Gaji extends CI_Controller
             $numrow = 6; // Set baris pertama untuk isi tabel adalah baris ke 4
             foreach ($datagaji2 as $hasil) { // Lakukan looping pada variabel siswa
                 $totalgaji = $hasil->gapok + $hasil->fungsional + $hasil->kinerja + $hasil->bpjs + $hasil->struktural + $hasil->walas + $hasil->penyesuaian;
-                $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
-                $jam = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
-                $hadir = $this->db->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
-                $sebelum = $this->db->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
+                $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+                $jam = $this->db_active->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+                $hadir = $this->db_active->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+                $sebelum = $this->db_active->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
 
                 $sheet->setCellValue('A' . $numrow, $no);
                 $sheet->setCellValue('B' . $numrow, bulan($datagaji->bulan));
@@ -866,7 +866,7 @@ class Gaji extends CI_Controller
 
 
         $sheet = $spreadsheet->getActiveSheet();
-        $datagaji2 =  $this->db->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' ORDER BY satminkal ASC, nama ASC ")->result();
+        $datagaji2 =  $this->db_active->query("SELECT * FROM gaji_detail WHERE gaji_id = '$id' ORDER BY satminkal ASC, nama ASC ")->result();
 
         $sheet->setCellValue('A1', "DAFTAR GAJI GURU & KARYAWAN"); // Set kolom A1 dengan tulisan "DATA SISWA"
         $sheet->mergeCells('A1:AA1'); // Set Merge Cell pada kolom A1 sampai E1
@@ -1005,10 +1005,10 @@ class Gaji extends CI_Controller
         $numrow = 6; // Set baris pertama untuk isi tabel adalah baris ke 4
         foreach ($datagaji2 as $hasil) { // Lakukan looping pada variabel siswa
             $totalgaji = $hasil->gapok + $hasil->fungsional + $hasil->kinerja + $hasil->bpjs + $hasil->struktural + $hasil->walas + $hasil->penyesuaian + $hasil->tambahan;
-            $potong = $this->db->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
-            $jam = $this->db->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
-            $hadir = $this->db->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
-            $sebelum = $this->db->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
+            $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+            $jam = $this->db_active->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+            $hadir = $this->db_active->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
+            $sebelum = $this->db_active->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
 
             $sheet->setCellValue('A' . $numrow, $no);
             $sheet->setCellValue('B' . $numrow, bulan($datagaji->bulan));
@@ -1154,8 +1154,8 @@ class Gaji extends CI_Controller
 
 
         $sheet = $spreadsheet->getActiveSheet();
-        $detail =  $this->db->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != ''  ")->row();
-        $jenispotongan =  $this->db->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
+        $detail =  $this->db_active->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != ''  ")->row();
+        $jenispotongan =  $this->db_active->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
         $jumlahJenisPotongan = count($jenispotongan);
 
         $sheet->setCellValue('A1', "DAFTAR POTONGAN GURU & KARYAWAN"); // Set kolom A1 dengan tulisan "DATA SISWA"
@@ -1218,7 +1218,7 @@ class Gaji extends CI_Controller
 
         $no = 1; // Untuk penomoran tabel, di awal set dengan 1
         $numrow = 6; // Set baris pertama untuk isi tabel adalah baris ke 4
-        $datas = $this->db->query("SELECT potongan.*, guru.nama, satminkal.nama as lembaga FROM potongan JOIN guru ON potongan.guru_id=guru.guru_id JOIN satminkal ON guru.satminkal=satminkal.id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ORDER BY satminkal.nama ASC, guru.nama ASC")->result();
+        $datas = $this->db_active->query("SELECT potongan.*, guru.nama, satminkal.nama as lembaga FROM potongan JOIN guru ON potongan.guru_id=guru.guru_id JOIN satminkal ON guru.satminkal=satminkal.id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ORDER BY satminkal.nama ASC, guru.nama ASC")->result();
         foreach ($datas as $hasil) { // Lakukan looping pada variabel siswa
 
 
@@ -1228,7 +1228,7 @@ class Gaji extends CI_Controller
             $sheet->setCellValue('D' . $numrow, $hasil->lembaga)->getStyle('D' . $numrow)->applyFromArray($style_row);
             $columnLetter2 = 'E'; // Mulai dari kolom D
             foreach ($jenispotongan as $header) {
-                $nomPotongan = $this->db->query("SELECT nominal FROM potongan WHERE potongan_id = '$id' AND guru_id = '$hasil->guru_id' AND ket = '$header->ket' ")->row();
+                $nomPotongan = $this->db_active->query("SELECT nominal FROM potongan WHERE potongan_id = '$id' AND guru_id = '$hasil->guru_id' AND ket = '$header->ket' ")->row();
                 $sheet->setCellValue($columnLetter2 . $numrow, $nomPotongan ? $nomPotongan->nominal : 0)->getStyle($columnLetter2 . $numrow)->applyFromArray($style_row);
                 $columnLetter2++; // Increment kolom (D -> E -> F -> dst.)
             }
@@ -1283,7 +1283,7 @@ class Gaji extends CI_Controller
             $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
         } else {
-            $gapok = $this->db->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
+            $gapok = $this->db_active->query("SELECT SUM(kehadiran) AS kehadiran FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = $gajis->tahun")->row();
             $gapok = $gapok ? ($gapok->kehadiran) : 0;
             $gapok = $guru->santri == 'santri' &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }
@@ -1298,7 +1298,7 @@ class Gaji extends CI_Controller
         $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
         $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
 
         echo json_encode([
             'guru_id' => $guru_id, // 9
@@ -1385,7 +1385,7 @@ class Gaji extends CI_Controller
             $gapok1 = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
             $gapok = $gapok1 ? $gapok1->nominal : 0;
         } else {
-            $gapok1 = $this->db->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajidtl->bulan AND tahun = '$gajidtl->tahun' GROUP BY honor.guru_id")->row();
+            $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajidtl->bulan AND tahun = '$gajidtl->tahun' GROUP BY honor.guru_id")->row();
             $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
         }
 
@@ -1400,7 +1400,7 @@ class Gaji extends CI_Controller
         $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
 
-        $tambahan = $this->db->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
+        $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
         $data_tambahan = $this->model->getBy('tambahan_detail',  'guru_id', $guru_id, 'gaji_id', $gaji_id)->result();
 
 
@@ -1423,7 +1423,7 @@ class Gaji extends CI_Controller
 
         $this->model->edit2('gaji_detail', 'guru_id', $guru_id, 'gaji_id', $gaji_id, $data);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error']);
@@ -1436,7 +1436,7 @@ class Gaji extends CI_Controller
         $gaji_id = $this->input->post('gaji_id', true);
         $this->model->edit('gaji', 'gaji_id', $gaji_id, ['status' => 'kunci']);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status', 'success']);
         } else {
             echo json_encode(['status', 'error']);

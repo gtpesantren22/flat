@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Golongan extends CI_Controller
+class Golongan extends MY_Controller
 {
     public function __construct()
     {
@@ -35,7 +35,7 @@ class Golongan extends CI_Controller
         ];
 
         $this->model->tambah('golongan', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Golongan berhasil ditambahkan');
             redirect('golongan');
         } else {
@@ -48,7 +48,7 @@ class Golongan extends CI_Controller
     {
         $this->model->hapus('golongan', 'id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Golongan berhasil dihapus');
             redirect('golongan');
         } else {
@@ -65,7 +65,7 @@ class Golongan extends CI_Controller
         ];
 
         $this->model->edit('golongan', 'id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Golongan berhasil diupdate');
             redirect('golongan');
         } else {

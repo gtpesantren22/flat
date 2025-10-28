@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Honor extends CI_Controller
+class Honor extends MY_Controller
 {
     public function __construct()
     {
@@ -28,11 +28,11 @@ class Honor extends CI_Controller
         $data['user'] = $this->Auth_model->current_user();
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Honor');
 
-        $honordata = $this->db->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC");
+        $honordata = $this->db_active->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC");
         $data['honorGroup'] = $honordata->result();
         $data['honorId'] = $honordata->row('honor_id');
         $data['honor'] = $this->model->getData('sik_setting')->result();
-        $data['nominal'] = $this->db->query("SELECT * FROM settings WHERE nama LIKE 'honor_%' ")->result();
+        $data['nominal'] = $this->db_active->query("SELECT * FROM settings WHERE nama LIKE 'honor_%' ")->result();
 
         $this->load->view('honor', $data);
     }
@@ -46,7 +46,7 @@ class Honor extends CI_Controller
 
         $this->model->edit('sik_setting', 'id', $id, [$field => $value]);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'success']);
         } else {
             echo json_encode(['status' => 'error']);
@@ -72,7 +72,7 @@ class Honor extends CI_Controller
             ];
             $this->model->tambah('honor', $data);
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Honor berhasil dibuat');
             redirect('honor');
         }
@@ -93,37 +93,37 @@ class Honor extends CI_Controller
         // $bulanIni = date('m');
         if ($id != 0) {
             $honorID = $this->model->getBy('honor', 'id', $id)->row('honor_id');
-            $this->db->from('honor');
-            $this->db->join('guru', 'honor.guru_id=guru.guru_id');
-            $this->db->where('honor_id', $honorID);
-            $this->db->order_by('guru.nama', 'ASC');
+            $this->db_active->from('honor');
+            $this->db_active->join('guru', 'honor.guru_id=guru.guru_id');
+            $this->db_active->where('honor_id', $honorID);
+            $this->db_active->order_by('guru.nama', 'ASC');
         } else {
-            $honorID = $this->db->query("SELECT honor_id FROM honor GROUP BY honor_id ORDER BY created_at DESC LIMIT 1")->row('honor_id');
-            $this->db->from('honor');
-            $this->db->join('guru', 'honor.guru_id=guru.guru_id');
-            $this->db->where('honor.honor_id', $honorID);
-            $this->db->order_by('guru.nama', 'ASC');
+            $honorID = $this->db_active->query("SELECT honor_id FROM honor GROUP BY honor_id ORDER BY created_at DESC LIMIT 1")->row('honor_id');
+            $this->db_active->from('honor');
+            $this->db_active->join('guru', 'honor.guru_id=guru.guru_id');
+            $this->db_active->where('honor.honor_id', $honorID);
+            $this->db_active->order_by('guru.nama', 'ASC');
         }
 
         // Filter search
         if (!empty($search_value)) {
-            $this->db->group_start();
-            $this->db->like('guru.nama', $search_value);
-            $this->db->or_like('guru.santri', $search_value);
-            $this->db->group_end();
+            $this->db_active->group_start();
+            $this->db_active->like('guru.nama', $search_value);
+            $this->db_active->or_like('guru.santri', $search_value);
+            $this->db_active->group_end();
         }
 
-        $total_records = $this->db->count_all_results('', false); // Count total records without limit
+        $total_records = $this->db_active->count_all_results('', false); // Count total records without limit
 
-        $this->db->limit($length, $start);
-        $query = $this->db->get();
+        $this->db_active->limit($length, $start);
+        $query = $this->db_active->get();
         $data = [];
         $row_number = $start + 1;
 
         foreach ($query->result() as $row) {
             $gruru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $lembaga = $this->model->getBy('satminkal', 'id', $row->lembaga)->row();
-            // $total = $this->db->query("SELECT kehadiran FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
+            // $total = $this->db_active->query("SELECT kehadiran FROM honor WHERE guru_id = '$row->guru_id' AND honor_id = '$row->honor_id' ")->row();
             // $hasil_hadir = $row->kehadiran;
             // if ($row->lembaga == 8 || $row->lembaga == 9) {
             //     $honorGuru = $row->kehadiran * $this->honor_rami;
@@ -175,7 +175,7 @@ class Honor extends CI_Controller
         }
 
         $this->model->edit('honor', 'id', $id, ['kehadiran' => $jam, 'nominal' => $nominal]);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'ok', 'besaran' => $nominal]);
         } else {
             echo json_encode(['status' => 'gagal']);
@@ -189,7 +189,7 @@ class Honor extends CI_Controller
         $id = $this->input->post('id', true);
         $honor = $this->model->getBy('honor', 'id', $id)->row();
 
-        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM honor WHERE honor_id = '$honor->honor_id' AND honor.guru_id = guru.guru_id) AND sik = 'PTTY' ");
+        $guru = $this->db_active->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM honor WHERE honor_id = '$honor->honor_id' AND honor.guru_id = guru.guru_id) AND sik = 'PTTY' ");
         if ($guru->row()) {
             foreach ($guru->result() as $value) {
                 $data = [
@@ -201,7 +201,7 @@ class Honor extends CI_Controller
                 ];
                 $this->model->tambah('honor', $data);
             }
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 echo json_encode(['status' => 'ok']);
             } else {
                 echo json_encode(['status' => 'gagal']);
@@ -226,7 +226,7 @@ class Honor extends CI_Controller
             $this->model->edit('honor', 'id', $key->id, ['nominal' => $nominal]);
         }
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Update nominal selesai');
             redirect('honor');
         } else {

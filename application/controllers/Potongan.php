@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Potongan extends CI_Controller
+class Potongan extends MY_Controller
 {
     public function __construct()
     {
@@ -28,7 +28,7 @@ class Potongan extends CI_Controller
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT * FROM potongan GROUP BY potongan_id ORDER BY tahun DESC, bulan DESC")->result();
+        $data['data'] = $this->db_active->query("SELECT * FROM potongan GROUP BY potongan_id ORDER BY tahun DESC, bulan DESC")->result();
 
         $this->load->view('potongan', $data);
     }
@@ -39,7 +39,7 @@ class Potongan extends CI_Controller
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
 
-        $dataguru = $this->db->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
+        $dataguru = $this->db_active->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
         $kirim = [];
         foreach ($dataguru as $row) {
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
@@ -104,7 +104,7 @@ class Potongan extends CI_Controller
             ];
             $this->model->tambah('potongan', $data);
         }
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Potongan berhasil di generate');
             redirect('potongan');
         } else {
@@ -119,12 +119,12 @@ class Potongan extends CI_Controller
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT potongan.*, guru.nama, SUM(potongan.nominal) as total FROM potongan JOIN guru  ON guru.guru_id=potongan.guru_id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ")->result();
+        $data['data'] = $this->db_active->query("SELECT potongan.*, guru.nama, SUM(potongan.nominal) as total FROM potongan JOIN guru  ON guru.guru_id=potongan.guru_id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ")->result();
 
-        $jenispotongan =  $this->db->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
+        $jenispotongan =  $this->db_active->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
         $datapotongan = [];
         foreach ($jenispotongan as $jenispotonganhasil) {
-            $nomPotongan = $this->db->query("SELECT SUM(nominal) AS nominal FROM potongan WHERE potongan_id = '$id' AND ket = '$jenispotonganhasil->ket' ")->row();
+            $nomPotongan = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM potongan WHERE potongan_id = '$id' AND ket = '$jenispotonganhasil->ket' ")->row();
             $datapotongan[] = [
                 'ket' => $jenispotonganhasil->ket,
                 'nominal' => $nomPotongan ? $nomPotongan->nominal : 0,
@@ -181,7 +181,7 @@ class Potongan extends CI_Controller
 
 
         $this->model->edit('potongan', 'id', $id, [$varname => $valueOk]);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $data = $this->model->getBy('potongan', 'id', $id)->row();
             $hasil = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->result();
             echo json_encode(['status' => 'success', 'data' => $hasil]);
@@ -197,7 +197,7 @@ class Potongan extends CI_Controller
         $data = $this->model->getBy('potongan', 'id', $id)->row();
 
         $this->model->hapus('potongan', 'id', $id);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $hasil = $this->model->getBy2('potongan', 'guru_id', $data->guru_id, 'potongan_id', $data->potongan_id)->result();
             echo json_encode(['status' => 'success', 'data' => $hasil]);
         } else {
@@ -209,7 +209,7 @@ class Potongan extends CI_Controller
     {
         $potongan = $this->model->getBy('potongan', 'potongan_id', $id)->row();
 
-        $guru = $this->db->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM potongan WHERE potongan_id = '$id' AND potongan.guru_id = guru.guru_id) ");
+        $guru = $this->db_active->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM potongan WHERE potongan_id = '$id' AND potongan.guru_id = guru.guru_id) ");
         if ($guru->row()) {
             foreach ($guru->result() as $value) {
                 $data = [
@@ -222,7 +222,7 @@ class Potongan extends CI_Controller
                 ];
                 $this->model->tambah('potongan', $data);
             }
-            if ($this->db->affected_rows() > 0) {
+            if ($this->db_active->affected_rows() > 0) {
                 $this->session->set_flashdata('ok', 'Data potongan diperbarui');
                 redirect('potongan/detail/' . $id);
             } else {

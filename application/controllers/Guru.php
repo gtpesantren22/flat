@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Guru extends CI_Controller
+class Guru extends MY_Controller
 {
     public function __construct()
     {
@@ -23,7 +23,7 @@ class Guru extends CI_Controller
         $data['judul'] = 'Guru';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT guru.*, satminkal.nama as nmlembaga, ijazah.nama as nmijazah, golongan.nama as nmgolongan, jabatan.nama as nmjabatan, kategori.nama as nmkategori FROM guru 
+        $data['data'] = $this->db_active->query("SELECT guru.*, satminkal.nama as nmlembaga, ijazah.nama as nmijazah, golongan.nama as nmgolongan, jabatan.nama as nmjabatan, kategori.nama as nmkategori FROM guru 
         LEFT JOIN satminkal ON satminkal.id=guru.satminkal
         LEFT JOIN ijazah ON ijazah.id=guru.ijazah
         LEFT JOIN golongan ON golongan.id=guru.golongan
@@ -60,7 +60,7 @@ class Guru extends CI_Controller
         ];
 
         $this->model->tambah('guru', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Guru berhasil ditambahkan');
             redirect('guru');
         } else {
@@ -73,7 +73,7 @@ class Guru extends CI_Controller
     {
         $this->model->hapus('guru', 'guru_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'guru berhasil dihapus');
             redirect('guru');
         } else {
@@ -104,7 +104,7 @@ class Guru extends CI_Controller
         ];
 
         $this->model->edit('guru', 'guru_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'guru berhasil diupdate');
             redirect('guru');
         } else {

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Ijazah extends CI_Controller
+class Ijazah extends MY_Controller
 {
     public function __construct()
     {
@@ -35,7 +35,7 @@ class Ijazah extends CI_Controller
         ];
 
         $this->model->tambah('ijazah', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Ijazah berhasil ditambahkan');
             redirect('ijazah');
         } else {
@@ -48,7 +48,7 @@ class Ijazah extends CI_Controller
     {
         $this->model->hapus('ijazah', 'id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Ijazah berhasil dihapus');
             redirect('ijazah');
         } else {
@@ -65,7 +65,7 @@ class Ijazah extends CI_Controller
         ];
 
         $this->model->edit('ijazah', 'id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Ijazah berhasil diupdate');
             redirect('ijazah');
         } else {

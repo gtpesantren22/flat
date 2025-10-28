@@ -78,7 +78,7 @@ $db['default'] = array(
 	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => '',
-	'database' => 'gaji_flat',
+	'database' => 'db_master',
 
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',

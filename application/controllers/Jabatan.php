@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Jabatan extends CI_Controller
+class Jabatan extends MY_Controller
 {
     public function __construct()
     {
@@ -35,7 +35,7 @@ class Jabatan extends CI_Controller
         ];
 
         $this->model->tambah('jabatan', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Jabatan berhasil ditambahkan');
             redirect('jabatan');
         } else {
@@ -48,7 +48,7 @@ class Jabatan extends CI_Controller
     {
         $this->model->hapus('jabatan', 'jabatan_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Jabatan berhasil dihapus');
             redirect('jabatan');
         } else {
@@ -65,7 +65,7 @@ class Jabatan extends CI_Controller
         ];
 
         $this->model->edit('jabatan', 'jabatan_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Jabatan berhasil diupdate');
             redirect('jabatan');
         } else {

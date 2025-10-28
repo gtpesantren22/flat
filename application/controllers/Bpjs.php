@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Bpjs extends CI_Controller
+class Bpjs extends MY_Controller
 {
     public function __construct()
     {
@@ -24,7 +24,7 @@ class Bpjs extends CI_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db->query("SELECT bpjs.*, guru.nama as nmguru FROM bpjs JOIN guru ON guru.guru_id=bpjs.guru_id ")->result();
+        $data['data'] = $this->db_active->query("SELECT bpjs.*, guru.nama as nmguru FROM bpjs JOIN guru ON guru.guru_id=bpjs.guru_id ")->result();
 
         $data['guruOpt'] = $this->model->getData('guru')->result();
         $this->load->view('bpjs', $data);
@@ -38,7 +38,7 @@ class Bpjs extends CI_Controller
         ];
 
         $this->model->tambah('bpjs', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'bpjs berhasil ditambahkan');
             redirect('bpjs');
         } else {
@@ -51,7 +51,7 @@ class Bpjs extends CI_Controller
     {
         $this->model->hapus('bpjs', 'bpjs_id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'bpjs berhasil dihapus');
             redirect('bpjs');
         } else {
@@ -69,7 +69,7 @@ class Bpjs extends CI_Controller
         ];
 
         $this->model->edit('bpjs', 'bpjs_id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'bpjs berhasil diupdate');
             redirect('bpjs');
         } else {

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Lembaga extends CI_Controller
+class Lembaga extends MY_Controller
 {
     public function __construct()
     {
@@ -36,7 +36,7 @@ class Lembaga extends CI_Controller
         ];
 
         $this->model->tambah('satminkal', $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Lembaga berhasil ditambahkan');
             redirect('lembaga');
         } else {
@@ -49,7 +49,7 @@ class Lembaga extends CI_Controller
     {
         $this->model->hapus('satminkal', 'id', $id);
 
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Lembaga berhasil dihapus');
             redirect('lembaga');
         } else {
@@ -67,7 +67,7 @@ class Lembaga extends CI_Controller
         ];
 
         $this->model->edit('satminkal', 'id', $id, $data);
-        if ($this->db->affected_rows() > 0) {
+        if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Lembaga berhasil diupdate');
             redirect('lembaga');
         } else {
