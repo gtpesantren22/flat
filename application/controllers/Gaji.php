@@ -1426,7 +1426,10 @@ class Gaji extends MY_Controller
         if ($this->db_active->affected_rows() > 0) {
             echo json_encode(['status' => 'success']);
         } else {
-            echo json_encode(['status' => 'error']);
+            echo json_encode([
+                'status' => 'error',
+                'message' => $this->db_active->error()['message'] ?? 'Tidak diketahui'
+            ]);
         }
     }
 

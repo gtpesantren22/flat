@@ -432,6 +432,7 @@
                     let berhasil = 0;
                     let gagal = 0;
                     let persen = 0;
+                    let errorMessages = [];
 
                     $button.prop('disabled', true);
                     $button.text('Processing...');
@@ -446,6 +447,10 @@
                             persen = (processed / total) * 100;
                         }
 
+                        const errorList = errorMessages.length > 0 ?
+                            `<ul class="text-start mt-2 text-danger" style="font-size: 0.9rem;">${errorMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>` :
+                            '';
+
                         hasil.html(`
                             <div class="text-center">
                                 <strong class="mb-2">Proses kunci data ...</strong>
@@ -455,6 +460,7 @@
                             </div>
                             <strong class="mb-1">Total success : ${berhasil}</strong><br>
                             <strong class="mb-1 text-danger">Total error : ${gagal}</strong><br>
+                             ${errorList}
                         `);
                     }
 
@@ -470,14 +476,18 @@
                                     },
                                     dataType: 'json',
                                     success: function(response) {
-                                        berhasil++;
+                                        if (res.status === 'success') {
+                                            berhasil++;
+                                        } else {
+                                            gagal++;
+                                            errorMessages.push(res.message || 'Gagal tanpa pesan');
+                                        }
                                         updateProgress();
-                                        console.log('Data updated successfully');
                                     },
                                     error: function() {
                                         gagal++;
+                                        errorMessages.push(errorThrown || 'Error tidak diketahui');
                                         updateProgress();
-                                        console.error('Failed to update data');
                                     },
                                     complete: resolve // Menandai bahwa AJAX request selesai
                                 });
