@@ -9,7 +9,7 @@ class Fungsional extends MY_Controller
 
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
-
+        $this->db_active = $this->dynamic_db->connect();
         // $user = $this->Auth_model->current_user();
 
         // $this->user = $user->nama;
@@ -24,9 +24,8 @@ class Fungsional extends MY_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db_active->query("SELECT fungsional.*, golongan.nama as nmgolongan, kategori.nama as nmkategori FROM fungsional 
+        $data['data'] = $this->db_active->query("SELECT fungsional.*, golongan.nama as nmgolongan, golongan.kategori as nmkategori FROM fungsional 
         JOIN golongan ON golongan.id=fungsional.golongan_id
-        JOIN kategori ON kategori.id=fungsional.kategori
         ")->result();
 
         $data['golonganOpt'] = $this->model->getData('golongan')->result();
@@ -70,9 +69,9 @@ class Fungsional extends MY_Controller
     {
         $id = $this->input->post('id', true);
         $data = [
-            'kategori' => $this->input->post('kategori', true),
+            // 'kategori' => $this->input->post('kategori', true),
             'golongan_id' => $this->input->post('golongan', true),
-            'masa_kerja' => $this->input->post('masa_kerja', true),
+            // 'masa_kerja' => $this->input->post('masa_kerja', true),
             'nominal' => rmRp($this->input->post('nominal', true)),
         ];
 
@@ -82,6 +81,26 @@ class Fungsional extends MY_Controller
             redirect('fungsional');
         } else {
             $this->session->set_flashdata('error', 'Fungsional gagal diupdate');
+            redirect('fungsional');
+        }
+    }
+
+    public function cek()
+    {
+        $datas = $this->model->getData('golongan')->result();
+        foreach ($datas as $data) {
+            $cek = $this->model->getBy('fungsional', 'golongan_id', $data->id)->row();
+            if (!$cek) {
+                $this->model->tambah('fungsional', ['golongan_id' => $data->id]);
+            } else {
+                $this->model->edit('fungsional', 'golongan_id', $data->id, ['golongan_id' => $data->id]);
+            }
+        }
+        if ($this->db_active->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'Fungsional berhasil direload');
+            redirect('fungsional');
+        } else {
+            $this->session->set_flashdata('error', 'Fungsional gagal direload');
             redirect('fungsional');
         }
     }

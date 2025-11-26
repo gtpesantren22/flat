@@ -52,7 +52,7 @@
             $("#hasil").html('')
             Swal.fire({
                 title: 'Yakin ?',
-                text: 'Data ' + info + ' akan disinkron',
+                text: info + ' akan disinkron',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -69,7 +69,7 @@
                             'id': id
                         },
                         beforeSend: function() {
-                            $("#status").text("Mengambil data dari API...");
+                            $("#status").text(`Mengambil ${info} dari API...`);
                         },
                         success: function(res) {
                             if (res.status === "success") {
@@ -88,7 +88,7 @@
                                     index++;
                                     if (index >= total) {
                                         clearInterval(interval);
-                                        $("#status").text("Sinkronisasi selesai ✅ Total disimpan: " + saved);
+                                        $("#status").text(`Sinkronisasi ${info} selesai ✅ Total disimpan: ` + saved);
                                     }
                                 }, 300);
                             } else {

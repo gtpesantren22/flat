@@ -97,4 +97,8 @@ class Modeldata extends CI_Model
         $this->db_active->order_by($orderby2, $list2);
         return $this->db_active->get($table);
     }
+    public function query($qr)
+    {
+        return $this->db_active->query($qr);
+    }
 }

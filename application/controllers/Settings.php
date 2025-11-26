@@ -286,7 +286,8 @@ class Settings extends MY_Controller
 
             $saved++;
         }
-
+        $this->db_active->where('id', $id)
+            ->update('sinkron', ['last' => date('Y-m-d H:i:s')]);
         echo json_encode([
             'status' => 'success',
             'total'  => count($items),
@@ -311,18 +312,20 @@ class Settings extends MY_Controller
             $data = [
                 'id' => $item['jenis_golongan_id'],
                 'nama'       => $item['nama'],
+                'kategori'       => $item['kategori'],
             ];
 
             if ($exists) {
                 $this->db_active->where('id', $item['jenis_golongan_id'])
-                    ->update('golongan', ['nama' => $item['nama']]);
+                    ->update('golongan', ['nama' => $item['nama'], 'kategori' => $item['kategori']]);
             } else {
                 $this->db_active->insert('golongan', $data);
             }
 
             $saved++;
         }
-
+        $this->db_active->where('id', $id)
+            ->update('sinkron', ['last' => date('Y-m-d H:i:s')]);
         echo json_encode([
             'status' => 'success',
             'total'  => count($items),
@@ -358,6 +361,46 @@ class Settings extends MY_Controller
 
             $saved++;
         }
+        $this->db_active->where('id', $id)
+            ->update('sinkron', ['last' => date('Y-m-d H:i:s')]);
+        echo json_encode([
+            'status' => 'success',
+            'total'  => count($items),
+            'saved'  => $saved
+        ]);
+    }
+    public function sinc_ijazah()
+    {
+        $id = $this->input->post('id', TRUE);
+        $cekdata = $this->model->getBy('sinkron', 'id', $id)->row();
+        $url = $cekdata->url;
+        $token = $this->token;
+
+        $decoded = fetchApiGet($url, $token);
+        $items = $decoded['data']['data'] ?? [];
+
+        $saved = 0;
+        foreach ($items as $item) {
+            // cek apakah lembaga_id sudah ada
+            $exists = $this->model->getBy('ijazah', 'id', $item['jenjang_pendidikan_id'])->row();
+
+            $data = [
+                'id' => $item['jenjang_pendidikan_id'],
+                'nama'       => $item['nama'],
+            ];
+
+            if ($exists) {
+                $this->db_active->where('id', $item['jenjang_pendidikan_id'])
+                    ->update('ijazah', ['nama' => $item['nama']]);
+            } else {
+                $this->db_active->insert('ijazah', $data);
+            }
+
+            $saved++;
+        }
+
+        $this->db_active->where('id', $id)
+            ->update('sinkron', ['last' => date('Y-m-d H:i:s')]);
 
         echo json_encode([
             'status' => 'success',
@@ -377,24 +420,99 @@ class Settings extends MY_Controller
 
         $saved = 0;
         foreach ($items as $item) {
-            // cek apakah lembaga_id sudah ada
-            $exists = $this->model->getBy('guru', 'nik', $item['nik'])->row();
 
-            $data = [
-                'nama' => $item['nama'],
-                'nipy' => $item['niy'],
-                'satminkal' => $item['niy'],
+            // Pastikan key ada
+            $ptkId = isset($item['ptk_id']) ? $item['ptk_id'] : null;
+            if (!$ptkId) continue; // skip jika tidak ada ptk_id
+
+            // cek apakah guru sudah ada
+            $exists = $this->model->getBy('guru', 'guru_id', $ptkId)->row();
+
+            // ambil detail dari API
+            $dtl = fetchApiGet('https://data.ppdwk.com/api/ptk/show/' . $ptkId, $token);
+
+            // pastikan registrasi_ptk adalah array
+            $reg = isset($dtl['registrasi_ptk']) && is_array($dtl['registrasi_ptk'])
+                ? $dtl['registrasi_ptk']
+                : [];
+
+            // default
+            $satminkal = '-';
+            $jabatan   = 0;
+
+            // ambil satminkal (ptk_induk == 1)
+            foreach ($reg as $r) {
+                if (isset($r['ptk_induk']) && $r['ptk_induk'] == 1) {
+                    $satminkal = isset($r['lembaga_id']) ? $r['lembaga_id'] : '-';
+                    break;
+                }
+            }
+
+            // ambil jabatan (jenis_tugas == 1)
+            foreach ($reg as $r) {
+                if (isset($r['jenis_tugas']) && $r['jenis_tugas'] == 1) {
+                    $jabatan = isset($r['jenis_jabatan']['jenis_jabatan_id'])
+                        ? $r['jenis_jabatan']['jenis_jabatan_id']
+                        : 0;
+                    break;
+                }
+            }
+
+            // kategori kriteria
+            $jenisPtkNama = isset($item['jenis_ptk']['nama']) ? $item['jenis_ptk']['nama'] : '';
+
+            if ($jenisPtkNama == 'Tendik') {
+                $kriteria = 'Karyawan';
+            } elseif ($jenisPtkNama == 'Pengkaderan') {
+                $kriteria = 'Pengabdian';
+            } else {
+                $kriteria = 'Guru';
+            }
+
+            // ambil pendidikan terakhir
+            $ijazah = isset($dtl['pendidikan_terakhir']['jenjang_pendidikan_id'])
+                ? (int) $dtl['pendidikan_terakhir']['jenjang_pendidikan_id']
+                : null;
+
+            // santri
+            $santri = (!empty($item['jenis_kesantrian']) && $item['jenis_kesantrian'] == 'Santri')
+                ? 'santri'
+                : 'non-santri';
+
+            $sik = isset($item['status_pegawai']) ? $item['status_pegawai'] : '';
+            // build array aman
+            $dataSv = [
+                'guru_id'  => $ptkId,
+                'nipy'     => isset($item['niy']) ? $item['niy'] : '',
+                'nik'      => isset($item['nik']) ? $item['nik'] : '',
+                'nama'     => isset($item['nama']) ? $item['nama'] : '',
+                'satminkal' => $satminkal,
+                'santri'   => $santri,
+                'jabatan'  => $jabatan,
+                'kriteria' => $kriteria,
+                'sik'      => $sik != '' && $sik != 'PTY' ? 'PTTY' : $sik,
+                'ijazah'   => $ijazah,
+                'tmt'      => isset($item['tmt_pengangkatan']) ? $item['tmt_pengangkatan'] : null,
+                'golongan' => isset($item['jenis_golongan_id']) ? $item['jenis_golongan_id'] : null,
+                'kategori' => isset($item['jenis_golongan_id']) ? $item['jenis_golongan_id'] : null,
+                'email'    => isset($item['email']) ? $item['email'] : '',
+                'hp'       => isset($item['telpon']) ? $item['telpon'] : '',
+                'rekening' => !empty($item['nomor_rekening']) ? $item['nomor_rekening'] : '',
             ];
 
+            // insert/update
             if ($exists) {
-                $this->db_active->where('jabatan_id', $item['ptk_id'])
-                    ->update('jabatan', ['nama' => $item['nama']]);
+                $this->db_active->where('guru_id', $ptkId)->update('guru', $dataSv);
             } else {
-                $this->db_active->insert('jabatan', $data);
+                $this->db_active->insert('guru', $dataSv);
             }
 
             $saved++;
         }
+
+        // update sinkron
+        $this->db_active->where('id', $id)
+            ->update('sinkron', ['last' => date('Y-m-d H:i:s')]);
 
         echo json_encode([
             'status' => 'success',

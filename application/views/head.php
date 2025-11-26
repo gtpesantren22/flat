@@ -163,7 +163,7 @@
                                 </a>
                             </li>
                             <li class="menu-item <?= $judul == 'Ijazah' ? 'active' : '' ?>">
-                                <a href="ijazah" class="menu-link">
+                                <a href="<?= base_url('ijazah') ?>" class="menu-link">
                                     <div data-i18n="Container">Data Ijazah</div>
                                 </a>
                             </li>

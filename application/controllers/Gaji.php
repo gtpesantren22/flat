@@ -51,18 +51,26 @@ class Gaji extends MY_Controller
                 $totalawal = 0;
                 $potongawal = 0;
 
-                $total = $this->db_active->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
+                $info = $this->db_active->query("SELECT * FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
                 $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = '$value->bulan' AND tahun = '$value->tahun'")->row();
+                $total = $this->db_active->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
+                $total = $total ? $total->total : 0;
+                $masaKerja = selisihTahun($info->tmt);
+                if ($masaKerja < 2 && $info->sik === 'PTY') {
+                    $totalGaji = $total * 0.8;
+                } else {
+                    $totalGaji = $total;
+                }
                 $datakirim[] = [
                     'gaji_id' => $value->gaji_id,  // 1
                     'status' => $value->status,  // 1
                     'tapel' => $value->tapel,  // 1
                     'bulan' => $value->bulan,  // 1
                     'tahun' => $value->tahun,  // 1
-                    'total' => $total->total,
+                    'total' => $totalGaji,
                     'potong' => $potong->total //18
                 ];
-                $totalawal += $total ? $total->total : 0;
+                $totalawal += $total ? $totalGaji : 0;
                 $potongawal += $potong ? $potong->total : 0;
             } else {
 
@@ -89,7 +97,7 @@ class Gaji extends MY_Controller
                         }
 
                         // Data tunjangan lainnya
-                        $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+                        $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
                         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
                         if ($guru->kriteria == 'Pengabdian') {
                             $struktural = $this->pengabdian;
@@ -109,14 +117,18 @@ class Gaji extends MY_Controller
                         ])->row();
 
                         // Hitung total awal
-                        $totalawal += ($gapok) +
+                        $ttlGaji = ($gapok) +
                             ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
                             ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
                             ($struktural ? $struktural : 0) +
                             ($bpjs ? $bpjs->nominal : 0) +
                             ($walas && !$struktural ? $walas->nominal : 0) +
                             ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
-
+                        $masaKerja = selisihTahun($guru->tmt);
+                        if ($masaKerja < 2 && $info->sik === 'PTY') {
+                            $ttlGaji = $total * 0.8;
+                        }
+                        $totalawal += $ttlGaji;
                         $potongawal += $potong ? $potong->total : 0;
                     }
                 }
@@ -193,12 +205,11 @@ class Gaji extends MY_Controller
             $this->session->set_flashdata('error', 'Gaji sudah digenerate');
             redirect('gaji');
         } else {
-            $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan, kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
+            $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan, golongan.kategori as kategori, guru.email, guru.rekening, guru.hp FROM guru
         LEFT JOIN satminkal ON guru.satminkal=satminkal.id
         LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
         LEFT JOIN ijazah ON guru.ijazah=ijazah.id
         LEFT JOIN golongan ON guru.golongan=golongan.id
-        LEFT JOIN kategori ON guru.kategori=kategori.id
         ")->result();
             foreach ($guru as $guruhasil) {
                 $data = [
@@ -240,12 +251,11 @@ class Gaji extends MY_Controller
             die();
         }
         $this->model->hapus('gaji_detail', 'gaji_id', $id);
-        $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , kategori.nama as kategori, guru.email, guru.rekening, guru.hp FROM guru
+        $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , golongan.kategori as kategori, guru.email, guru.rekening, guru.hp FROM guru
         LEFT JOIN satminkal ON guru.satminkal=satminkal.id
         LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
         LEFT JOIN ijazah ON guru.ijazah=ijazah.id
         LEFT JOIN golongan ON guru.golongan=golongan.id
-        LEFT JOIN kategori ON guru.kategori=kategori.id
         ")->result();
         foreach ($guru as $guruhasil) {
             $data = [
@@ -322,7 +332,7 @@ class Gaji extends MY_Controller
                 $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
-            $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+            $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             if ($guru->kriteria == 'Pengabdian') {
                 $struktural = $this->pengabdian;
@@ -333,6 +343,19 @@ class Gaji extends MY_Controller
             $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
             $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
+
+            $totalGaji =
+                ($gapok) +
+                ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
+                ($struktural ? $struktural : 0) +
+                ($bpjs ? $bpjs->nominal : 0) +
+                ($walas && !$struktural ? $walas->nominal : 0) +
+                ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
+            $masaKerja = selisihTahun($guru->tmt);
+            if ($masaKerja < 2 && $guru->sik === 'PTY') {
+                $totalGaji = $totalGaji * 0.8;
+            }
 
             $data[] = [
                 $row_number++, // 0
@@ -351,15 +374,7 @@ class Gaji extends MY_Controller
                 $bpjs ? $bpjs->nominal : 0, // 13
                 $walas && !$struktural ? $walas->nominal : 0, // 14
                 $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
-                (
-                    ($gapok) +
-                    ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                    ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
-                    ($struktural ? $struktural : 0) +
-                    ($bpjs ? $bpjs->nominal : 0) +
-                    ($walas && !$struktural ? $walas->nominal : 0) +
-                    ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
-                ), // 16
+                $totalGaji, // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
                 $row->guru_id, // 19
@@ -415,6 +430,18 @@ class Gaji extends MY_Controller
         $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
         foreach ($query->result() as $row) {
             $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
+            $masaKerja = selisihTahun($row->tmt);
+            $totalGaji = ($row->gapok) +
+                ($row->fungsional) +
+                ($row->kinerja) +
+                ($row->struktural) +
+                ($row->bpjs) +
+                ($row->walas) +
+                ($row->penyesuaian) +
+                ($row->tambahan);
+            if ($masaKerja < 2 && $row->sik === 'PTY') {
+                $totalGaji = $totalGaji * 0.8;
+            }
             $data[] = [
                 $row_number++, // 0
                 $row->gaji_id,  // 1
@@ -432,16 +459,7 @@ class Gaji extends MY_Controller
                 $row->bpjs, // 13
                 $row->walas, // 14
                 $row->penyesuaian, // 15
-                (
-                    ($row->gapok) +
-                    ($row->fungsional) +
-                    ($row->kinerja) +
-                    ($row->struktural) +
-                    ($row->bpjs) +
-                    ($row->walas) +
-                    ($row->penyesuaian) +
-                    ($row->tambahan)
-                ), // 16
+                $totalGaji, // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
                 $row->guru_id, //19
@@ -493,7 +511,7 @@ class Gaji extends MY_Controller
                 $gapok = $guru->kriteria != 'Karyawan' ? $gapok : 0;
             }
 
-            $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+            $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             if ($guru->kriteria == 'Pengabdian') {
                 $struktural = $this->pengabdian;
@@ -1009,7 +1027,10 @@ class Gaji extends MY_Controller
             $jam = $this->db_active->query("SELECT SUM(kehadiran) as total FROM honor WHERE guru_id = '$hasil->guru_id' AND guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
             $hadir = $this->db_active->query("SELECT SUM(kehadiran) as total FROM kehadiran WHERE guru_id = '$hasil->guru_id' AND bulan = '$datagaji->bulan' AND tahun = '$datagaji->tahun'")->row();
             $sebelum = $this->db_active->query("SELECT nominal FROM perbandingan WHERE guru_id = '$hasil->guru_id'")->row();
-
+            $masaKerja = selisihTahun($hasil->tmt);
+            if ($masaKerja < 2 && $hasil->sik === 'PTY') {
+                $totalgaji = $totalgaji * 0.8;
+            }
             $sheet->setCellValue('A' . $numrow, $no);
             $sheet->setCellValue('B' . $numrow, bulan($datagaji->bulan));
             $sheet->setCellValue('C' . $numrow, $datagaji->tahun);
@@ -1020,7 +1041,7 @@ class Gaji extends MY_Controller
             $sheet->setCellValue('H' . $numrow, $hasil->sik);
             $sheet->setCellValue('I' . $numrow, $hasil->ijazah);
             $sheet->setCellValue('J' . $numrow, $hasil->tmt);
-            $sheet->setCellValue('K' . $numrow, selisihTahun($hasil->tmt));
+            $sheet->setCellValue('K' . $numrow, $masaKerja);
             $sheet->setCellValue('L' . $numrow, $hasil->santri);
             $sheet->setCellValue('M' . $numrow, $hasil->gapok);
             $sheet->setCellValue('N' . $numrow, $hasil->fungsional);
@@ -1288,7 +1309,7 @@ class Gaji extends MY_Controller
             $gapok = $guru->santri == 'santri' &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok * $this->honor_santri : $gapok * $this->honor_non;
         }
 
-        $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+        $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
         if ($guru->kriteria == 'Pengabdian') {
             $struktural = $this->pengabdian;
@@ -1300,6 +1321,18 @@ class Gaji extends MY_Controller
         $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
         $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru_id' AND gaji_id = '$gaji_id' ")->row();
 
+        $totalGaji = ($gapok) +
+            ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+            ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
+            ($struktural ? $struktural : 0) +
+            ($bpjs ? $bpjs->nominal : 0) +
+            ($walas && !$struktural ? $walas->nominal : 0) +
+            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
+
+        $masaKerja = selisihTahun($guru->tmt);
+        if ($masaKerja < 2 && $guru->sik === 'PTY') {
+            $totalGaji = $totalGaji * 0.8;
+        }
         echo json_encode([
             'guru_id' => $guru_id, // 9
             'gapok' =>  $gapok  ? $gapok : '0', // 9
@@ -1309,15 +1342,7 @@ class Gaji extends MY_Controller
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
             'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
-            'total' => (
-                ($gapok) +
-                ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
-                ($struktural ? $struktural : 0) +
-                ($bpjs ? $bpjs->nominal : 0) +
-                ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total
-            ), // 16
+            'total' => $totalGaji, // 16
         ]);
     }
 
@@ -1389,7 +1414,7 @@ class Gaji extends MY_Controller
             $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
         }
 
-        $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+        $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
         if ($guru->kriteria == 'Pengabdian') {
             $struktural = $this->pengabdian;

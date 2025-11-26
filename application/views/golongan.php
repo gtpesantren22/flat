@@ -14,6 +14,7 @@
                             <thead>
                                 <tr>
                                     <th>Nama Golongan</th>
+                                    <th>Kategory</th>
                                     <th>#</th>
                                 </tr>
                             </thead>
@@ -21,6 +22,7 @@
                                 <?php foreach ($data as $data): ?>
                                     <tr>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nama ?></strong></td>
+                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->kategori ?></strong></td>
                                         <td>
                                             <div class="dropdown">
                                                 <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -115,16 +117,16 @@
 
     <script>
         $(document).ready(function() {
-            
+
             $('.edit-btn').on('click', function() {
                 var id = $(this).data('id');
                 var nama = $(this).data('nama');
-                
+
                 $('#nama').val(nama);
                 $('#id').val(id);
                 $('#editModal').modal('show');
             });
-            
+
             $('#table1').DataTable();
         });
     </script>

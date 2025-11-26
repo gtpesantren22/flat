@@ -3,12 +3,16 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Struktural extends MY_Controller
 {
+    protected $db_active;
+
     public function __construct()
     {
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
+        $this->load->library('Dynamic_db');
+        $this->db_active = $this->dynamic_db->connect(); // baru panggil method connect()
 
         // $user = $this->Auth_model->current_user();
 
@@ -25,9 +29,10 @@ class Struktural extends MY_Controller
         $data['sub'] = 'tunjangan';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db_active->query("SELECT struktural.*, satminkal.nama as nmsatminkal, jabatan.nama as nmjabatan FROM struktural 
+        $data['datas'] = $this->db_active->query("SELECT struktural.*, satminkal.nama as nmsatminkal, jabatan.nama as nmjabatan FROM struktural 
         JOIN satminkal ON satminkal.id=struktural.satminkal_id
         JOIN jabatan ON jabatan.jabatan_id=struktural.jabatan_id
+        ORDER BY struktural.nominal ASC
         ")->result();
 
         $data['jabatanOpt'] = $this->model->getData('jabatan')->result();
@@ -92,6 +97,34 @@ class Struktural extends MY_Controller
         ];
 
         $this->model->edit('struktural', 'struktural_id', $id, $data);
+        if ($this->db_active->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'struktural berhasil diupdate');
+            redirect('struktural');
+        } else {
+            $this->session->set_flashdata('error', 'struktural gagal diupdate');
+            redirect('struktural');
+        }
+    }
+
+    public function reload()
+    {
+        $gru = $this->model->getData('guru')->result();
+        foreach ($gru as $guru) {
+            $cek = $this->model->getBy2('struktural', 'satminkal_id', $guru->satminkal, 'jabatan_id', $guru->jabatan)->row();
+            if (!$cek) {
+                $datasv = [
+                    'satminkal_id' => $guru->satminkal,
+                    'jabatan_id' => $guru->jabatan
+                ];
+                $this->model->tambah('struktural', $datasv);
+            } else {
+                $datasv = [
+                    'satminkal_id' => $guru->satminkal,
+                    'jabatan_id' => $guru->jabatan
+                ];
+                $this->model->edit('struktural', 'struktural_id', $cek->struktural_id, $datasv);
+            }
+        }
         if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'struktural berhasil diupdate');
             redirect('struktural');

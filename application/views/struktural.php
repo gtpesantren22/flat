@@ -6,13 +6,14 @@
                 <div class="card">
                     <h5 class="card-header">
                         Tunjangan Struktural
-                        <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal"
-                            data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button>
+                        <!-- <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button> -->
+                        <a href="<?= base_url('struktural/reload') ?>" class="btn btn-sm btn-primary float-end tbl-confirm" value="Data tunjangan Struktural akan dimuat ulang"><i class='bx bxs-plus-circle'></i> Reload Data</a>
                     </h5>
                     <div class="table-responsive card-datatable">
                         <table class="table mb-10" id="table1">
                             <thead>
                                 <tr>
+                                    <th>No</th>
                                     <th>Jabatan</th>
                                     <th>Satminkal</th>
                                     <!-- <th>Masa Kerja</th> -->
@@ -22,8 +23,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($data as $data): ?>
+                                <?php $no = 1;
+                                foreach ($datas as $data): ?>
                                     <tr>
+                                        <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $no++ ?></strong></td>
                                         <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $data->nmjabatan ?></strong></td>
                                         <td><?= $data->nmsatminkal ?></td>
                                         <!-- <td><?= $data->masa_kerja ?> tahun</td> -->

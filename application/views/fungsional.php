@@ -6,8 +6,8 @@
                 <div class="card">
                     <h5 class="card-header">
                         Tunjangan Fungsional
-                        <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal"
-                            data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button>
+                        <!-- <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button> -->
+                        <a href="<?= base_url('fungsional/cek') ?>" class="btn btn-sm btn-primary float-end tbl-confirm" value="Yakin akan dimuat ulang ?"><i class='bx bxs-plus-circle mr-2'></i> Cek data</a>
                     </h5>
                     <div class="table-responsive card-datatable">
                         <table class="table mb-10" id="table1">
@@ -139,23 +139,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="kategori">Kategori</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" id="kategori" name="kategori" required>
-                                    <option value=""> -pilih- </option>
-                                    <?php foreach ($kategoriOpt as $kategori): ?>
-                                        <option value="<?= $kategori->id ?>"><?= $kategori->nama ?></option>
-                                    <?php endforeach ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <label class="col-sm-2 col-form-label" for="masa_kerja">Masa kerja</label>
-                            <div class="col-sm-10">
-                                <input type="number" class="form-control" id="masa_kerja" name="masa_kerja" value="0" required />
-                            </div>
-                        </div>
+
                         <div class="row mb-2">
                             <label class="col-sm-2 col-form-label" for="nominal">Nominal</label>
                             <div class="col-sm-10">
@@ -185,14 +169,14 @@
 
                 var id = $(this).data('id');
                 var golongan = $(this).data('golongan');
-                var kategori = $(this).data('kategori');
-                var masa_kerja = $(this).data('masa_kerja');
+                // var kategori = $(this).data('kategori');
+                // var masa_kerja = $(this).data('masa_kerja');
                 var nominal = $(this).data('nominal');
 
                 $('#id').val(id);
                 $('#golongan').val(golongan).change();
-                $('#kategori').val(kategori);
-                $('#masa_kerja').val(masa_kerja);
+                // $('#kategori').val(kategori);
+                // $('#masa_kerja').val(masa_kerja);
                 $('#nominal').val(nominal);
 
                 $('#editModal').modal('show');
