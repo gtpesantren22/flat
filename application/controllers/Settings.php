@@ -521,6 +521,96 @@ class Settings extends MY_Controller
         ]);
     }
 
+    public function sinc_guruOne($id)
+    {
+
+        $token = $this->token;
+        $grc = $this->model->getBy('guru', 'guru_id', $id)->row();
+        // ambil detail dari API
+        $dtl = fetchApiGet('https://data.ppdwk.com/api/ptk/show/' . $id, $token);
+        $items = fetchApiGet('https://data.ppdwk.com/api/datatables?data=referensi-guru&page=1&per_page=5&q=' . $grc->nik . '&sortby=nama&sortbydesc=ASC', $token);
+        $item = $items['data']['data'][0];
+
+        // pastikan registrasi_ptk adalah array
+        $reg = isset($dtl['registrasi_ptk']) && is_array($dtl['registrasi_ptk'])
+            ? $dtl['registrasi_ptk']
+            : [];
+
+        // default
+        $satminkal = '-';
+        $jabatan   = 0;
+
+        // ambil satminkal (ptk_induk == 1)
+        foreach ($reg as $r) {
+            if (isset($r['ptk_induk']) && $r['ptk_induk'] == 1) {
+                $satminkal = isset($r['lembaga_id']) ? $r['lembaga_id'] : '-';
+                break;
+            }
+        }
+
+        // ambil jabatan (jenis_tugas == 1)
+        foreach ($reg as $r) {
+            if (isset($r['jenis_tugas']) && $r['jenis_tugas'] == 1) {
+                $jabatan = isset($r['jenis_jabatan']['jenis_jabatan_id'])
+                    ? $r['jenis_jabatan']['jenis_jabatan_id']
+                    : 0;
+                break;
+            }
+        }
+
+        // kategori kriteria
+        $jenisPtkNama = isset($item['jenis_ptk']['nama']) ? $item['jenis_ptk']['nama'] : '';
+
+        if ($jenisPtkNama == 'Tendik') {
+            $kriteria = 'Karyawan';
+        } elseif ($jenisPtkNama == 'Pengkaderan') {
+            $kriteria = 'Pengabdian';
+        } else {
+            $kriteria = 'Guru';
+        }
+
+        // ambil pendidikan terakhir
+        $ijazah = isset($dtl['pendidikan_terakhir']['jenjang_pendidikan_id'])
+            ? (int) $dtl['pendidikan_terakhir']['jenjang_pendidikan_id']
+            : null;
+
+        // santri
+        $santri = (!empty($item['jenis_kesantrian']) && $item['jenis_kesantrian'] == 'Santri')
+            ? 'santri'
+            : 'non-santri';
+
+        $sik = isset($item['status_pegawai']) ? $item['status_pegawai'] : '';
+        // build array aman
+        $dataSv = [
+            'guru_id'  => $id,
+            'nipy'     => isset($item['niy']) ? $item['niy'] : '',
+            'nik'      => isset($item['nik']) ? $item['nik'] : '',
+            'nama'     => isset($item['nama']) ? $item['nama'] : '',
+            'satminkal' => $satminkal,
+            'santri'   => $santri,
+            'jabatan'  => $jabatan,
+            'kriteria' => $kriteria,
+            'sik'      => $sik != '' && $sik != 'PTY' ? 'PTTY' : $sik,
+            'ijazah'   => $ijazah,
+            'tmt'      => isset($item['tmt_pengangkatan']) ? $item['tmt_pengangkatan'] : null,
+            'golongan' => isset($item['jenis_golongan_id']) ? $item['jenis_golongan_id'] : null,
+            'kategori' => isset($item['jenis_golongan_id']) ? $item['jenis_golongan_id'] : null,
+            'email'    => isset($item['email']) ? $item['email'] : '',
+            'hp'       => isset($item['telpon']) ? $item['telpon'] : '',
+            'rekening' => !empty($item['nomor_rekening']) ? $item['nomor_rekening'] : '',
+        ];
+
+        $this->db_active->where('guru_id', $id)->update('guru', $dataSv);
+        if ($this->db_active->affected_rows() > 0) {
+            redirect('guru');
+        } else {
+            redirect('guru');
+        }
+        // echo '<pre>';
+        // var_dump($dataSv);
+        // echo '</pre>';
+    }
+
     public function setDb()
     {
         $db_id = $this->input->post('db_id', TRUE);

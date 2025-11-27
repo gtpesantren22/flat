@@ -50,6 +50,7 @@
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item edit-btn" href="javascript:void(0);" data-bs-toggle="modal" data-id="<?= $data->guru_id ?>" data-nama="<?= $data->nama ?>" data-nipy="<?= $data->nipy ?>" data-nik="<?= $data->nik ?>" data-satminkal="<?= $data->satminkal ?>" data-jabatan="<?= $data->jabatan ?>" data-kriteria="<?= $data->kriteria ?>" data-sik="<?= $data->sik ?>" data-ijazah="<?= $data->ijazah ?>" data-tmt="<?= $data->tmt ?>" data-golongan="<?= $data->golongan ?>" data-santri="<?= $data->santri ?>" data-kategori="<?= $data->kategori ?>" data-email="<?= $data->email ?>" data-hp="<?= $data->hp ?>" data-rekening="<?= $data->rekening ?>" data-bs-target="#editModal"><i class="bx bx-edit-alt me-1"></i> Edit</a>
                                                     <a class="dropdown-item tombol-hapus" href="<?= base_url('guru/hapus/' . $data->guru_id) ?>"><i class="bx bx-trash me-1"></i> Delete</a>
+                                                    <a class="dropdown-item" href="<?= base_url('settings/sinc_guruOne/' . $data->guru_id) ?>"><i class="bx bx-refresh me-1"></i> Sinc</a>
                                                 </div>
                                             </div>
                                         </td>
