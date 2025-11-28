@@ -91,7 +91,7 @@ class Kinerja extends MY_Controller
 
         $bulan = $this->input->post('bulan', true);
         $tahun = $this->input->post('tahun', true);
-        $guru = $this->db_active->query("SELECT guru_id FROM guru WHERE kriteria = 'Karyawan' ")->result();
+        $guru = $this->db_active->query("SELECT guru_id FROM guru WHERE kriteria = 'Karyawan' AND sik = 'PTY' ")->result();
         $at = date('Y-m-d H:i');
         $id = $this->uuid->v4('');
         foreach ($guru as $value) {
@@ -130,12 +130,14 @@ class Kinerja extends MY_Controller
             $this->db_active->join('guru', 'kehadiran.guru_id=guru.guru_id');
             $this->db_active->where('kehadiran_id', $kehadiranID);
             $this->db_active->where('guru.kriteria', 'Karyawan');
+            $this->db_active->where('guru.sik', 'PTY');
         } else {
             $kehadiranID = $this->db_active->query("SELECT kehadiran_id FROM kehadiran GROUP BY kehadiran_id ORDER BY created_at DESC LIMIT 1")->row('kehadiran_id');
             $this->db_active->from('kehadiran');
             $this->db_active->join('guru', 'kehadiran.guru_id=guru.guru_id');
             $this->db_active->where('kehadiran.kehadiran_id', $kehadiranID);
             $this->db_active->where('guru.kriteria', 'Karyawan');
+            $this->db_active->where('guru.sik', 'PTY');
         }
 
 
@@ -211,7 +213,7 @@ class Kinerja extends MY_Controller
         $id = $this->input->post('id', true);
         $kehadiran = $this->model->getBy('kehadiran', 'id', $id)->row();
 
-        $guru = $this->db_active->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM kehadiran WHERE kehadiran_id = '$kehadiran->kehadiran_id' AND kehadiran.guru_id = guru.guru_id) AND kriteria = 'Karyawan' ");
+        $guru = $this->db_active->query("SELECT * FROM guru WHERE NOT EXISTS (SELECT 1 FROM kehadiran WHERE kehadiran_id = '$kehadiran->kehadiran_id' AND kehadiran.guru_id = guru.guru_id) AND kriteria = 'Karyawan' AND sik = 'PTY' ");
         if ($guru->row()) {
             foreach ($guru->result() as $value) {
                 $data = [
