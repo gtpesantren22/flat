@@ -194,6 +194,7 @@ class Honor extends MY_Controller
             foreach ($guru->result() as $value) {
                 $data = [
                     'guru_id' => $value->guru_id,
+                    'lembaga' => $value->satminkal,
                     'honor_id' => $honor->honor_id,
                     'bulan' => $honor->bulan,
                     'tahun' => $honor->tahun,
