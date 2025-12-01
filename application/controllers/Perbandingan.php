@@ -52,7 +52,7 @@ class Perbandingan extends MY_Controller
                 $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
-            $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
+            $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             if ($guru->kriteria == 'Pengabdian') {
                 $struktural = $this->pengabdian;
@@ -63,7 +63,18 @@ class Perbandingan extends MY_Controller
             $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
             $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
             $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
-
+            $totalGaji = ($gapok) +
+                ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
+                ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
+                ($struktural ? $struktural : 0) +
+                ($bpjs ? $bpjs->nominal : 0) +
+                ($walas && !$struktural ? $walas->nominal : 0) +
+                ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                $tambahan->total;
+            $masaKerja = selisihTahun($guru->tmt);
+            if ($masaKerja < 2 && $guru->sik === 'PTY') {
+                $totalGaji = $totalGaji * 0.8;
+            }
             $kirim[] = [
                 'id' =>  $row->id,
                 'nama' =>  $guru->nama,
@@ -72,14 +83,7 @@ class Perbandingan extends MY_Controller
                 'lembaga' =>  $satminkal ? $satminkal->nama : '',
                 'jabatan' =>  $jabatan ? $jabatan->nama : '',
                 'sebelum' =>  $row->nominal,
-                'total' => ($gapok) +
-                    ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                    ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
-                    ($struktural ? $struktural : 0) +
-                    ($bpjs ? $bpjs->nominal : 0) +
-                    ($walas && !$struktural ? $walas->nominal : 0) +
-                    ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
-                    $tambahan->total
+                'total' => $totalGaji
             ];
         }
         $data['hasil'] = $kirim;
