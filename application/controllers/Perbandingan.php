@@ -69,8 +69,8 @@ class Perbandingan extends MY_Controller
                 'nama' =>  $guru->nama,
                 'guru_id' =>  $guru->guru_id,
                 'sik' =>  $guru->sik,
-                'lembaga' =>  $satminkal->nama,
-                'jabatan' =>  $jabatan->nama,
+                'lembaga' =>  $satminkal ? $satminkal->nama : '',
+                'jabatan' =>  $jabatan ? $jabatan->nama : '',
                 'sebelum' =>  $row->nominal,
                 'total' => ($gapok) +
                     ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
