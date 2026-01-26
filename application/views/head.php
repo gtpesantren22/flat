@@ -172,6 +172,11 @@
                                     <div data-i18n="Fluid">Data Jabatan</div>
                                 </a>
                             </li>
+                            <li class="menu-item <?= $judul == 'Pembanding' ? 'active' : '' ?>">
+                                <a href="<?= base_url('pembanding') ?>" class="menu-link">
+                                    <div data-i18n="Fluid">Nominal Pembanding</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="menu-item <?= $judul == 'Guru' ? 'active' : '' ?>">

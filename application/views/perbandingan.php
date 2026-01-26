@@ -15,10 +15,10 @@
                                     <th>#</th>
                                     <th>Nama</th>
                                     <th>SIK</th>
-                                    <th>Jabatan</th>
-                                    <th>Lembaga</th>
-                                    <th>Nominal Flat</th>
+                                    <th>Jabatan Lama</th>
+                                    <th>Jabatan Baru</th>
                                     <th>Nominal Sebelum</th>
+                                    <th>Nominal Flat</th>
                                     <th>Selisih</th>
                                     <th></th>
                                 </tr>
@@ -33,8 +33,8 @@
                                         <td><?= $data['sik'] ?></td>
                                         <td><?= $data['jabatan'] ?></td>
                                         <td><?= $data['lembaga'] ?></td>
-                                        <td><?= rupiah($data['total']) ?></td>
                                         <td><?= rupiah($data['sebelum']) ?></td>
+                                        <td><?= rupiah($data['total']) ?></td>
                                         <td>
                                             <?php if ($data['total'] > $data['sebelum']) { ?>
                                                 <b class="text-success"><i class="bx bx-plus"></i><?= number_format($selisih) ?> <i class='bx bxs-up-arrow-alt'></i></b>

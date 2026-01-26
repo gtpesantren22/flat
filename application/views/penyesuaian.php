@@ -8,8 +8,8 @@
                     <h5 class="card-header">
                         Tunjangan Penyesuaian
                         <!-- <button class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#tambahModal"><i class='bx bxs-plus-circle'></i> Tambah Data</button> -->
-                        <a href="<?= base_url('penyesuaian/reset') ?>" class="btn btn-sm btn-danger float-end tbl-confirm" value="Data akan direset/dikosongkan"><i class='bx bx-reset'></i> Reset Data</a>
-                        <a href="<?= base_url('penyesuaian/sesuaikan') ?>" class="btn btn-sm btn-primary float-end tbl-confirm" value="Data akan direset/dikosongkan"><i class='bx bxs-pin'></i> Sesuaikan data</a>
+                        <!-- <a href="<?= base_url('penyesuaian/reset') ?>" class="btn btn-sm btn-danger float-end tbl-confirm" value="Data akan direset/dikosongkan"><i class='bx bx-reset'></i> Reset Data</a>
+                        <a href="<?= base_url('penyesuaian/sesuaikan') ?>" class="btn btn-sm btn-primary float-end tbl-confirm" value="Data akan direset/dikosongkan"><i class='bx bxs-pin'></i> Sesuaikan data</a> -->
                     </h5>
                     <div class="table-responsive card-datatable">
                         <table class="table mb-10" id="table1">
