@@ -202,8 +202,10 @@ class Perbandingan extends MY_Controller
         $cek = $this->model->getBy('penyesuaian', 'guru_id', $id)->row();
         if ($cek) {
             $this->model->edit('penyesuaian', 'guru_id', $id, ['nominal' => $nominal]);
+            echo json_encode(['success' => true]);
         } else {
             $this->model->tambah('penyesuaian', ['guru_id' => $id, 'nominal' => $nominal]);
+            echo json_encode(['success' => false]);
         }
     }
 }

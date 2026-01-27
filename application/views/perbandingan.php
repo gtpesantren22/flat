@@ -219,11 +219,15 @@
                 },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('update Ok');
+                    if (response.success) {
+                        console.log('success');
+                    } else {
+                        console.log('Error');
+                    }
                 },
-                error: function() {
-                    alert('Terjadi kesalahan saat mengupdate data');
-                    console.error();
+                error: function(xhr, ajaxOptions, thrownError) {
+                    console.log(xhr.status);
+                    console.log(thrownError);
                 }
             });
         });
