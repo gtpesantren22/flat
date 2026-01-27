@@ -199,11 +199,11 @@ class Perbandingan extends MY_Controller
         $id = $this->input->post('id', TRUE);
         $nominal = rmRp($this->input->post('value', TRUE));
 
-        $cek = $this->model->edit('penyesuaian', 'guru_id', $id, ['nominal' => $nominal]);
+        $cek = $this->model->getBy('penyesuaian', 'guru_id', $id)->row();
         if ($cek) {
-            echo json_encode(['status' => 'ok']);
+            $this->model->edit('penyesuaian', 'guru_id', $id, ['nominal' => $nominal]);
         } else {
-            echo json_encode(['status' => 'error', 'message' => $this->db_active->error()]);
+            $this->model->tambah('penyesuaian', ['guru_id' => $id, 'nominal' => $nominal]);
         }
     }
 }
