@@ -9,6 +9,7 @@ class Perbandingan extends MY_Controller
 
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
+        $this->db_utama = $this->load->database('utama', TRUE);
 
         $user = $this->Auth_model->current_user();
         $this->userID = $user->id_user;
@@ -42,6 +43,15 @@ class Perbandingan extends MY_Controller
             $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
             $satminkal = $this->model->getBy('satminkal', 'id', $guru->satminkal)->row();
             $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
+
+            $jabatan_old = $this->db_utama
+                ->select('j.*')
+                ->from('guru g')
+                ->join('jabatan j', 'j.jabatan_id = g.jabatan', 'left')
+                ->where('g.guru_id', $guru->guru_id_old)
+                ->get()
+                ->row();
+
             $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
 
             if ($guru->sik === 'PTY') {
@@ -69,7 +79,7 @@ class Perbandingan extends MY_Controller
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
                 ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                ($penyesuaian && $guru->kriteria != 'Pengabdian' && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0) +
                 $tambahan->total;
             $masaKerja = selisihTahun($guru->tmt);
             if ($masaKerja < 2 && $guru->sik === 'PTY') {
@@ -82,8 +92,10 @@ class Perbandingan extends MY_Controller
                 'sik' =>  $guru->sik,
                 'lembaga' =>  $satminkal ? $satminkal->nama : '',
                 'jabatan' =>  $jabatan ? $jabatan->nama : '',
+                'jabatan_old' =>  $jabatan_old ? $jabatan_old->nama : '',
                 'sebelum' =>  $row->nominal,
-                'total' => $totalGaji
+                'total' => $totalGaji,
+                'penyesuaian' => $penyesuaian ? $penyesuaian->nominal : 0,
             ];
         }
         $data['hasil'] = $kirim;
@@ -148,7 +160,7 @@ class Perbandingan extends MY_Controller
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0, // 15
             'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : 0 // 16
         ]);
     }
@@ -179,6 +191,19 @@ class Perbandingan extends MY_Controller
                 $this->session->set_flashdata('error', 'Data gagal disesuaikan');
                 redirect('perbandingan');
             }
+        }
+    }
+
+    public function editPenyesuaian()
+    {
+        $id = $this->input->post('id', TRUE);
+        $nominal = rmRp($this->input->post('value', TRUE));
+
+        $cek = $this->model->edit('penyesuaian', 'guru_id', $id, ['nominal' => $nominal]);
+        if ($cek) {
+            echo json_encode(['status' => 'ok']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => $this->db_active->error()]);
         }
     }
 }

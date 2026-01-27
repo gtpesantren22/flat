@@ -285,6 +285,7 @@ class Gaji extends MY_Controller
         }
     }
 
+    // Detail gaji sebelum dikunci
     public function detail2($id)
     {
         $this->Auth_model->log_activity($this->userID, 'Akses detail honor-sebelum kunci C: Gaji');
@@ -351,7 +352,8 @@ class Gaji extends MY_Controller
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
                 ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
+                ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0)
+                + $tambahan->total;
             $masaKerja = selisihTahun($guru->tmt);
             if ($masaKerja < 2 && $guru->sik === 'PTY') {
                 $totalGaji = $totalGaji * 0.8;
@@ -373,7 +375,7 @@ class Gaji extends MY_Controller
                 $struktural ? $struktural : 0, // 12
                 $bpjs ? $bpjs->nominal : 0, // 13
                 $walas && !$struktural ? $walas->nominal : 0, // 14
-                $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+                $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0, // 15
                 $totalGaji, // 16
                 $row->kategori, // 17
                 $potong ? $potong->total : 0, //18
@@ -396,6 +398,7 @@ class Gaji extends MY_Controller
         // var_dump($output);
     }
 
+    // Detail kalau sudah dikunci
     public function detail3($id)
     {
         $this->Auth_model->log_activity($this->userID, 'Akses getail honor - setelah kunci C: Gaji');
@@ -529,7 +532,7 @@ class Gaji extends MY_Controller
                 'struktural' => $struktural ? $struktural : 0, // 12
                 'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
                 'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-                'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+                'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0, // 15
             ];
             $this->model->edit('gaji_detail', 'id_detail', $row->id_detail, $data);
             // echo '<pre>';
@@ -1327,7 +1330,7 @@ class Gaji extends MY_Controller
             ($struktural ? $struktural : 0) +
             ($bpjs ? $bpjs->nominal : 0) +
             ($walas && !$struktural ? $walas->nominal : 0) +
-            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
+            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0) + $tambahan->total;
 
         $masaKerja = selisihTahun($guru->tmt);
         if ($masaKerja < 2 && $guru->sik === 'PTY') {
@@ -1341,7 +1344,7 @@ class Gaji extends MY_Controller
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0, // 15
+            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0, // 15
             'total' => $totalGaji, // 16
         ]);
     }
@@ -1436,7 +1439,7 @@ class Gaji extends MY_Controller
             'struktural' => $struktural ? $struktural : 0, // 12
             'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
             'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0,
+            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0,
             'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : '0' // 16
         ];
         if ($data_tambahan) {

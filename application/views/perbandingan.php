@@ -27,12 +27,12 @@
                                 <?php foreach ($hasil as $data):
                                     $selisih = $data['total'] - $data['sebelum'];
                                 ?>
-                                    <tr data-id="<?= $data['id'] ?>">
+                                    <tr>
                                         <td><?= $no++ ?></td>
-                                        <td><?= $data['nama'] ?></td>
+                                        <td class="click-nama" data-id="<?= $data['id'] ?>"><?= $data['nama'] ?></td>
                                         <td><?= $data['sik'] ?></td>
+                                        <td><?= $data['jabatan_old'] ?></td>
                                         <td><?= $data['jabatan'] ?></td>
-                                        <td><?= $data['lembaga'] ?></td>
                                         <td><?= rupiah($data['sebelum']) ?></td>
                                         <td><?= rupiah($data['total']) ?></td>
                                         <td>
@@ -46,13 +46,14 @@
                                         </td>
                                         <td>
                                             <?php if ($data['total'] < $data['sebelum']) { ?>
-                                                <form action="<?= base_url('perbandingan/sesuaikan') ?>" method="post">
+                                                <!-- <form action="<?= base_url('perbandingan/sesuaikan') ?>" method="post">
                                                     <input type="hidden" name="guru_id" value="<?= $data['guru_id'] ?>">
                                                     <input type="hidden" name="flat" value="<?= $data['total'] ?>">
                                                     <input type="hidden" name="sebelum" value="<?= $data['sebelum'] ?>">
                                                     <button class="btn btn-sm btn-primary">Sesuaikan</button>
-                                                </form>
+                                                </form> -->
                                             <?php }  ?>
+                                            <input type="text" class="form-control form-input uang" data-id="<?= $data['guru_id'] ?>" value="<?= $data['penyesuaian'] ?>">
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
@@ -71,14 +72,18 @@
 
     <!-- / Content -->
     <?php include 'foot.php' ?>
+    <script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
 
     <script>
+        $('.uang').mask('000.000.000.000', {
+            reverse: true
+        });
         $(document).ready(function() {
 
             var table = $('#table1').DataTable();
 
             // Event klik pada baris tabel untuk toggle card
-            $('#table1 tbody').on('click', 'tr', function() {
+            $('#table1 tbody').on('click', '.click-nama', function() {
                 var tr = $(this); // Baris yang diklik
                 var row = table.row(tr);
                 var id = tr.data('id'); // Ambil ID dari atribut data-id
@@ -200,4 +205,26 @@
                 minimumFractionDigits: 0
             }).format(number);
         }
+
+        $('#table1').on('change', '.form-input', function() {
+            var newValue = $(this).val(); // nilai baru dari input
+            var id = $(this).data('id'); // id dari baris data
+
+            $.ajax({
+                url: '<?= base_url("perbandingan/editPenyesuaian") ?>', // endpoint untuk update data
+                type: 'POST',
+                data: {
+                    id: id,
+                    value: newValue
+                },
+                dataType: 'json',
+                success: function(response) {
+                    console.log('update Ok');
+                },
+                error: function() {
+                    alert('Terjadi kesalahan saat mengupdate data');
+                    console.error();
+                }
+            });
+        });
     </script>
