@@ -205,7 +205,7 @@ class Perbandingan extends MY_Controller
             echo json_encode(['success' => true]);
         } else {
             $this->model->tambah('penyesuaian', ['guru_id' => $id, 'nominal' => $nominal]);
-            echo json_encode(['success' => false]);
+            echo json_encode(['success' => true]);
         }
     }
 }
