@@ -123,7 +123,7 @@ class Gaji extends MY_Controller
                             ($struktural ? $struktural : 0) +
                             ($bpjs ? $bpjs->nominal : 0) +
                             ($walas && !$struktural ? $walas->nominal : 0) +
-                            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) + $tambahan->total;
+                            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->nominal : 0) + $tambahan->total;
                         $masaKerja = selisihTahun($guru->tmt);
                         if ($masaKerja < 2 && $guru->sik === 'PTY') {
                             $ttlGaji = $ttlGaji * 0.8;

@@ -69,7 +69,7 @@ class Penyesuaian extends MY_Controller
                 ($struktural ? $struktural : 0) +
                 ($bpjs ? $bpjs->nominal : 0) +
                 ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $row->kriteria != 'Pengabdian' &&  !in_array($row->jabatan, $this->struktural) ? $penyesuaian->sebelum - $penyesuaian->sesudah : 0) +
+                ($penyesuaian && $row->kriteria != 'Pengabdian' &&  !in_array($row->jabatan, $this->struktural) ? $penyesuaian->nominal : 0) +
                 $tambahan->total;
 
             $dataKirim[] = [
