@@ -50,7 +50,7 @@ class Penyesuaian extends MY_Controller
                 $gapok = $gapok1 &&  !in_array($row->jabatan, $this->struktural) && $row->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
             }
 
-            $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
+            $fungsional = $this->model->getBy('fungsional', 'golongan_id', $row->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($row->tmt))->row();
             if ($row->kriteria == 'Pengabdian') {
                 $struktural = $this->pengabdian;
