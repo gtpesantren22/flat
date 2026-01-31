@@ -1,16 +1,20 @@
 <?php
-function selisihTahun($tanggal)
+function selisihTahun($tanggal_awal, $tanggal_akhir = null)
 {
-    // Ubah parameter tanggal menjadi objek DateTime
-    $tanggalAwal = new DateTime($tanggal);
-    // Buat objek DateTime untuk tanggal hari ini
-    $tanggalSekarang = new DateTime();
+    if (!$tanggal_akhir) {
+        $tanggal_akhir = date('Y-m-d');
+    }
 
-    // Hitung selisih menggunakan diff()
-    $selisih = $tanggalAwal->diff($tanggalSekarang);
+    $awal  = new DateTime($tanggal_awal);
+    $akhir = new DateTime($tanggal_akhir);
 
-    // Kembalikan selisih dalam tahun
-    return $selisih->y;
+    if ($awal > $akhir) {
+        return 0;
+    }
+
+    $diff = $awal->diff($akhir);
+
+    return (int) $diff->y;
 }
 
 function rupiah($rp)
