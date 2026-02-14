@@ -8,6 +8,7 @@ class Guru extends MY_Controller
         parent::__construct();
 
         $this->load->model('Modeldata', 'model');
+        $this->load->model('Gajimodel');
         $this->load->model('Auth_model');
 
         // $user = $this->Auth_model->current_user();
@@ -16,6 +17,8 @@ class Guru extends MY_Controller
         if (!$this->Auth_model->current_user()) {
             redirect('login/logout');
         }
+
+        $this->token = $this->model->getBy('settings', 'nama', 'token')->row('isi');
     }
 
     public function index()
@@ -110,5 +113,125 @@ class Guru extends MY_Controller
             $this->session->set_flashdata('error', 'guru gagal diupdate');
             redirect('guru');
         }
+    }
+
+    public function datatable()
+    {
+        $search   = $this->input->get('search') ?? '';
+        $page     = max(1, (int) ($this->input->get('page') ?? 1));
+        $perPage  = max(1, (int) ($this->input->get('perPage') ?? 10));
+        $sortBy   = $this->input->get('sortBy') ?? 'nama';
+        $sortDir  = strtoupper($this->input->get('sortDir') ?? 'ASC');
+
+        /* ================= API URL ================= */
+        $apiUrl = 'https://data.ppdwk.com/api/datatables?' . http_build_query([
+            'data'       => 'referensi-guru',
+            'page'       => $page,
+            'per_page'   => $perPage,
+            'q'          => $search,
+            'sortby'     => $sortBy,
+            'sortbydesc' => $sortDir,
+        ]);
+
+        /* ================= cURL ================= */
+        $ch = curl_init($apiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $this->token,
+                'Accept: application/json'
+            ],
+            CURLOPT_TIMEOUT => 15
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            // fallback aman
+            $result = [
+                'data'     => [],
+                'total'    => 0,
+                'page'     => $page,
+                'perPage'  => $perPage,
+                'lastPage' => 0,
+            ];
+        } else {
+            $api = json_decode($response, true);
+
+            /* ================= OUTPUT (TIDAK DIUBAH) ================= */
+            $total = (int) ($api['data']['total'] ?? 0);
+
+            $rawData = $api['data']['data'] ?? [];
+
+            $data = array_map(function ($row) {
+                $dtl = $this->Gajimodel->detailGuru($row['ptk_id'] ?? '');
+                $satminkal = '-';
+                $jabatan = '-';
+                $ijazah_terakhir = '-';
+
+                if (!empty($dtl['registrasi_ptk'])) {
+
+                    foreach ($dtl['registrasi_ptk'] as $r) {
+
+                        // Satminkal (PTK Induk)
+                        if ($satminkal === '-' && (string)$r['ptk_induk'] === '1') {
+                            $satminkal = $r['lembaga']['nama'] ?? '-';
+                        }
+
+                        // Jabatan
+                        if ($jabatan === '-' && $r['jenis_tugas'] == 1) {
+                            $jabatan = $r['jenis_jabatan']['nama'] ?? '-';
+                        }
+
+                        // Stop loop jika semua sudah ketemu
+                        if ($satminkal !== '-' && $jabatan !== '-') {
+                            break;
+                        }
+                    }
+                }
+                if (!empty($dtl['rwy_pend_formal']) && !empty($dtl['pendidikan_terakhir'])) {
+                    foreach ($dtl['rwy_pend_formal'] as $r) {
+                        if ((string)$r['rwy_pend_formal_id'] === (string)$dtl['pendidikan_terakhir']['rwy_pend_formal_id']) {
+                            $ijazah_terakhir = $r['jenjang_pendidikan']['nama'] ?? '-';
+                            break;
+                        }
+                    }
+                }
+
+                return [
+                    'nama'     => $row['nama'] ?? '',
+                    'satminkal'      => $satminkal,
+                    'jabatan'    => $jabatan,
+                    'kriteria'     => $row['jenis_ptk']['nama'] ?? '',
+                    'sik'     => $row['status_pegawai'] ?? '',
+                    'ijazah'     => $ijazah_terakhir,
+                    'tmt'     => $row['tmt_pengangkatan'] ?? '',
+                    'golongan'     => $row['jenis_golongan']['nama'] ?? '',
+                    'ket'     => $row['jenis_kesantrian'] ?? '',
+                ];
+            }, $rawData);
+
+
+            $result = [
+                'data'     => $data,
+                'total'    => $total,
+                'page'     => $page,
+                'perPage'  => $perPage,
+                'lastPage' => $perPage > 0 ? ceil($total / $perPage) : 0,
+            ];
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($result));
+    }
+
+    public function cekguru()
+    {
+        $dtl = $this->Gajimodel->detailGuru('a54323e2-8062-4a29-8f31-84c0433a7567');
+        var_dump($dtl);
+        exit;
     }
 }

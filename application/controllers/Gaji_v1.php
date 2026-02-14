@@ -7,7 +7,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class Gaji extends CI_Controller
+class GajiV1 extends CI_Controller
 {
     public function __construct()
     {
