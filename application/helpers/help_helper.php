@@ -49,7 +49,7 @@ function bulan($bulan)
         "Desember"
     ];
 
-    return isset($namaBulan[$bulan]) ? $namaBulan[$bulan] : date('F');
+    return isset($namaBulan[$bulan]) ? $namaBulan[$bulan] : 'Non-Valid';
 }
 
 function formatUangSingkat($angka)

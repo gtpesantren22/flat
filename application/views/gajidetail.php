@@ -1,7 +1,7 @@
     <?php
     include 'head.php';
     $a = 1;
-    $url = $datagaji->status == 'kunci' ? base_url('gaji/detail3/' . $datagaji->gaji_id) : base_url('gaji/detail2/' . $datagaji->gaji_id);
+    $url = $datagaji->status == 'kunci' ? base_url('gaji/detail3') : base_url('gaji/detail2');
     ?>
 
     <!-- Content -->
@@ -12,30 +12,72 @@
                     <!-- <div class="card-header">
                         Data Gaji Guru/Karyawan
                     </div> -->
+
                     <div class="card-body">
                         <h5 class="card-title">
                             <?= $datagaji->status == 'kunci' ? "<span class='text-danger bx bxs-key'>locked</span> || " : '' ?> Data Gaji Guru/Karyawan
-                            <a class="btn btn-outline-primary btn-sm float-end tbl-confirm" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-refresh"></i> Generate Ulang</a>
-                            <!-- <a class="btn btn-outline-danger btn-sm float-end tbl-confirm" value="Fitur ini akan mengunci dan mempermanenkan data" href="<?= base_url('gaji/kunci/' . $idgaji) ?>"><i class="bx bxs-key"></i> Kunci Data</a> -->
-                            <button class="btn btn-outline-danger btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modal-kunci"><i class="bx bxs-key"></i> Kunci Data</button>
+                            <!-- <a class="btn btn-outline-primary btn-sm float-end tbl-confirm" value="Fitur ini akan men-generate ulang semua data yang sudah ada" href="<?= base_url('gaji/regenerate/' . $idgaji) ?>"><i class="bx bx-refresh"></i> Generate Ulang</a> -->
+                            <!-- <button class="btn btn-outline-danger btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modal-kunci"><i class="bx bxs-key"></i> Kunci Data</button> -->
                             <div class="btn-group float-end">
-                                <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-spreadsheet"></i> Export to Excel</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-menu"></i> Menu</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item tbl-confirm" value="Pastikan data gaji nya sudah dikunci terlebih dahulu" href="<?= base_url('gaji/exportGajiV2/' . $idgaji) ?>">Export Gaji</a></li>
-                                    <li><a class="dropdown-item" href="<?= base_url('gaji/exportPotongan/' . $potong->potongan_id) ?>">Export Potongan</a></li>
+                                    <li><a class="dropdown-item " href="<?= base_url('gaji/regenerate/' . $idgaji) ?>">Regenerate</a></li>
+                                    <li><a class="dropdown-item tbl-confirm" value="Fitur ini akan mengupdate nominal gaji berdasarkan data guru yang terbaru" href=" <?= base_url('sinc_guru/reloadNominal/' . $idgaji) ?>">Reload Nominal</a></li>
+                                    <li><a class="dropdown-item cursor-pointer text-danger" data-bs-toggle="modal" data-bs-target="#modal-kunci"><i class="bx bxs-key"></i> Kunci Gaji</a></li>
                                 </ul>
                             </div>
+                            <?php if ($potong): ?>
+                                <div class=" btn-group float-end">
+                                    <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-spreadsheet"></i> Export to Excel</button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item tbl-confirm" value="Pastikan data gaji nya sudah dikunci terlebih dahulu" href="<?= base_url('gaji/exportGajiV2/' . $idgaji) ?>">Export Gaji</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('gaji/exportPotongan/' . $potong->potongan_id) ?>">Export Potongan</a></li>
+                                    </ul>
+                                </div>
+                            <?php endif ?>
                         </h5>
+
+                        <!-- TOOLBAR -->
+                        <div class="row px-4 py-2 align-items-center">
+                            <!-- PER PAGE (KIRI) -->
+                            <div class="col-md-6 col-12 mb-2 mb-md-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="mb-0 fw-semibold">Show</label>
+                                    <select id="perPage" class="form-select form-select w-auto">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                    <span class="fw-semibold">entries</span>
+                                </div>
+                            </div>
+
+                            <!-- SEARCH (KANAN) -->
+                            <div class="col-md-6 col-12 text-md-end">
+                                <div class="input-group input-group w-60 w-md-50 ms-md-auto">
+                                    <span class="input-group-text">
+                                        <i class="bx bx-search"></i>
+                                    </span>
+                                    <input
+                                        type="search"
+                                        id="search"
+                                        class="form-control"
+                                        placeholder="Cari data...">
+                                </div>
+                            </div>
+                        </div>
+
                         <p class="card-text"></p>
                         <div class="table-responsive card-table">
-                            <table class="table table-sm" id="table1">
+                            <table class="table table-sm" id="">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Nama Guru</th>
                                         <th>Satminkal</th>
                                         <th>Jabatan</th>
-                                        <th>Golongan</th>
+                                        <th>Gol</th>
                                         <th>SIK</th>
                                         <th>Ijazah</th>
                                         <th>TMT</th>
@@ -43,10 +85,27 @@
                                         <th>#</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tableBody">
 
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between p-3 border-top">
+
+                            <!-- INFO -->
+                            <div class="text-muted small mb-2 mb-md-0">
+                                Menampilkan
+                                <span id="startRecord">1</span>
+                                sampai
+                                <span id="endRecord">10</span>
+                                dari
+                                <span id="totalRecords">100</span>
+                                entri
+                            </div>
+
+                            <!-- PAGINATION -->
+                            <div id="pagination"></div>
+
                         </div>
                         <!-- <button type="submit" class="btn btn-primary">Simpan</button> -->
                     </div>
@@ -212,75 +271,6 @@
 
     <script>
         $('document').ready(function() {
-
-            $('#table1').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
-                    "url": "<?= $url ?>",
-                    "type": "POST",
-
-                },
-                "columns": [{
-                        "data": null,
-                        "render": function(data, type, row, meta) {
-                            return meta.row + meta.settings._iDisplayStart + 1; // Nomor urut
-                        }
-                    },
-                    {
-                        "data": 2
-                    },
-                    {
-                        "data": 3
-                    },
-                    {
-                        "data": 4
-                    },
-                    {
-                        "render": function(data, type, row, meta) {
-                            return row[5] + '-' + row[17];
-                        }
-                    },
-                    {
-                        "data": 6
-                    },
-                    {
-                        "data": 7
-                    },
-                    {
-                        "render": function(data, type, row) {
-                            var tmt = row[8];
-                            var startYear = new Date(tmt).getFullYear();
-                            var currentYear = new Date().getFullYear();
-                            var difference = currentYear - startYear;
-                            return tmt + `
-                                <span class="badge bg-secondary">${difference} thn</span>
-                            `;
-                        }
-                    },
-                    {
-                        "render": function(data, type, row) {
-                            var total = row[16];
-                            var potong = row[18];
-                            return `
-                                <b class="text-bold text-primary">${formatRupiah(total-potong)}</b>
-                            `;
-                        }
-
-                    },
-                    {
-                        "render": function(data, type, row) {
-                            return `
-                                <button class="btn btn-xs btn-warning btn-detail" data-id="${row[1]}" data-nama="${row[2]}" data-satminkal="${row[3]}" data-sik="${row[6]}" data-gapok="${formatRupiah(row[9])}" data-fungsional="${formatRupiah(row[10])}" data-kinerja="${formatRupiah(row[11])}" data-bpjs="${formatRupiah(row[13])}" data-struktural="${formatRupiah(row[12])}" data-walas="${formatRupiah(row[14])}" data-penyesuaian="${formatRupiah(row[15])}" data-tambahan="${formatRupiah(row[20])}" data-total="${formatRupiah(row[16])}" data-guru_id="${row[19]}" data-kriteria="${row[21]}">Rincian</button>
-                            `;
-                        }
-
-                    },
-
-                ],
-                "pageLength": 10,
-                "searchDelay": 500
-            });
 
             $(document).on('submit', '.form-update', function(e) {
                 e.preventDefault(); // Mencegah form dari reload halaman
@@ -527,4 +517,174 @@
                 }
             });
         })
+    </script>
+
+    <script>
+        let state = {
+            page: 1,
+            perPage: 10,
+            search: '',
+            sortBy: 'nama',
+            sortDir: 'ASC',
+            total: 0,
+            gaji_id: '<?= $idgaji ?>',
+            bulan: <?= $datagaji->bulan ?>,
+            tahun: <?= $datagaji->tahun ?>
+        };
+
+        function loadData() {
+            const params = new URLSearchParams(state).toString();
+
+            fetch(`<?= base_url('gaji/detail2') ?>?${params}`)
+                .then(res => res.json())
+                .then(res => {
+                    renderTable(res.data, res);
+                    renderPagination(res);
+                    state.total = res.total;
+                    info(state.perPage, state.page, state.total);
+                });
+        }
+
+        function renderTable(data, meta) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(data)) return;
+            let start = (meta.page - 1) * meta.perPage;
+
+            data.forEach((row, index) => {
+                let wrn = row.warna != '' && row.warna != null ? row.warna : 'black'
+                tbody.innerHTML += `
+                    <tr style="color: ${wrn}">
+                        <td>${start + index + 1}</td>
+                        <td>${row.nama}</td>
+                        <td>${row.satminkal}</td>
+                        <td>${row.jabatan}</td>
+                        <td>${row.golongan}</td>
+                        <td>${row.sik}</td>
+                        <td>${row.ijazah}</td>
+                        <td>${row.tmt} <span class="badge bg-secondary">${selisihTahun(row.tmt)} thn</span></td>
+                        <td>${formatRupiah(row.total_gaji-row.potongan)}</td>
+                        <td>
+                            <button class="btn btn-xs btn-warning btn-detail" data-id="<?= $datagaji->gaji_id ?>" data-nama="${row['nama']}" data-satminkal="${row['satminkal']}" data-sik="${row['sik']}" data-gapok="${formatRupiah(row['gapok'])}" data-fungsional="${formatRupiah(row['fungsional'])}" data-kinerja="${formatRupiah(row['kinerja'])}" data-bpjs="${formatRupiah(row['bpjs'])}" data-struktural="${formatRupiah(row['struktural'])}" data-walas="${formatRupiah(row['walas'])}" data-penyesuaian="${formatRupiah(row['penyesuaian'])}" data-tambahan="${formatRupiah(row['tambahan'])}" data-total="${formatRupiah(row['total_gaji'])}" data-guru_id="${row['guru_id']}" data-kriteria="${row['kriteria']}">Rincian</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderPagination(meta) {
+            const pag = document.getElementById('pagination');
+            pag.innerHTML = `
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-rounded"></ul>
+                </nav>
+            `;
+
+            const ul = pag.querySelector('ul');
+
+            const current = meta.page;
+            const last = meta.lastPage;
+            const delta = 1;
+
+            function addButton(label, page = null, active = false, disabled = false) {
+
+                let liClass = 'page-item';
+                if (active) liClass += ' active';
+                if (disabled) liClass += ' disabled';
+
+                let content = label;
+                if (label === '«') {
+                    content = `<i class="icon-base bx bx-chevrons-left icon-sm"></i>`;
+                    liClass += ' first';
+                }
+                if (label === '»') {
+                    content = `<i class="icon-base bx bx-chevrons-right icon-sm"></i>`;
+                    liClass += ' last';
+                }
+
+                ul.innerHTML += `
+                    <li class="${liClass}">
+                        <a class="page-link"
+                        href="javascript:void(0);"
+                        ${(!disabled && page) ? `onclick="goPage(${page})"` : ''}>
+                        ${content}
+                        </a>
+                    </li>
+                `;
+            }
+
+            // Prev
+            addButton('«', current - 1, false, current === 1);
+
+            // Page 1
+            addButton(1, 1, current === 1);
+
+            let start = Math.max(2, current - delta);
+            let end = Math.min(last - 1, current + delta);
+
+            if (start > 2) addButton('...', null, false, true);
+
+            for (let i = start; i <= end; i++) {
+                addButton(i, i, current === i);
+            }
+
+            if (end < last - 1) addButton('...', null, false, true);
+
+            // Last page
+            if (last > 1) addButton(last, last, current === last);
+
+            // Next
+            addButton('»', current + 1, false, current === last);
+        }
+
+
+        function goPage(page) {
+            state.page = page;
+            loadData();
+        }
+
+        function sort(field) {
+            state.sortDir = state.sortDir === 'ASC' ? 'DESC' : 'ASC';
+            state.sortBy = field;
+            loadData();
+        }
+
+        function info(perpage, page, total) {
+            document.getElementById('startRecord').textContent = (page - 1) * perpage + 1;
+            document.getElementById('endRecord').textContent = Math.min(page * perpage, total);
+            document.getElementById('totalRecords').textContent = total;
+        }
+
+        /* ===== EVENTS ===== */
+        document.getElementById('search').addEventListener('input', e => {
+            state.search = e.target.value;
+            state.page = 1;
+            loadData();
+            info(state.perPage, state.page, state.total);
+        });
+
+        document.getElementById('perPage').addEventListener('change', e => {
+            state.perPage = e.target.value;
+            state.page = 1;
+            loadData();
+            info(state.perPage, state.page, 0);
+        });
+
+        /* INIT */
+        loadData();
+
+        function selisihTahun(a, b = new Date().toISOString().slice(0, 10)) {
+            const awal = new Date(a);
+            const akhir = new Date(b);
+            if (awal > akhir) return 0;
+
+            let y = akhir.getFullYear() - awal.getFullYear();
+            if (
+                akhir.getMonth() < awal.getMonth() ||
+                (akhir.getMonth() === awal.getMonth() && akhir.getDate() < awal.getDate())
+            ) y--;
+
+            return y;
+        }
     </script>

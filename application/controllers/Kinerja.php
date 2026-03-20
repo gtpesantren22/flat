@@ -27,7 +27,17 @@ class Kinerja extends MY_Controller
         $data['user'] = $this->Auth_model->current_user();
 
         $data['data'] = $this->model->getdata('kinerja')->result();
-        $data['absen'] = $this->model->getGroup('kehadiran', 'kehadiran_id')->result();
+
+        $data['absen'] = $this->db_active->query("
+            SELECT
+                kehadiran_id,
+                MAX(bulan) AS bulan,
+                MAX(tahun) AS tahun
+            FROM kehadiran
+            GROUP BY kehadiran_id
+            ORDER BY tahun DESC, bulan DESC
+        ")->result();
+
 
         $this->load->view('kinerja', $data);
     }

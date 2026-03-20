@@ -28,8 +28,8 @@
                                     <tr>
                                         <td><?= bulan($row->bulan) . ' ' . $row->tahun ?></td>
                                         <td>
-                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $row->id ?>">Cek</button>
-                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $row->id ?>">Refresh</button>
+                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $row->honor_id ?>">Cek</button>
+                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $row->honor_id ?>">Refresh</button>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>

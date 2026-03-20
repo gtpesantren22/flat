@@ -22,7 +22,6 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Keterangan</th>
-                                        <th>Tahun Pelajaran</th>
                                         <th>Total Gaji</th>
                                         <th>Total Potongan</th>
                                         <th>Total Akhir</th>
@@ -34,10 +33,9 @@
                                         <tr>
                                             <td><?= $a++; ?></td>
                                             <td><?= $gaji['status'] == 'kunci' ? "<span class='text-warning bx bxs-key'></span>" : '' ?> <?= bulan($gaji['bulan']) . ' ' . $gaji['tahun'] ?></td>
-                                            <td><?= $gaji['tapel'] ?></td>
                                             <td><?= rupiah($gaji['total']) ?></td>
-                                            <td><?= rupiah($gaji['potong']) ?></td>
-                                            <td><?= rupiah($gaji['total'] - $gaji['potong']) ?></td>
+                                            <td><?= rupiah($gaji['potongan']) ?></td>
+                                            <td><?= rupiah($gaji['total'] - $gaji['potongan']) ?></td>
                                             <td>
                                                 <button onclick="window.location='<?= base_url('gaji/detail/' . $gaji['gaji_id']) ?>'" class="btn btn-info btn-sm"><i class="bx bx-detail"></i> Detail</button>
                                                 <a href="<?= base_url('gaji/hapus/' . $gaji['gaji_id']) ?>" class="btn btn-danger btn-sm tombol-hapus"><i class="bx bx-trash"></i> Hapus</a>
@@ -47,7 +45,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th colspan="3">TOTAL</th>
+                                        <th colspan="2">TOTAL</th>
                                         <th><?= rupiah($t_akhir) ?></th>
                                         <th><?= rupiah($p_akhir) ?></th>
                                         <th><?= rupiah($t_akhir - $p_akhir) ?></th>
@@ -111,3 +109,8 @@
 
     <!-- / Content -->
     <?php include 'foot.php' ?>
+    <script>
+        $(document).ready(function() {
+            $('#table1').DataTable();
+        });
+    </script>

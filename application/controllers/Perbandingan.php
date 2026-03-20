@@ -9,6 +9,8 @@ class Perbandingan extends MY_Controller
 
         $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
+        $this->load->model('Gajimodel', 'm_gaji');
+
         $this->db_utama = $this->load->database('utama', TRUE);
 
         $user = $this->Auth_model->current_user();
@@ -33,9 +35,10 @@ class Perbandingan extends MY_Controller
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Perbandingan');
-        $bulan = date('m');
-        $tahun = date('Y');
-        $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
+        // $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
+        $gaji = $this->model->query("SELECT * FROM gaji ORDER BY tahun DESC, bulan DESC LIMIT 1 ")->row();
+        $bulan = $gaji->bulan;
+        $tahun = $gaji->tahun;
 
         $dataguru = $this->db_active->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id ")->result();
         $kirim = [];
@@ -52,35 +55,16 @@ class Perbandingan extends MY_Controller
                 ->get()
                 ->row();
 
-            $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
+            // Gaji data
+            $gapok = $this->m_gaji->gapok($guru->guru_id, $guru->kriteria, $guru->sik, $guru->golongan, $guru->tmt, $guru->jabatan, $bulan, $tahun);
+            $fungsional = $this->m_gaji->fungsional($guru->golongan, $guru->kriteria, $guru->sik, $guru->ijazah);
+            $kinerja = $this->m_gaji->kinerja($guru->guru_id, $bulan, $tahun, $guru->tmt,  $guru->kriteria,  $guru->jabatan);
+            $struktural = $this->m_gaji->struktural($guru->kriteria, $guru->jabatan, $guru->satminkal);
+            $bpjs = $this->m_gaji->bpjs($guru->guru_id);
+            $penyesuaian = $this->m_gaji->penyesuaian($guru->guru_id,  $guru->kriteria,  $guru->jabatan, $guru->sik);
+            $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji->gaji_id);
 
-            if ($guru->sik === 'PTY') {
-                $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-                $gapok = $gapok ? $gapok->nominal : 0;
-            } else {
-                $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
-            }
-
-            $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
-            $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
-            if ($guru->kriteria == 'Pengabdian') {
-                $struktural = $this->pengabdian;
-            } else {
-                $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
-            }
-            $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
-            $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
-            $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-            $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
-            $totalGaji = ($gapok) +
-                ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0) +
-                ($struktural ? $struktural : 0) +
-                ($bpjs ? $bpjs->nominal : 0) +
-                ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $guru->kriteria != 'Pengabdian' && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0) +
-                $tambahan->total;
+            $totalGaji = $gapok + $fungsional + $kinerja + $struktural + $bpjs + $penyesuaian + $tambahan;
             $masaKerja = selisihTahun($guru->tmt);
             if ($masaKerja < 2 && $guru->sik === 'PTY') {
                 $totalGaji = $totalGaji * 0.8;
@@ -90,12 +74,12 @@ class Perbandingan extends MY_Controller
                 'nama' =>  $guru->nama,
                 'guru_id' =>  $guru->guru_id,
                 'sik' =>  $guru->sik,
-                'lembaga' =>  $satminkal ? $satminkal->nama : '',
+                'lembaga' =>  $satminkal,
                 'jabatan' =>  $jabatan ? $jabatan->nama : '',
                 'jabatan_old' =>  $jabatan_old ? $jabatan_old->nama : '',
                 'sebelum' =>  $row->nominal,
                 'total' => $totalGaji,
-                'penyesuaian' => $penyesuaian ? $penyesuaian->nominal : 0,
+                'penyesuaian' => $penyesuaian,
             ];
         }
         $data['hasil'] = $kirim;
@@ -105,12 +89,13 @@ class Perbandingan extends MY_Controller
 
     public function detail()
     {
+        $this->Auth_model->log_activity($this->userID, 'Akses detail C: Perbandingan');
         $id = $this->input->post('id', 'true');
         $data = $this->model->getBy('perbandingan', 'id', $id)->row();
-        $bulan = date('m');
-        $tahun = date('Y');
-        $gaji = $this->model->getBy2('gaji', 'tahun', $tahun, 'bulan', $bulan)->row();
-        $this->Auth_model->log_activity($this->userID, 'Akses detail C: Perbandingan');
+
+        $gaji = $this->model->query("SELECT * FROM gaji ORDER BY tahun DESC, bulan DESC LIMIT 1 ")->row();
+        $bulan = $gaji->bulan;
+        $tahun = $gaji->tahun;
 
         $dataguru = $this->db_active->query("SELECT a.* FROM perbandingan a JOIN guru b ON a.guru_id=b.guru_id WHERE a.guru_id = '$data->guru_id' ")->row();
 
@@ -120,48 +105,35 @@ class Perbandingan extends MY_Controller
         $jabatan = $this->model->getBy('jabatan', 'jabatan_id', $guru->jabatan)->row();
         $golongan = $this->model->getBy('golongan', 'id', $guru->golongan)->row();
         $ijazah = $this->model->getBy('ijazah', 'id', $guru->ijazah)->row();
-        $hadir = $this->model->getBy3('kehadiran', 'guru_id', $guru->guru_id, 'bulan', date('m'), 'tahun', date('Y'))->row();
 
-        if ($guru->sik === 'PTY') {
-            $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-            $gapok = $gapok ? $gapok->nominal : 0;
-        } else {
-            $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $bulan AND tahun = '$tahun' GROUP BY honor.guru_id")->row();
-            $gapok = $gapok1 && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
-        }
-
-        $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $guru->golongan, 'kategori', $guru->kategori)->row();
-        $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
-        if ($guru->kriteria == 'Pengabdian') {
-            $struktural = $this->pengabdian;
-        } else {
-            $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
-        }
-        $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
-        $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
-        $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-        $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$gaji->gaji_id' ")->row();
+        $gapok = $this->m_gaji->gapok($guru->guru_id, $guru->kriteria, $guru->sik, $guru->golongan, $guru->tmt, $guru->jabatan, $bulan, $tahun);
+        $fungsional = $this->m_gaji->fungsional($guru->golongan, $guru->kriteria, $guru->sik, $guru->ijazah);
+        $kinerja = $this->m_gaji->kinerja($guru->guru_id, $bulan, $tahun, $guru->tmt,  $guru->kriteria,  $guru->jabatan);
+        $struktural = $this->m_gaji->struktural($guru->kriteria, $guru->jabatan, $guru->satminkal);
+        $bpjs = $this->m_gaji->bpjs($guru->guru_id);
+        $penyesuaian = $this->m_gaji->penyesuaian($guru->guru_id,  $guru->kriteria,  $guru->jabatan, $guru->sik);
+        $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji->gaji_id);
 
         echo json_encode([
             'id' =>  $row->id,
             'nama' =>  $guru->nama,
             'sik' =>  $guru->sik,
-            'satminkal' =>  $satminkal->nama,
-            'jabatan' =>  $jabatan->nama,
-            'golongan' =>  $golongan->nama,
-            'ijazah' =>  $ijazah->nama,
+            'satminkal' =>  $satminkal ? $satminkal->nama : '',
+            'jabatan' =>  $jabatan ? $jabatan->nama : '',
+            'golongan' =>  $golongan ? $golongan->nama : '',
+            'ijazah' =>  $ijazah ? $ijazah->nama : '',
             'tmt' =>  $guru->tmt,
             'masa' =>  selisihTahun($guru->tmt),
             'ket' =>  $guru->santri,
             'sebelum' =>  $row->nominal,
-            'gapok' =>  $gapok ? $gapok : '0', // 9
-            'fungsional' => $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-            'kinerja' => $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($row->jabatan, $this->struktural) ? $kinerja->nominal * ($hadir ? $hadir->kehadiran : 0) : 0, // 11
-            'struktural' => $struktural ? $struktural : 0, // 12
-            'bpjs' => $bpjs ? $bpjs->nominal : 0, // 13
-            'walas' => $walas && !$struktural ? $walas->nominal : 0, // 14
-            'penyesuaian' => $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0, // 15
-            'tambahan' => $tambahan && $tambahan->total != null ? $tambahan->total : 0 // 16
+            'gapok' =>  $gapok, // 9
+            'fungsional' => $fungsional, // 10
+            'kinerja' => $kinerja, // 11
+            'struktural' => $struktural, // 12
+            'bpjs' => $bpjs, // 13
+            'walas' =>  0, // 14
+            'penyesuaian' => $penyesuaian, // 15
+            'tambahan' => $tambahan // 16
         ]);
     }
 

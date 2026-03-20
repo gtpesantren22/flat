@@ -13,16 +13,17 @@ class Gaji extends MY_Controller
     {
         parent::__construct();
 
-        $this->load->model('Modeldata', 'model');
         $this->load->model('Auth_model');
+        if (!$this->Auth_model->current_user()) {
+            redirect('login/logout');
+        }
+        $this->load->model('Modeldata', 'model');
+        $this->load->model('Gajimodel', 'm_gaji');
 
         $user = $this->Auth_model->current_user();
         $this->userID = $user->id_user;
 
-        $this->tahun = '2024/2025';
-        if (!$this->Auth_model->current_user()) {
-            redirect('login/logout');
-        }
+        $this->tahun = '2025/2026';
 
         $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
@@ -47,105 +48,18 @@ class Gaji extends MY_Controller
         $gajiAwal = $this->model->getOrder2('gaji', 'tahun', 'DESC', 'bulan', 'DESC')->result();
 
         foreach ($gajiAwal as  $value) {
-            if ($value->status == 'kunci') {
-                $totalawal = 0;
-                $potongawal = 0;
 
-                $info = $this->db_active->query("SELECT * FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
-                $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE bulan = '$value->bulan' AND tahun = '$value->tahun'")->row();
-                $total = $this->db_active->query("SELECT SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) as total FROM gaji_detail WHERE gaji_id = '$value->gaji_id'")->row();
-                $total = $total ? $total->total : 0;
-                $masaKerja = selisihTahun($info->tmt);
-                if ($masaKerja < 2 && $info->sik === 'PTY') {
-                    $totalGaji = $total * 0.8;
-                } else {
-                    $totalGaji = $total;
-                }
-                $datakirim[] = [
-                    'gaji_id' => $value->gaji_id,  // 1
-                    'status' => $value->status,  // 1
-                    'tapel' => $value->tapel,  // 1
-                    'bulan' => $value->bulan,  // 1
-                    'tahun' => $value->tahun,  // 1
-                    'total' => $totalGaji,
-                    'potong' => $potong->total //18
-                ];
-                $totalawal += $total ? $totalGaji : 0;
-                $potongawal += $potong ? $potong->total : 0;
-            } else {
+            $datakirim[] = [
+                'gaji_id' => $value->gaji_id,  // 1
+                'status' => $value->status,  // 1
+                'bulan' => $value->bulan,  // 1
+                'tahun' => $value->tahun,  // 1
+                'total' => $value->total,
+                'potongan' => $value->potongan //18
+            ];
 
-                $query = $this->model->getBy('gaji_detail', 'gaji_id', $value->gaji_id);
-                $totalawal = 0;
-                $potongawal = 0;
-
-                if ($query->row()) {
-                    foreach ($query->result() as $row) {
-                        $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
-                        $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $value->bulan, 'tahun', $value->tahun)->row();
-
-                        if (!$guru) {
-                            continue; // Skip jika data guru tidak ditemukan
-                        }
-
-                        // Hitung gaji pokok (gapok)
-                        if ($guru->sik === 'PTY') {
-                            $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-                            $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
-                        } else {
-                            $gapok = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $value->bulan AND tahun = '$value->tahun' GROUP BY honor.guru_id")->row();
-                            $gapok = $gapok && !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok->nominal : 0;
-                        }
-
-                        // Data tunjangan lainnya
-                        $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
-                        $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
-                        if ($guru->kriteria == 'Pengabdian') {
-                            $struktural = $this->pengabdian;
-                        } else {
-                            $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
-                        }
-                        $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
-                        $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
-                        $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-                        $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$value->gaji_id' ")->row();
-
-                        // Hitung total potongan
-                        $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = ? AND bulan = ? AND tahun = ?", [
-                            $row->guru_id,
-                            $value->bulan,
-                            $value->tahun
-                        ])->row();
-
-                        // Hitung total awal
-                        $ttlGaji = ($gapok) +
-                            ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                            ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
-                            ($struktural ? $struktural : 0) +
-                            ($bpjs ? $bpjs->nominal : 0) +
-                            ($walas && !$struktural ? $walas->nominal : 0) +
-                            ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) ? $penyesuaian->nominal : 0) + 
-                            $tambahan->total;
-                        $masaKerja = selisihTahun($guru->tmt);
-                        if ($masaKerja < 2 && $guru->sik === 'PTY') {
-                            $ttlGaji = $ttlGaji * 0.8;
-                        }
-                        $totalawal += $ttlGaji;
-                        $potongawal += $potong ? $potong->total : 0;
-                    }
-                }
-                $datakirim[] = [
-                    'gaji_id' => $value->gaji_id,  // 1
-                    'status' => $value->status,  // 1
-                    'tapel' => $value->tapel,  // 1
-                    'bulan' => $value->bulan,  // 1
-                    'tahun' => $value->tahun,  // 1
-                    'total' => $totalawal, // Per gaji, bukan total akumulasi
-                    'potong' => $potongawal
-                ];
-            }
-
-            $totalakhir += $totalawal;
-            $potongakhir += $potongawal;
+            $totalakhir += $value->total;
+            $potongakhir += $value->potongan;
         }
         $data['gaji'] = $datakirim;
         $data['t_akhir'] = $totalakhir;
@@ -170,7 +84,54 @@ class Gaji extends MY_Controller
             $data['potong'] = $this->model->getBy2('potongan', 'bulan', $data['datagaji']->bulan, 'tahun', $data['datagaji']->tahun)->row();
             $this->load->view('gajidetail', $data);
         } else {
-            redirect('gaji/generate/' . $id);
+            redirect('gaji/regenerate/' . $id);
+        }
+    }
+
+    public function regenerate($id)
+    {
+        $this->Auth_model->log_activity($this->userID, 'Akses re generate gaji C: Gaji');
+
+        $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
+        if ($cek->status === 'kunci') {
+            $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
+            redirect('gaji/detail/' . $id);
+            die();
+        }
+        $this->model->hapus('gaji_detail', 'gaji_id', $id);
+        $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, guru.kriteria, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , golongan.kategori as kategori, guru.email, guru.rekening, guru.hp FROM guru
+        LEFT JOIN satminkal ON guru.satminkal=satminkal.id
+        LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
+        LEFT JOIN ijazah ON guru.ijazah=ijazah.id
+        LEFT JOIN golongan ON guru.golongan=golongan.id
+        ")->result();
+        foreach ($guru as $guruhasil) {
+            $data = [
+                'guru_id' => $guruhasil->guru_id,
+                'nama' => $guruhasil->nama,
+                'sik' => $guruhasil->sik,
+                'tmt' => $guruhasil->tmt,
+                'satminkal' => $guruhasil->satminkal,
+                'jabatan' => $guruhasil->jabatan,
+                'ijazah' => $guruhasil->ijazah,
+                'golongan' => $guruhasil->golongan,
+                'santri' => $guruhasil->santri,
+                'kategori' => $guruhasil->kategori,
+                'kriteria' => $guruhasil->kriteria,
+                'gaji_id' => $id,
+                'email' => $guruhasil->email,
+                'hp' => $guruhasil->hp,
+                'rekening' => $guruhasil->rekening,
+                'is_dirty' => 1
+            ];
+            $this->model->tambah('gaji_detail', $data);
+        }
+        if ($this->db_active->affected_rows() > 0) {
+            $this->session->set_flashdata('ok', 'Gaji berhasil di generate');
+            redirect('gaji/detail/' . $id);
+        } else {
+            $this->session->set_flashdata('error', 'Gaji gagal di generate');
+            redirect('gaji/detail/' . $id);
         }
     }
 
@@ -192,211 +153,105 @@ class Gaji extends MY_Controller
         }
     }
 
-    public function generate($id)
-    {
-        $this->Auth_model->log_activity($this->userID, 'Akses genaatre gaji C: Gaji');
-
-        $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
-        if ($cek->status == 'kunci') {
-            $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
-            redirect('gaji');
-        }
-        $gajidata = $this->model->getBy('gaji_detail', 'gaji_id', $id)->row();
-        if ($gajidata) {
-            $this->session->set_flashdata('error', 'Gaji sudah digenerate');
-            redirect('gaji');
-        } else {
-            $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan, golongan.kategori as kategori, guru.email, guru.rekening, guru.hp FROM guru
-        LEFT JOIN satminkal ON guru.satminkal=satminkal.id
-        LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
-        LEFT JOIN ijazah ON guru.ijazah=ijazah.id
-        LEFT JOIN golongan ON guru.golongan=golongan.id
-        ")->result();
-            foreach ($guru as $guruhasil) {
-                $data = [
-                    'guru_id' => $guruhasil->guru_id,
-                    'nama' => $guruhasil->nama,
-                    'sik' => $guruhasil->sik,
-                    'tmt' => $guruhasil->tmt,
-                    'satminkal' => $guruhasil->satminkal,
-                    'jabatan' => $guruhasil->jabatan,
-                    'ijazah' => $guruhasil->ijazah,
-                    'golongan' => $guruhasil->golongan,
-                    'santri' => $guruhasil->santri,
-                    'kategori' => $guruhasil->kategori,
-                    'gaji_id' => $id,
-                    'email' => $guruhasil->email,
-                    'hp' => $guruhasil->hp,
-                    'rekening' => $guruhasil->rekening,
-                ];
-                $this->model->tambah('gaji_detail', $data);
-            }
-            if ($this->db_active->affected_rows() > 0) {
-                $this->session->set_flashdata('ok', 'Gaji berhasil di generate');
-                redirect('gaji/detail/' . $id);
-            } else {
-                $this->session->set_flashdata('error', 'Gaji gagal di generate');
-                redirect('gaji/detail/' . $id);
-            }
-        }
-    }
-
-    public function regenerate($id)
-    {
-        $this->Auth_model->log_activity($this->userID, 'Akses re generate gaji C: Gaji');
-
-        $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
-        if ($cek->status === 'kunci') {
-            $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
-            redirect('gaji/detail/' . $id);
-            die();
-        }
-        $this->model->hapus('gaji_detail', 'gaji_id', $id);
-        $guru = $this->db_active->query("SELECT guru.guru_id, guru.nama, guru.sik, guru.santri, guru.tmt, satminkal.nama as satminkal, jabatan.nama as jabatan, ijazah.nama as ijazah, golongan.nama as golongan , golongan.kategori as kategori, guru.email, guru.rekening, guru.hp FROM guru
-        LEFT JOIN satminkal ON guru.satminkal=satminkal.id
-        LEFT JOIN jabatan ON guru.jabatan=jabatan.jabatan_id
-        LEFT JOIN ijazah ON guru.ijazah=ijazah.id
-        LEFT JOIN golongan ON guru.golongan=golongan.id
-        ")->result();
-        foreach ($guru as $guruhasil) {
-            $data = [
-                'guru_id' => $guruhasil->guru_id,
-                'nama' => $guruhasil->nama,
-                'sik' => $guruhasil->sik,
-                'tmt' => $guruhasil->tmt,
-                'satminkal' => $guruhasil->satminkal,
-                'jabatan' => $guruhasil->jabatan,
-                'ijazah' => $guruhasil->ijazah,
-                'golongan' => $guruhasil->golongan,
-                'santri' => $guruhasil->santri,
-                'kategori' => $guruhasil->kategori,
-                'gaji_id' => $id,
-                'email' => $guruhasil->email,
-                'hp' => $guruhasil->hp,
-                'rekening' => $guruhasil->rekening,
-            ];
-            $this->model->tambah('gaji_detail', $data);
-        }
-        if ($this->db_active->affected_rows() > 0) {
-            $this->session->set_flashdata('ok', 'Gaji berhasil di generate');
-            redirect('gaji/detail/' . $id);
-        } else {
-            $this->session->set_flashdata('error', 'Gaji gagal di generate');
-            redirect('gaji/detail/' . $id);
-        }
-    }
-
     // Detail gaji sebelum dikunci
-    public function detail2($id)
+    public function detail2()
     {
         $this->Auth_model->log_activity($this->userID, 'Akses detail honor-sebelum kunci C: Gaji');
 
-        $draw = intval($this->input->post('draw'));
-        $start = intval($this->input->post('start'));
-        $length = intval($this->input->post('length'));
-        $search_value = isset($this->input->post('search')['value']) ? $this->input->post('search')['value'] : '';
+        $search  = $this->input->get('search') ?? '';
+        $page    = max(1, (int) ($this->input->get('page') ?? 1));
+        $perPage = max(1, (int) ($this->input->get('perPage') ?? 10));
+        $sortBy  = $this->input->get('sortBy') ?? 'nama';
+        $sortDir = strtoupper($this->input->get('sortDir') ?? 'ASC');
 
-        $length = $length > 0 ? $length : 10;
-        $start = $start >= 0 ? $start : 0;
-        // $bulanIni = date('m');
+        $gaji_id = $this->input->get('gaji_id');
 
-        $this->db_active->from('gaji_detail');
-        $this->db_active->where('gaji_id', $id);
+        $allowedSort = [
+            'nama',
+            'satminkal',
+            'jabatan',
+            'golongan',
+            'sik',
+            'ijazah',
+            'tmt',
+            'total_gaji',
+        ];
 
-        // Filter search
-        if (!empty($search_value)) {
+        if (!in_array($sortBy, $allowedSort)) {
+            $sortBy = 'nama';
+        }
+
+        $sortDir = $sortDir === 'DESC' ? 'DESC' : 'ASC';
+
+        $offset = ($page - 1) * $perPage;
+
+
+        /* ================= BASE QUERY ================= */
+
+        $this->db_active->from('gaji_detail gd');
+
+        $this->db_active->join('gaji g', 'g.gaji_id = gd.gaji_id');
+
+        if ($search) {
             $this->db_active->group_start();
-            $this->db_active->like('nama', $search_value);
-            $this->db_active->or_like('satminkal', $search_value);
-            $this->db_active->or_like('sik', $search_value);
-            $this->db_active->or_like('jabatan', $search_value);
+            $this->db_active->like('gd.nama', $search);
+            $this->db_active->or_like('gd.satminkal', $search);
+            $this->db_active->or_like('gd.jabatan', $search);
             $this->db_active->group_end();
         }
 
-        $total_records = $this->db_active->count_all_results('', false); // Count total records without limit
+        $this->db_active->where('gd.gaji_id', $gaji_id);
 
-        $this->db_active->limit($length, $start);
-        $query = $this->db_active->get();
-        $data = [];
-        $row_number = $start + 1;
-        $gajis = $this->model->getBy('gaji', 'gaji_id', $id)->row();
 
-        foreach ($query->result() as $row) {
-            $potong = $this->db_active->query("SELECT SUM(nominal) as total FROM potongan WHERE guru_id = '$row->guru_id' AND bulan = '$gajis->bulan' AND tahun = '$gajis->tahun' ")->row();
-            $guru = $this->model->getBy('guru', 'guru_id', $row->guru_id)->row();
-            $kehadiran = $this->model->getBy3('kehadiran', 'guru_id', $row->guru_id, 'bulan', $gajis->bulan, 'tahun', $gajis->tahun)->row();
+        /* ================= COUNT TOTAL ================= */
 
-            if ($guru->sik === 'PTY') {
-                $gapok = $this->model->getBy2('gapok', 'golongan_id', $guru->golongan, 'masa_kerja', selisihTahun($guru->tmt))->row();
-                $gapok = $gapok &&  !in_array($guru->jabatan, $this->struktural) ? $gapok->nominal : 0;
-            } else {
-                $gapok1 = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM honor WHERE guru_id = '$guru->guru_id' AND bulan = $gajis->bulan AND tahun = '$gajis->tahun' GROUP BY honor.guru_id")->row();
-                $gapok = $gapok1 &&  !in_array($guru->jabatan, $this->struktural) && $guru->kriteria != 'Karyawan' ? $gapok1->nominal : 0;
-            }
+        $total = $this->db_active->count_all_results('', false);
 
-            $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
-            $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
-            if ($guru->kriteria == 'Pengabdian') {
-                $struktural = $this->pengabdian;
-            } else {
-                $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
-            }
-            $bpjs = $this->model->getBy('bpjs', 'guru_id', $guru->guru_id)->row();
-            $walas = $this->model->getBy('walas', 'guru_id', $guru->guru_id)->row();
-            $penyesuaian = $this->model->getBy('penyesuaian', 'guru_id', $guru->guru_id)->row();
-            $tambahan = $this->db_active->query("SELECT SUM(tambahan.nominal*tambahan_detail.jumlah) AS total FROM tambahan_detail JOIN tambahan ON tambahan.id_tambahan=tambahan_detail.id_tambahan WHERE  guru_id = '$guru->guru_id' AND gaji_id = '$id' ")->row();
 
-            $totalGaji =
-                ($gapok) +
-                ($fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0) +
-                ($kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0) +
-                ($struktural ? $struktural : 0) +
-                ($bpjs ? $bpjs->nominal : 0) +
-                ($walas && !$struktural ? $walas->nominal : 0) +
-                ($penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0)
-                + $tambahan->total;
-            $masaKerja = selisihTahun($guru->tmt);
-            if ($masaKerja < 2 && $guru->sik === 'PTY') {
-                $totalGaji = $totalGaji * 0.8;
-            }
+        /* ================= DATA QUERY ================= */
 
-            $data[] = [
-                $row_number++, // 0
-                $row->gaji_id,  // 1
-                $row->nama, // 2
-                $row->satminkal, // 3
-                $row->jabatan, // 4 
-                $row->golongan, // 5
-                $row->sik, // 6
-                $row->ijazah, // 7
-                $row->tmt, // 8
-                $gapok, // 9
-                $fungsional && $guru->kriteria == 'Guru' && $guru->sik == 'PTY' && in_array($guru->ijazah, $this->minimum) ? $fungsional->nominal : 0, // 10
-                $kinerja && $guru->kriteria == 'Karyawan' &&  !in_array($guru->jabatan, $this->struktural) ? $kinerja->nominal * ($kehadiran ? $kehadiran->kehadiran : 0) : 0, // 11
-                $struktural ? $struktural : 0, // 12
-                $bpjs ? $bpjs->nominal : 0, // 13
-                $walas && !$struktural ? $walas->nominal : 0, // 14
-                $penyesuaian && $guru->kriteria != 'Pengabdian' &&  !in_array($guru->jabatan, $this->struktural) && $guru->sik == 'PTY' ? $penyesuaian->nominal : 0, // 15
-                $totalGaji, // 16
-                $row->kategori, // 17
-                $potong ? $potong->total : 0, //18
-                $row->guru_id, // 19
-                $tambahan->total, // 20
-                $guru->kriteria, // 21
-            ];
-        }
+        $this->db_active->select("
+            gd.*,
+            (gd.gapok+gd.fungsional+gd.kinerja+gd.struktural+
+            gd.bpjs+gd.penyesuaian+gd.tambahan+gd.walas) as total_gaji,
+            IFNULL(p.potongan,0) as potongan
+        ");
 
-        $output = [
-            "draw" => $draw,
-            "recordsTotal" => $total_records,
-            "recordsFiltered" => $total_records,
-            "data" => $data
+        $this->db_active->join(
+            "(
+                SELECT guru_id, bulan, tahun, SUM(nominal) potongan
+                FROM potongan
+                GROUP BY guru_id,bulan,tahun
+            ) p",
+            "p.guru_id = gd.guru_id AND p.bulan = g.bulan AND p.tahun = g.tahun",
+            "left",
+            false
+        );
+
+        /* ================= SORT ================= */
+
+        $this->db_active->order_by("gd.$sortBy", $sortDir);
+
+        /* ================= PAGINATION ================= */
+
+        $this->db_active->limit($perPage, $offset);
+
+        $data = $this->db_active->get()->result_array();
+
+
+        /* ================= RESULT ================= */
+
+        $result = [
+            'data'     => $data,
+            'total'    => $total,
+            'page'     => $page,
+            'perPage'  => $perPage,
+            'lastPage' => ceil($total / $perPage)
         ];
 
-        // Set content-type header and return JSON data
-        header('Content-Type: application/json');
-        echo json_encode($output);
-        // var_dump($output);
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($result));
     }
 
     // Detail kalau sudah dikunci

@@ -2,7 +2,7 @@
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <div class="row">
-            <div class="col-lg-7 mb-4 order-0">
+            <div class="col-lg-6 mb-4 order-0">
                 <div class="card">
                     <h5 class="card-header">
                         Tunjangan Kinerja
@@ -48,7 +48,7 @@
                 <!-- Bootstrap Table with Caption -->
 
             </div>
-            <div class="col-lg-5 mb-4 order-0">
+            <div class="col-lg-6 mb-4 order-0">
                 <div class="card">
                     <h5 class="card-header">
                         Data Kehadiran
@@ -68,8 +68,8 @@
                                     <tr>
                                         <td><?= bulan($absen->bulan) . ' ' . $absen->tahun ?></td>
                                         <td>
-                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $absen->id ?>">Cek</button>
-                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $absen->id ?>">Refresh</button>
+                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $absen->kehadiran_id ?>">Cek</button>
+                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $absen->kehadiran_id ?>">Refresh</button>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>

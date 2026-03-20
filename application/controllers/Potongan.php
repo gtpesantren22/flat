@@ -28,7 +28,14 @@ class Potongan extends MY_Controller
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db_active->query("SELECT * FROM potongan GROUP BY potongan_id ORDER BY tahun DESC, bulan DESC")->result();
+        $data['data'] = $this->db_active->query("SELECT *
+            FROM potongan
+            WHERE id IN (
+                SELECT MAX(id)
+                FROM potongan
+                GROUP BY potongan_id
+            )
+            ORDER BY tahun DESC, bulan DESC")->result();
 
         $this->load->view('potongan', $data);
     }
@@ -119,9 +126,32 @@ class Potongan extends MY_Controller
         $data['sub'] = '';
         $data['user'] = $this->Auth_model->current_user();
 
-        $data['data'] = $this->db_active->query("SELECT potongan.*, guru.nama, SUM(potongan.nominal) as total FROM potongan JOIN guru  ON guru.guru_id=potongan.guru_id WHERE potongan_id = '$id' GROUP BY potongan.guru_id ")->result();
+        $data['data'] = $this->db_active->query("
+            SELECT 
+                potongan.guru_id,
+                guru.nama,
+                MAX(potongan.id) AS id,
+                MAX(potongan.bulan) AS bulan,
+                MAX(potongan.tahun) AS tahun,
+                SUM(potongan.nominal) AS total
+            FROM potongan
+            JOIN guru ON guru.guru_id = potongan.guru_id
+            WHERE potongan_id = '$id'
+            GROUP BY potongan.guru_id, guru.nama
+        ")->result();
 
-        $jenispotongan =  $this->db_active->query("SELECT * FROM potongan WHERE potongan_id = '$id' AND ket IS NOT NULL AND ket != '' GROUP BY ket ")->result();
+        $jenispotongan = $this->db_active->query("
+            SELECT *
+            FROM potongan
+            WHERE id IN (
+                SELECT MAX(id)
+                FROM potongan
+                WHERE potongan_id = '$id'
+                AND ket IS NOT NULL
+                AND ket != ''
+                GROUP BY ket
+            )
+        ")->result();
         $datapotongan = [];
         foreach ($jenispotongan as $jenispotonganhasil) {
             $nomPotongan = $this->db_active->query("SELECT SUM(nominal) AS nominal FROM potongan WHERE potongan_id = '$id' AND ket = '$jenispotonganhasil->ket' ")->row();

@@ -15,6 +15,11 @@ class Modeldata extends CI_Model
     public function tambah($table, $data)
     {
         $this->db_active->insert($table, $data);
+        if ($this->db_active->affected_rows() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function getData($table)
@@ -43,6 +48,11 @@ class Modeldata extends CI_Model
     {
         $this->db_active->where($where, $dtwhere);
         $this->db_active->update($table, $data);
+        if ($this->db_active->affected_rows() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
     public function edit2($table, $where, $dtwhere, $where2, $dtwhere2, $data)
     {

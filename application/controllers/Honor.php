@@ -28,7 +28,14 @@ class Honor extends MY_Controller
         $data['user'] = $this->Auth_model->current_user();
         $this->Auth_model->log_activity($this->userID, 'Akses index C: Honor');
 
-        $honordata = $this->db_active->query("SELECT * FROM honor GROUP BY honor_id ORDER BY created_at DESC");
+        $honordata = $this->db_active->query("SELECT
+                honor_id,
+                MAX(bulan) AS bulan,
+                MAX(tahun) AS tahun
+            FROM honor
+            GROUP BY honor_id
+            ORDER BY tahun DESC, bulan DESC");
+
         $data['honorGroup'] = $honordata->result();
         $data['honorId'] = $honordata->row('honor_id');
         $data['honor'] = $this->model->getData('sik_setting')->result();
@@ -92,7 +99,7 @@ class Honor extends MY_Controller
         $start = $start >= 0 ? $start : 0;
         // $bulanIni = date('m');
         if ($id != 0) {
-            $honorID = $this->model->getBy('honor', 'id', $id)->row('honor_id');
+            $honorID = $id;
             $this->db_active->from('honor');
             $this->db_active->join('guru', 'honor.guru_id=guru.guru_id');
             $this->db_active->where('honor_id', $honorID);

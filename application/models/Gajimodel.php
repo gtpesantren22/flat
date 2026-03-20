@@ -11,14 +11,19 @@ class Gajimodel extends CI_Model
         $this->load->library('Dynamic_db'); // load dulu
         $this->db_active = $this->dynamic_db->connect(); // baru panggil method connect()
 
+        $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
+        $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
+        $this->pengabdian = $this->model->getBy('settings', 'nama', 'pengabdian')->row('isi');
         $ijazah = $this->model->getBy('settings', 'nama', 'ijazah')->row('isi');
         $this->minimum = explode(',', $ijazah);
         $str = $this->model->getBy('settings', 'nama', 'struktural')->row('isi');
         $this->struktural = explode(',', $str);
-
-        $this->token = $this->model->getBy('settings', 'nama', 'token')->row('isi');
     }
 
+    public function getAllGaji()
+    {
+        $this->db_active->get('gaji')->result();
+    }
     public function gapok($guru_id, $kriteria, $sik, $golongan, $tmt, $jabatan, $bulan, $tahun)
     {
         if ($sik === 'PTY') {
@@ -54,7 +59,7 @@ class Gajimodel extends CI_Model
         return $nominal;
     }
 
-    public function kirnerja($guru_id, $bulan, $tahun, $tmt, $kriteria, $jabatan)
+    public function kinerja($guru_id, $bulan, $tahun, $tmt, $kriteria, $jabatan)
     {
         $kehadiran = $this->db_active
             ->where('guru_id', $guru_id)
@@ -99,6 +104,15 @@ class Gajimodel extends CI_Model
         return $nominal;
     }
 
+    public function bpjs($guru_id)
+    {
+        $bpjs = $this->db_active
+            ->where('guru_id', $guru_id)
+            ->get('bpjs')
+            ->row();
+        return $bpjs ? $bpjs->nominal : 0;
+    }
+
     public function tambahan($guru_id, $gaji_id)
     {
         $tambahan = $this->db_active
@@ -115,7 +129,7 @@ class Gajimodel extends CI_Model
 
     public function detailGuru($guru_id)
     {
-        $apiUrl = 'https://data.ppdwk.com/api/ptk/show/' . $guru_id;
+        $apiUrl = 'https://data.ppdwk.com/api/ptk/detil-ptk/' . $guru_id;
 
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [
