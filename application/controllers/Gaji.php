@@ -142,7 +142,7 @@ class Gaji extends MY_Controller
         $bulan = $this->input->post('bulan');
         $tahun = $this->input->post('tahun');
 
-        $this->model->tambah('gaji', ['gaji_id' => $id, 'bulan' => $bulan, 'tahun' => $tahun, 'tapel' => $this->tahun, 'created_at' => date('Y-m-d H:i:s')]);
+        $this->model->tambah('gaji', ['gaji_id' => $id, 'bulan' => $bulan, 'tahun' => $tahun, 'tapel' => $this->tahun, 'status' => 'draft', 'created_at' => date('Y-m-d H:i:s')]);
 
         if ($this->db_active->affected_rows() > 0) {
             $this->session->set_flashdata('ok', 'Gaji berhasil ditambahkan');
