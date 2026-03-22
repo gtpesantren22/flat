@@ -93,7 +93,7 @@ class Gaji extends MY_Controller
         $this->Auth_model->log_activity($this->userID, 'Akses re generate gaji C: Gaji');
 
         $cek = $this->model->getBy('gaji', 'gaji_id', $id)->row();
-        if ($cek->status === 'kunci') {
+        if ($cek->status == 'kunci') {
             $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
             redirect('gaji/detail/' . $id);
             die();
@@ -346,7 +346,7 @@ class Gaji extends MY_Controller
         // var_dump($output);
     }
 
-    public function kunci($id)
+    public function kunci_old($id)
     {
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci data honor C: Gaji');
 
@@ -402,6 +402,158 @@ class Gaji extends MY_Controller
         } else {
             $this->session->set_flashdata('error', 'Data Gaji gagal dikunci');
             redirect('gaji/detail/' . $id);
+        }
+    }
+
+    public function kunci()
+    {
+        $this->Auth_model->log_activity($this->userID, 'Akses proses kunci data honor C: Gaji');
+        $gaji_id = $this->input->post('gaji_id', true);
+
+        $cek = $this->model->getBy('gaji', 'gaji_id', $gaji_id)->row();
+        if ($cek->status == 'kunci') {
+            $this->session->set_flashdata('error', 'Data gaji sudah terkunci');
+            redirect('gaji/detail/' . $gaji_id);
+            die();
+        }
+
+        $bulan = $cek->bulan;
+        $tahun = $cek->tahun;
+
+        $this->db_active->trans_start();
+
+        /* ================= AMBIL DATA SEKALI ================= */
+
+        $dataGaji = $this->db_active
+            ->select('gd.id_detail, gd.guru_id, g.kriteria, g.sik, g.golongan, g.tmt, g.jabatan, g.satminkal, g.ijazah')
+            ->from('gaji_detail gd')
+            ->join('guru g', 'g.guru_id = gd.guru_id')
+            ->where('gd.gaji_id', $gaji_id)
+            ->get()
+            ->result();
+
+
+        $updateBatch = [];
+
+        foreach ($dataGaji as $row) {
+
+            $gapok = $this->m_gaji->gapok(
+                $row->guru_id,
+                $row->kriteria,
+                $row->sik,
+                $row->golongan,
+                $row->tmt,
+                $row->jabatan,
+                $bulan,
+                $tahun
+            );
+
+            $fungsional = $this->m_gaji->fungsional(
+                $row->golongan,
+                $row->kriteria,
+                $row->sik,
+                $row->ijazah
+            );
+
+            $kinerja = $this->m_gaji->kinerja(
+                $row->guru_id,
+                $bulan,
+                $tahun,
+                $row->tmt,
+                $row->kriteria,
+                $row->jabatan
+            );
+
+            $struktural = $this->m_gaji->struktural(
+                $row->kriteria,
+                $row->jabatan,
+                $row->satminkal
+            );
+
+            $bpjs = $this->m_gaji->bpjs($row->guru_id);
+
+            $penyesuaian = $this->m_gaji->penyesuaian(
+                $row->guru_id,
+                $row->kriteria,
+                $row->jabatan,
+                $row->sik
+            );
+
+            $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji_id);
+
+
+            $updateBatch[] = [
+                'id_detail' => $row->id_detail,
+                'gapok' => $gapok ?? 0,
+                'fungsional' => $fungsional ?? 0,
+                'kinerja' => $kinerja ?? 0,
+                'struktural' => $struktural ?? 0,
+                'bpjs' => $bpjs ?? 0,
+                'penyesuaian' => $penyesuaian ?? 0,
+                'tambahan' => $tambahan ?? 0,
+                'is_dirty' => 0
+            ];
+        }
+
+        /* ================= BATCH UPDATE ================= */
+
+        if (!empty($updateBatch)) {
+            $this->db_active->update_batch('gaji_detail', $updateBatch, 'id_detail');
+        }
+
+        $this->db_active->trans_complete();
+
+        if ($this->db_active->trans_status() === FALSE) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Gaji gagal dikunci'
+            ]);
+        } else {
+            $sqlSummary = $this->db_active->query("
+                    UPDATE gaji g
+                    LEFT JOIN (
+                        SELECT 
+                            gaji_id,
+                            SUM(fungsional+kinerja+bpjs+struktural+penyesuaian+walas+gapok+tambahan) AS total
+                        FROM gaji_detail
+                        GROUP BY gaji_id
+                    ) gd ON gd.gaji_id = g.gaji_id
+
+                    LEFT JOIN (
+                        SELECT 
+                            bulan,
+                            tahun,
+                            SUM(nominal) AS potongan
+                        FROM potongan
+                        GROUP BY bulan,tahun
+                    ) p ON p.bulan = g.bulan AND p.tahun = g.tahun
+
+                    SET 
+                    g.total = IFNULL(gd.total,0),
+                    g.potongan = IFNULL(p.potongan,0)
+
+                    WHERE g.gaji_id = '$gaji_id';
+            ");
+
+            if ($sqlSummary) {
+                $kunci = $this->model->edit('gaji', 'gaji_id', $gaji_id, ['status' => 'kunci']);
+                if ($kunci) {
+                    echo json_encode([
+                        'status' => 'success',
+                        'message' => 'Gaji berhasil dikunci'
+                    ]);
+                } else {
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Gaji gagal dikunci'
+                    ]);
+                }
+            } else {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Gaji gagal dikunci'
+                ]);
+            }
         }
     }
 

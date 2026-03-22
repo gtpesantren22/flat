@@ -619,6 +619,25 @@ class Settings extends MY_Controller
         ];
 
         $this->db_active->where('guru_id', $id)->update('guru', $dataSv);
+
+        // Input registrasi guru
+        $this->db_active->where('id_guru', $id)->delete('registrasi');
+        foreach ($reg as $rg) {
+            if (isset($rg['ptk_induk']) && $rg['ptk_induk'] == 1) {
+                $satminkal = 1;
+            } else {
+                $satminkal = 0;
+            }
+
+            $dataR = [
+                'id_guru' => $id,
+                'id_lembaga' => $rg['lembaga_id'],
+                'satminkal' => $satminkal,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+            $this->db_active->insert('registrasi', $dataR);
+        }
+
         if ($this->db_active->affected_rows() > 0) {
             redirect('guru');
         } else {

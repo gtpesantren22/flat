@@ -11,25 +11,33 @@ class Sinc_guru extends MY_Controller
         $this->load->model('Gajimodel', 'm_gaji');
     }
 
-    public function tambah($id_guru)
+    /**
+     * Mempersiapkan mapping data API untuk tabel guru dan gaji_detail
+     * (Menghilangkan duplikasi kode di method tambah() dan edit())
+     */
+    private function _prepareDataGuru($id_guru)
     {
         $row = $this->m_gaji->detailGuru($id_guru);
 
-        $satminkal = '-';
-        $jabatan = '-';
-        $satminkalId = '-';
-        $jabatanId = '-';
-        $sik = $row['status_pegawai'] ?? '';
-        $ijazah = $row['pendidikan_terakhir']['jenjang_pendidikan']['nama'] ?? '';
-        $ijazahId = $row['pendidikan_terakhir']['jenjang_pendidikan']['jenjang_pendidikan_id'] ?? '';
-        $golongan = $row['jenis_golongan']['nama'] ?? '';
-        $golonganId = $row['jenis_golongan']['jenis_golongan_id'] ?? '';
-        $tmt = $row['tmt_pengangkatan'] ?? '';
-        $ket = $row['jenis_kesantrian'] === 'Santri' ? 'santri' : 'non-santri';
+        $satminkalVal = '-';
+        $jabatanVal   = '-';
+        $satminkalId  = '-';
+        $jabatanId    = '-';
 
-        if ($row['jenis_ptk']['nama'] && $row['jenis_ptk']['nama'] == 'Tendik') {
+        $sik        = $row['status_pegawai'] ?? '';
+        $ijazah     = $row['pendidikan_terakhir']['jenjang_pendidikan']['nama'] ?? '';
+        $ijazahId   = $row['pendidikan_terakhir']['jenjang_pendidikan']['jenjang_pendidikan_id'] ?? '';
+        $golongan   = $row['jenis_golongan']['nama'] ?? '';
+        $golonganId = $row['jenis_golongan']['jenis_golongan_id'] ?? '';
+        $tmt        = $row['tmt_pengangkatan'] ?? '';
+
+        $jenisKesantrian = $row['jenis_kesantrian'] ?? '';
+        $ket = $jenisKesantrian === 'Santri' ? 'santri' : 'non-santri';
+
+        $jenisPtk = $row['jenis_ptk']['nama'] ?? '';
+        if ($jenisPtk == 'Tendik') {
             $kriteria = 'Karyawan';
-        } elseif ($row['jenis_ptk']['nama'] && $row['jenis_ptk']['nama'] == 'Pengkaderan') {
+        } elseif ($jenisPtk == 'Pengkaderan') {
             $kriteria = 'Pengabdian';
         } else {
             $kriteria = 'Guru';
@@ -37,69 +45,143 @@ class Sinc_guru extends MY_Controller
 
         if (!empty($row['registrasi_ptk'])) {
             foreach ($row['registrasi_ptk'] as $r) {
-
                 // Satminkal (PTK Induk)
-                if ($satminkal === '-' && (string)$r['ptk_induk'] === '1') {
-                    $satminkal = $r['lembaga']['nama'] ?? '-';
-                    $satminkalId = $r['lembaga']['lembaga_id'] ?? '-';
+                if ($satminkalVal === '-' && isset($r['ptk_induk']) && (string)$r['ptk_induk'] === '1') {
+                    $satminkalVal = $r['lembaga']['nama'] ?? '-';
+                    $satminkalId  = $r['lembaga']['lembaga_id'] ?? '-';
                 }
 
                 // Jabatan
-                if ($jabatan === '-' && $r['jenis_tugas'] == 1) {
-                    $jabatan = $r['jenis_jabatan']['nama'] ?? '-';
-                    $jabatanId = $r['jenis_jabatan']['jenis_jabatan_id'] ?? '-';
+                if ($jabatanVal === '-' && isset($r['jenis_tugas']) && $r['jenis_tugas'] == 1) {
+                    $jabatanVal = $r['jenis_jabatan']['nama'] ?? '-';
+                    $jabatanId  = $r['jenis_jabatan']['jenis_jabatan_id'] ?? '-';
                 }
 
                 // Stop loop jika semua sudah ketemu
-                if ($satminkal !== '-' && $jabatan !== '-') {
+                if ($satminkalVal !== '-' && $jabatanVal !== '-') {
                     break;
                 }
             }
         }
 
         $dataGuru = [
-            'guru_id' => $id_guru,
-            'nipy'     => $row['nipy'] ?? '',
-            'nik'     => $row['nik'] ?? '',
-            'nama'     => $row['nama'] ?? '',
-            'satminkal'      => $satminkalId,
-            'santri' => $ket,
-            'jabatan'    => $jabatanId,
-            'kriteria'     => $kriteria,
-            'sik'     => $sik,
-            'ijazah'     => $ijazahId,
-            'tmt'     => $tmt,
-            'golongan'     => $golonganId,
-            'kategori' => '',
-            'email' => $row['email'] ?? '',
-            'hp' => $row['telpon'] ?? '',
-            'rekening' => $row['nomor_rekening'] ?? '',
+            'nipy'      => $row['nipy'] ?? '',
+            'nik'       => $row['nik'] ?? '',
+            'nama'      => $row['nama'] ?? '',
+            'satminkal' => $satminkalId,
+            'santri'    => $ket,
+            'jabatan'   => $jabatanId,
+            'kriteria'  => $kriteria,
+            'sik'       => $sik,
+            'ijazah'    => $ijazahId,
+            'tmt'       => $tmt,
+            'golongan'  => $golonganId,
+            'kategori'  => '',
+            'email'     => $row['email'] ?? '',
+            'hp'        => $row['telpon'] ?? '',
+            'rekening'  => $row['nomor_rekening'] ?? '',
         ];
+
+        $dataGuruDtl = [
+            'nama'      => $row['nama'] ?? '',
+            'satminkal' => $satminkalVal,
+            'jabatan'   => $jabatanVal,
+            'golongan'  => $golongan,
+            'sik'       => $sik,
+            'ijazah'    => $ijazah,
+            'tmt'       => $tmt,
+            'kriteria'  => $kriteria,
+            'santri'    => $ket,
+            'kategori'  => $row['jenis_golongan']['kategori'] ?? '',
+            'email'     => $row['email'] ?? '',
+            'hp'        => $row['telpon'] ?? '',
+            'rekening'  => $row['nomor_rekening'] ?? '',
+            'is_dirty'  => 1
+        ];
+
+        return [
+            'raw_row'     => $row,
+            'dataGuru'    => $dataGuru,
+            'dataGuruDtl' => $dataGuruDtl,
+        ];
+    }
+
+    /**
+     * Memproses mapping dan insert batch tabel registrasi
+     * (Menghapus bug overwriting variabel $satminkal dan optimasi DB call)
+     */
+    private function _prosesRegistrasi($id_guru, $registrasi_ptk)
+    {
+        $this->db_active->delete('registrasi', ['id_guru' => $id_guru]);
+        if (!empty($registrasi_ptk)) {
+            $batch_registrasi = [];
+            foreach ($registrasi_ptk as $r) {
+                // BUG FIX: Jangan gunakan kembali variabel yang memuat nama lembaga untuk value boolean.
+                $isInduk = (isset($r['ptk_induk']) && (string)$r['ptk_induk'] === '1') ? 1 : 0;
+
+                $batch_registrasi[] = [
+                    'id_guru'    => $id_guru,
+                    'id_lembaga' => $r['lembaga']['lembaga_id'] ?? '-',
+                    'satminkal'  => $isInduk,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+            }
+            if (!empty($batch_registrasi)) {
+                $this->db_active->insert_batch('registrasi', $batch_registrasi);
+            }
+        }
+    }
+
+    /**
+     * Kalkulasi semua komponen gaji (Menghilangkan duplikasi loop di reloadNominal & reCalcGaji)
+     */
+    private function _hitungKomponenGaji($row, $bulan, $tahun, $gaji_id, $set_clean = false)
+    {
+        $gapok = $this->m_gaji->gapok($row->guru_id, $row->kriteria, $row->sik, $row->golongan, $row->tmt, $row->jabatan, $bulan, $tahun);
+        $fungsional = $this->m_gaji->fungsional($row->golongan, $row->kriteria, $row->sik, $row->ijazah);
+        $kinerja = $this->m_gaji->kinerja($row->guru_id, $bulan, $tahun, $row->tmt, $row->kriteria, $row->jabatan);
+        $struktural = $this->m_gaji->struktural($row->kriteria, $row->jabatan, $row->satminkal);
+        $bpjs = $this->m_gaji->bpjs($row->guru_id);
+        $penyesuaian = $this->m_gaji->penyesuaian($row->guru_id, $row->kriteria, $row->jabatan, $row->sik);
+        $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji_id);
+
+        $calc = [
+            'id_detail'   => $row->id_detail,
+            'gapok'       => $gapok ?? 0,
+            'fungsional'  => $fungsional ?? 0,
+            'kinerja'     => $kinerja ?? 0,
+            'struktural'  => $struktural ?? 0,
+            'bpjs'        => $bpjs ?? 0,
+            'penyesuaian' => $penyesuaian ?? 0,
+            'tambahan'    => $tambahan ?? 0
+        ];
+
+        if ($set_clean) {
+            $calc['is_dirty'] = 0;
+        }
+
+        return $calc;
+    }
+
+    public function tambah($id_guru)
+    {
+        $parsed = $this->_prepareDataGuru($id_guru);
+
+        $dataGuru = $parsed['dataGuru'];
+        $dataGuru['guru_id'] = $id_guru;
 
         $cek = $this->db_active->get_where('gaji', ['status !=' => 'kunci'])->row();
         if ($cek) {
-            $dataGuruDtl = [
-                'gaji_id' => $cek->gaji_id,
-                'guru_id' => $id_guru,
-                'nama'     => $row['nama'] ?? '',
-                'satminkal'      => $satminkal,
-                'jabatan'    => $jabatan,
-                'golongan'     => $golongan,
-                'sik'     => $sik,
-                'ijazah'     => $ijazah,
-                'tmt'     => $tmt,
-                'kriteria'     => $kriteria,
-                'santri' => $ket,
-                'kategori' => $row['jenis_golongan']['kategori'],
-                'email' => $row['email'] ?? '',
-                'hp' => $row['telpon'] ?? '',
-                'rekening' => $row['nomor_rekening'] ?? '',
-                'is_dirty' => 1
-            ];
+            $dataGuruDtl = $parsed['dataGuruDtl'];
+            $dataGuruDtl['gaji_id'] = $cek->gaji_id;
+            $dataGuruDtl['guru_id'] = $id_guru;
             $this->db_active->insert('gaji_detail', $dataGuruDtl);
         }
+
         $this->db_active->insert('guru', $dataGuru);
+        $this->_prosesRegistrasi($id_guru, $parsed['raw_row']['registrasi_ptk'] ?? []);
     }
+
     public function hapus($id_guru)
     {
         $this->db_active->delete('guru', ['guru_id' => $id_guru]);
@@ -109,93 +191,23 @@ class Sinc_guru extends MY_Controller
             $this->db_active->delete('potongan', ['guru_id' => $id_guru, 'bulan' => $cek->bulan, 'tahun' => $cek->tahun]);
             $this->db_active->delete('kehadiran', ['guru_id' => $id_guru, 'bulan' => $cek->bulan, 'tahun' => $cek->tahun]);
             $this->db_active->delete('honor', ['guru_id' => $id_guru, 'bulan' => $cek->bulan, 'tahun' => $cek->tahun]);
+            $this->db_active->delete('registrasi', ['id_guru' => $id_guru]);
         }
     }
+
     public function edit($id_guru)
     {
-        $row = $this->m_gaji->detailGuru($id_guru);
-
-        $satminkal = '-';
-        $jabatan = '-';
-        $satminkalId = '-';
-        $jabatanId = '-';
-        $sik = $row['status_pegawai'] ?? '';
-        $ijazah = $row['pendidikan_terakhir']['jenjang_pendidikan']['nama'] ?? '';
-        $ijazahId = $row['pendidikan_terakhir']['jenjang_pendidikan']['jenjang_pendidikan_id'] ?? '';
-        $golongan = $row['jenis_golongan']['nama'] ?? '';
-        $golonganId = $row['jenis_golongan']['jenis_golongan_id'] ?? '';
-        $tmt = $row['tmt_pengangkatan'] ?? '';
-        $ket = $row['jenis_kesantrian'] === 'Santri' ? 'santri' : 'non-santri';
-
-        if ($row['jenis_ptk']['nama'] && $row['jenis_ptk']['nama'] == 'Tendik') {
-            $kriteria = 'Karyawan';
-        } elseif ($row['jenis_ptk']['nama'] && $row['jenis_ptk']['nama'] == 'Pengkaderan') {
-            $kriteria = 'Pengabdian';
-        } else {
-            $kriteria = 'Guru';
-        }
-
-        if (!empty($row['registrasi_ptk'])) {
-            foreach ($row['registrasi_ptk'] as $r) {
-
-                // Satminkal (PTK Induk)
-                if ($satminkal === '-' && (string)$r['ptk_induk'] === '1') {
-                    $satminkal = $r['lembaga']['nama'] ?? '-';
-                    $satminkalId = $r['lembaga']['lembaga_id'] ?? '-';
-                }
-
-                // Jabatan
-                if ($jabatan === '-' && $r['jenis_tugas'] == 1) {
-                    $jabatan = $r['jenis_jabatan']['nama'] ?? '-';
-                    $jabatanId = $r['jenis_jabatan']['jenis_jabatan_id'] ?? '-';
-                }
-
-                // Stop loop jika semua sudah ketemu
-                if ($satminkal !== '-' && $jabatan !== '-') {
-                    break;
-                }
-            }
-        }
-
-        $dataGuru = [
-            'nipy'     => $row['nipy'] ?? '',
-            'nik'     => $row['nik'] ?? '',
-            'nama'     => $row['nama'] ?? '',
-            'satminkal'      => $satminkalId,
-            'santri' => $ket,
-            'jabatan'    => $jabatanId,
-            'kriteria'     => $kriteria,
-            'sik'     => $sik,
-            'ijazah'     => $ijazahId,
-            'tmt'     => $tmt,
-            'golongan'     => $golonganId,
-            'kategori' => '',
-            'email' => $row['email'] ?? '',
-            'hp' => $row['telpon'] ?? '',
-            'rekening' => $row['nomor_rekening'] ?? '',
-        ];
+        $parsed = $this->_prepareDataGuru($id_guru);
+        $dataGuru = $parsed['dataGuru'];
 
         $cek = $this->db_active->get_where('gaji', ['status !=' => 'kunci'])->row();
         if ($cek) {
-            $dataGuruDtl = [
-                'nama'     => $row['nama'] ?? '',
-                'satminkal'      => $satminkal,
-                'jabatan'    => $jabatan,
-                'golongan'     => $golongan,
-                'sik'     => $sik,
-                'ijazah'     => $ijazah,
-                'tmt'     => $tmt,
-                'kriteria'     => $kriteria,
-                'santri' => $ket,
-                'kategori' => $row['jenis_golongan']['kategori'],
-                'email' => $row['email'] ?? '',
-                'hp' => $row['telpon'] ?? '',
-                'rekening' => $row['nomor_rekening'] ?? '',
-                'is_dirty' => 1
-            ];
+            $dataGuruDtl = $parsed['dataGuruDtl'];
             $this->db_active->update('gaji_detail', $dataGuruDtl, ['guru_id' => $id_guru, 'gaji_id' => $cek->gaji_id]);
         }
+
         $this->db_active->update('guru', $dataGuru, ['guru_id' => $id_guru]);
+        $this->_prosesRegistrasi($id_guru, $parsed['raw_row']['registrasi_ptk'] ?? []);
     }
 
     public function reloadNominal($gaji_id)
@@ -213,8 +225,6 @@ class Sinc_guru extends MY_Controller
 
         $this->db_active->trans_start();
 
-        /* ================= AMBIL DATA SEKALI ================= */
-
         $dataGaji = $this->db_active
             ->select('gd.id_detail, gd.guru_id, g.kriteria, g.sik, g.golongan, g.tmt, g.jabatan, g.satminkal, g.ijazah')
             ->from('gaji_detail gd')
@@ -223,69 +233,10 @@ class Sinc_guru extends MY_Controller
             ->get()
             ->result();
 
-
         $updateBatch = [];
-
         foreach ($dataGaji as $row) {
-
-            $gapok = $this->m_gaji->gapok(
-                $row->guru_id,
-                $row->kriteria,
-                $row->sik,
-                $row->golongan,
-                $row->tmt,
-                $row->jabatan,
-                $bulan,
-                $tahun
-            );
-
-            $fungsional = $this->m_gaji->fungsional(
-                $row->golongan,
-                $row->kriteria,
-                $row->sik,
-                $row->ijazah
-            );
-
-            $kinerja = $this->m_gaji->kinerja(
-                $row->guru_id,
-                $bulan,
-                $tahun,
-                $row->tmt,
-                $row->kriteria,
-                $row->jabatan
-            );
-
-            $struktural = $this->m_gaji->struktural(
-                $row->kriteria,
-                $row->jabatan,
-                $row->satminkal
-            );
-
-            $bpjs = $this->m_gaji->bpjs($row->guru_id);
-
-            $penyesuaian = $this->m_gaji->penyesuaian(
-                $row->guru_id,
-                $row->kriteria,
-                $row->jabatan,
-                $row->sik
-            );
-
-            $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji_id);
-
-
-            $updateBatch[] = [
-                'id_detail' => $row->id_detail,
-                'gapok' => $gapok ?? 0,
-                'fungsional' => $fungsional ?? 0,
-                'kinerja' => $kinerja ?? 0,
-                'struktural' => $struktural ?? 0,
-                'bpjs' => $bpjs ?? 0,
-                'penyesuaian' => $penyesuaian ?? 0,
-                'tambahan' => $tambahan ?? 0
-            ];
+            $updateBatch[] = $this->_hitungKomponenGaji($row, $bulan, $tahun, $gaji_id);
         }
-
-        /* ================= BATCH UPDATE ================= */
 
         if (!empty($updateBatch)) {
             $this->db_active->update_batch('gaji_detail', $updateBatch, 'id_detail');
@@ -314,8 +265,6 @@ class Sinc_guru extends MY_Controller
 
             $this->db_active->trans_start();
 
-            /* ================= AMBIL DATA SEKALI ================= */
-
             $dataGaji = $this->db_active
                 ->select('gd.id_detail, gd.guru_id, g.kriteria, g.sik, g.golongan, g.tmt, g.jabatan, g.satminkal, g.ijazah')
                 ->from('gaji_detail gd')
@@ -325,69 +274,11 @@ class Sinc_guru extends MY_Controller
                 ->get()
                 ->result();
 
-
             $updateBatch = [];
-
             foreach ($dataGaji as $row) {
-
-                $gapok = $this->m_gaji->gapok(
-                    $row->guru_id,
-                    $row->kriteria,
-                    $row->sik,
-                    $row->golongan,
-                    $row->tmt,
-                    $row->jabatan,
-                    $bulan,
-                    $tahun
-                );
-
-                $fungsional = $this->m_gaji->fungsional(
-                    $row->golongan,
-                    $row->kriteria,
-                    $row->sik,
-                    $row->ijazah
-                );
-
-                $kinerja = $this->m_gaji->kinerja(
-                    $row->guru_id,
-                    $bulan,
-                    $tahun,
-                    $row->tmt,
-                    $row->kriteria,
-                    $row->jabatan
-                );
-
-                $struktural = $this->m_gaji->struktural(
-                    $row->kriteria,
-                    $row->jabatan,
-                    $row->satminkal
-                );
-
-                $bpjs = $this->m_gaji->bpjs($row->guru_id);
-
-                $penyesuaian = $this->m_gaji->penyesuaian(
-                    $row->guru_id,
-                    $row->kriteria,
-                    $row->jabatan,
-                    $row->sik
-                );
-
-                $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji_id);
-
-                $updateBatch[] = [
-                    'id_detail' => $row->id_detail,
-                    'gapok' => $gapok ?? 0,
-                    'fungsional' => $fungsional ?? 0,
-                    'kinerja' => $kinerja ?? 0,
-                    'struktural' => $struktural ?? 0,
-                    'bpjs' => $bpjs ?? 0,
-                    'penyesuaian' => $penyesuaian ?? 0,
-                    'tambahan' => $tambahan ?? 0,
-                    'is_dirty' => 0
-                ];
+                // Parameter ke-5 `true` mereset flag is_dirty
+                $updateBatch[] = $this->_hitungKomponenGaji($row, $bulan, $tahun, $gaji_id, true);
             }
-
-            /* ================= BATCH UPDATE ================= */
 
             if (!empty($updateBatch)) {
                 $this->db_active->update_batch('gaji_detail', $updateBatch, 'id_detail');
@@ -432,6 +323,6 @@ class Sinc_guru extends MY_Controller
             g.potongan = IFNULL(p.potongan,0)
 
             WHERE g.gaji_id = '$gaji_id';
-     ");
+        ");
     }
 }

@@ -405,109 +405,27 @@
         }
 
         $(document).on('click', '#proses-kunci', function() {
-            // e.preventDefault();
             const id = $(this).data('id');
 
             var $button = $('#proses-kunci');
 
+            $button.prop('disabled', true);
+            $button.text('Processing...');
+
             $.ajax({
-                url: '<?= base_url("gaji/getGajiRinci") ?>',
+                url: '<?= base_url("gaji/kunci") ?>',
                 type: 'POST',
                 data: {
                     gaji_id: id,
                 },
                 dataType: 'json',
                 success: function(response) {
-                    const hasil = $('#view-hasil');
-                    let berhasil = 0;
-                    let gagal = 0;
-                    let persen = 0;
-                    let errorMessages = [];
-
-                    $button.prop('disabled', true);
-                    $button.text('Processing...');
-
-                    function updateProgress() {
-                        const total = Number(response.total); // Konversi ke number
-                        if (isNaN(total) || total === 0) {
-                            persen = 0; // Jika total tidak valid atau 0, set persen ke 0
-                        } else {
-                            // Hitung persentase
-                            processed = berhasil + gagal; // Total yang sudah diproses
-                            persen = (processed / total) * 100;
-                        }
-
-                        const errorList = errorMessages.length > 0 ?
-                            `<ul class="text-start mt-2 text-danger" style="font-size: 0.9rem;">${errorMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>` :
-                            '';
-
-                        hasil.html(`
-                            <div class="text-center">
-                                <strong class="mb-2">Proses kunci data ...</strong>
-                                <div class="progress mb-3" style="height: 17px;">
-                                    <div class="progress-bar" role="progressbar" style="width: ${persen}%;" aria-valuenow="${persen}" aria-valuemin="0" aria-valuemax="100">${persen.toFixed(2)}%</div>
-                                </div>
-                            </div>
-                            <strong class="mb-1">Total success : ${berhasil}</strong><br>
-                            <strong class="mb-1 text-danger">Total error : ${gagal}</strong><br>
-                             ${errorList}
-                        `);
+                    if (response.status === 'success') {
+                        window.location.reload()
+                    } else {
+                        console.error('Failed to update data');
                     }
 
-                    const ajaxRequests = response.data.map((item, index) => {
-                        return new Promise((resolve) => {
-                            setTimeout(() => {
-                                $.ajax({
-                                    url: '<?= base_url("gaji/updateGaji") ?>',
-                                    type: 'POST',
-                                    data: {
-                                        gaji_id: item.gaji_id,
-                                        guru_id: item.guru_id,
-                                    },
-                                    dataType: 'json',
-                                    success: function(res) {
-                                        if (res.status === 'success') {
-                                            berhasil++;
-                                        } else {
-                                            gagal++;
-                                            errorMessages.push(res.message || 'Gagal tanpa pesan');
-                                        }
-                                        updateProgress();
-                                    },
-                                    error: function() {
-                                        gagal++;
-                                        errorMessages.push(errorThrown || 'Error tidak diketahui');
-                                        updateProgress();
-                                    },
-                                    complete: resolve // Menandai bahwa AJAX request selesai
-                                });
-                            }, index * 750); // Menambah jeda 500ms per request
-                        });
-                    });
-
-                    Promise.all(ajaxRequests)
-                        .then(function() {
-                            // console.log('Semua permintaan AJAX selesai');
-                            $.ajax({
-                                url: '<?= base_url("gaji/updateKunci") ?>',
-                                type: 'POST',
-                                data: {
-                                    gaji_id: id,
-                                },
-                                dataType: 'json',
-                                success: function(response) {
-                                    window.location.reload()
-                                },
-                                error: function() {
-                                    gagal++; // Tambahkan 1 ke variabel gagal
-                                    updateProgress(); // Perbarui tampilan progress bar dan hasil
-                                    console.error('Failed to update data');
-                                }
-                            });
-                        })
-                        .catch(function(error) {
-                            console.error('Ada permintaan AJAX yang gagal', error);
-                        });
                 },
                 error: function(xhr, status, error) {
                     console.log(xhr.responseText);
@@ -517,6 +435,118 @@
                 }
             });
         })
+        // $(document).on('click', '#proses-kunci', function() {
+        //     const id = $(this).data('id');
+
+        //     var $button = $('#proses-kunci');
+
+        //     $.ajax({
+        //         url: '<?= base_url("gaji/getGajiRinci") ?>',
+        //         type: 'POST',
+        //         data: {
+        //             gaji_id: id,
+        //         },
+        //         dataType: 'json',
+        //         success: function(response) {
+        //             const hasil = $('#view-hasil');
+        //             let berhasil = 0;
+        //             let gagal = 0;
+        //             let persen = 0;
+        //             let errorMessages = [];
+
+        //             $button.prop('disabled', true);
+        //             $button.text('Processing...');
+
+        //             function updateProgress() {
+        //                 const total = Number(response.total); // Konversi ke number
+        //                 if (isNaN(total) || total === 0) {
+        //                     persen = 0; // Jika total tidak valid atau 0, set persen ke 0
+        //                 } else {
+        //                     // Hitung persentase
+        //                     processed = berhasil + gagal; // Total yang sudah diproses
+        //                     persen = (processed / total) * 100;
+        //                 }
+
+        //                 const errorList = errorMessages.length > 0 ?
+        //                     `<ul class="text-start mt-2 text-danger" style="font-size: 0.9rem;">${errorMessages.map(msg => `<li>${msg}</li>`).join('')}</ul>` :
+        //                     '';
+
+        //                 hasil.html(`
+        //                     <div class="text-center">
+        //                         <strong class="mb-2">Proses kunci data ...</strong>
+        //                         <div class="progress mb-3" style="height: 17px;">
+        //                             <div class="progress-bar" role="progressbar" style="width: ${persen}%;" aria-valuenow="${persen}" aria-valuemin="0" aria-valuemax="100">${persen.toFixed(2)}%</div>
+        //                         </div>
+        //                     </div>
+        //                     <strong class="mb-1">Total success : ${berhasil}</strong><br>
+        //                     <strong class="mb-1 text-danger">Total error : ${gagal}</strong><br>
+        //                      ${errorList}
+        //                 `);
+        //             }
+
+        //             const ajaxRequests = response.data.map((item, index) => {
+        //                 return new Promise((resolve) => {
+        //                     setTimeout(() => {
+        //                         $.ajax({
+        //                             url: '<?= base_url("gaji/updateGaji") ?>',
+        //                             type: 'POST',
+        //                             data: {
+        //                                 gaji_id: item.gaji_id,
+        //                                 guru_id: item.guru_id,
+        //                             },
+        //                             dataType: 'json',
+        //                             success: function(res) {
+        //                                 if (res.status === 'success') {
+        //                                     berhasil++;
+        //                                 } else {
+        //                                     gagal++;
+        //                                     errorMessages.push(res.message || 'Gagal tanpa pesan');
+        //                                 }
+        //                                 updateProgress();
+        //                             },
+        //                             error: function() {
+        //                                 gagal++;
+        //                                 errorMessages.push(errorThrown || 'Error tidak diketahui');
+        //                                 updateProgress();
+        //                             },
+        //                             complete: resolve // Menandai bahwa AJAX request selesai
+        //                         });
+        //                     }, index * 750); // Menambah jeda 500ms per request
+        //                 });
+        //             });
+
+        //             Promise.all(ajaxRequests)
+        //                 .then(function() {
+        //                     // console.log('Semua permintaan AJAX selesai');
+        //                     $.ajax({
+        //                         url: '<?= base_url("gaji/updateKunci") ?>',
+        //                         type: 'POST',
+        //                         data: {
+        //                             gaji_id: id,
+        //                         },
+        //                         dataType: 'json',
+        //                         success: function(response) {
+        //                             window.location.reload()
+        //                         },
+        //                         error: function() {
+        //                             gagal++; // Tambahkan 1 ke variabel gagal
+        //                             updateProgress(); // Perbarui tampilan progress bar dan hasil
+        //                             console.error('Failed to update data');
+        //                         }
+        //                     });
+        //                 })
+        //                 .catch(function(error) {
+        //                     console.error('Ada permintaan AJAX yang gagal', error);
+        //                 });
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.log(xhr.responseText);
+        //             console.log(status);
+        //             console.log(error);
+        //             // alert(xhr.responseText);
+        //         }
+        //     });
+        // })
     </script>
 
     <script>
