@@ -20,6 +20,9 @@ class Honor extends MY_Controller
         $this->honor_santri = $this->model->getBy('settings', 'nama', 'honor_santri')->row('isi');
         $this->honor_non = $this->model->getBy('settings', 'nama', 'honor_non')->row('isi');
         $this->honor_rami = $this->model->getBy('settings', 'nama', 'honor_rami')->row('isi');
+
+        $this->id_ra = $this->model->getBy('settings', 'nama', 'id_ra')->row('isi');
+        $this->id_mi = $this->model->getBy('settings', 'nama', 'id_mi')->row('isi');
     }
 
     public function index()
@@ -175,7 +178,7 @@ class Honor extends MY_Controller
         $dtlHonor = $this->model->getBy('honor', 'id', $id)->row();
         $guru = $this->model->getBy('guru', 'guru_id', $dtlHonor->guru_id)->row();
 
-        if ($dtlHonor->lembaga == 8 || $dtlHonor->lembaga == 9) {
+        if ($dtlHonor->lembaga === $this->id_ra || $dtlHonor->lembaga === $this->id_mi) {
             $nominal = $jam * $this->honor_rami;
         } else {
             $nominal = $guru->santri == 'santri' ? $jam * $this->honor_santri : $jam * $this->honor_non;
@@ -225,7 +228,7 @@ class Honor extends MY_Controller
         $honor = $this->model->getBy('honor', 'honor_id', $id)->result();
         foreach ($honor as $key) {
             $guru = $this->model->getBy('guru', 'guru_id', $key->guru_id)->row();
-            if ($key->lembaga == 8 || $key->lembaga == 9) {
+            if ($key->lembaga === $this->id_ra || $key->lembaga === $this->id_mi) {
                 $nominal = $key->kehadiran * $this->honor_rami;
             } else {
                 $nominal = $guru->santri == 'santri' ? $key->kehadiran * $this->honor_santri : $key->kehadiran * $this->honor_non;
