@@ -31,6 +31,7 @@ class Kinerja extends MY_Controller
         $data['absen'] = $this->db_active->query("
             SELECT
                 kehadiran_id,
+                MAX(id) AS id,
                 MAX(bulan) AS bulan,
                 MAX(tahun) AS tahun
             FROM kehadiran

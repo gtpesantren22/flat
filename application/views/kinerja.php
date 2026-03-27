@@ -64,12 +64,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($absen as $absen): ?>
+                                <?php foreach ($absen as $absendt): ?>
                                     <tr>
-                                        <td><?= bulan($absen->bulan) . ' ' . $absen->tahun ?></td>
+                                        <td><?= bulan($absendt->bulan) . ' ' . $absendt->tahun ?></td>
                                         <td>
-                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $absen->kehadiran_id ?>">Cek</button>
-                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $absen->kehadiran_id ?>">Refresh</button>
+                                            <button class="btn btn-xs btn-info btn-cek" data-id="<?= $absendt->id ?>">Cek</button>
+                                            <button class="btn btn-xs btn-danger btn-refresh" data-id="<?= $absendt->id ?>">Refresh</button>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
