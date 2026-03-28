@@ -9,6 +9,8 @@ class Sinc_guru extends MY_Controller
 
         $this->load->model('Modeldata', 'model');
         $this->load->model('Gajimodel', 'm_gaji');
+
+        $this->token = $this->model->getBy('settings', 'nama', 'token')->row('isi');
     }
 
     /**
@@ -17,7 +19,7 @@ class Sinc_guru extends MY_Controller
      */
     private function _prepareDataGuru($id_guru)
     {
-        $row = $this->m_gaji->detailGuru($id_guru);
+        $row = fetchApiGet('https://data.ppdwk.com/api/ptk/detil-ptk/' . $id_guru, $this->token);
 
         $satminkalVal = '-';
         $jabatanVal   = '-';
