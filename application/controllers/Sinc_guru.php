@@ -121,10 +121,15 @@ class Sinc_guru extends MY_Controller
                 // BUG FIX: Jangan gunakan kembali variabel yang memuat nama lembaga untuk value boolean.
                 $isInduk = (isset($r['ptk_induk']) && (string)$r['ptk_induk'] === '1') ? 1 : 0;
 
+                $idJabatan = (isset($r['jenis_jabatan']) && is_array($r['jenis_jabatan']) && isset($r['jenis_jabatan']['jenis_jabatan_id']))
+                    ? (int)$r['jenis_jabatan']['jenis_jabatan_id']
+                    : 0;
+
                 $batch_registrasi[] = [
                     'id_guru'    => $id_guru,
                     'id_lembaga' => $r['lembaga']['lembaga_id'] ?? '-',
                     'satminkal'  => $isInduk,
+                    'id_jabatan' => $idJabatan,
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
             }
@@ -146,6 +151,7 @@ class Sinc_guru extends MY_Controller
         $bpjs = $this->m_gaji->bpjs($row->guru_id);
         $penyesuaian = $this->m_gaji->penyesuaian($row->guru_id, $row->kriteria, $row->jabatan, $row->sik);
         $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji_id);
+        $walas = $this->m_gaji->walas($row->guru_id);
 
         $calc = [
             'id_detail'   => $row->id_detail,
@@ -155,7 +161,8 @@ class Sinc_guru extends MY_Controller
             'struktural'  => $struktural ?? 0,
             'bpjs'        => $bpjs ?? 0,
             'penyesuaian' => $penyesuaian ?? 0,
-            'tambahan'    => $tambahan ?? 0
+            'tambahan'    => $tambahan ?? 0,
+            'walas'       => $walas ?? 0
         ];
 
         if ($set_clean) {

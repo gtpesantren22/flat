@@ -516,10 +516,15 @@ class Settings extends MY_Controller
                     $satminkal = 0;
                 }
 
+                $idJabatan = (isset($rg['jenis_jabatan']) && is_array($rg['jenis_jabatan']) && isset($rg['jenis_jabatan']['jenis_jabatan_id']))
+                    ? (int)$rg['jenis_jabatan']['jenis_jabatan_id']
+                    : 0;
+
                 $dataR = [
                     'id_guru' => $ptkId,
                     'id_lembaga' => $rg['lembaga_id'],
                     'satminkal' => $satminkal,
+                    'id_jabatan' => $idJabatan,
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
                 $this->db_active->insert('registrasi', $dataR);
@@ -629,10 +634,15 @@ class Settings extends MY_Controller
                 $satminkal = 0;
             }
 
+            $idJabatan = (isset($rg['jenis_jabatan']) && is_array($rg['jenis_jabatan']) && isset($rg['jenis_jabatan']['jenis_jabatan_id']))
+                ? (int)$rg['jenis_jabatan']['jenis_jabatan_id']
+                : 0;
+
             $dataR = [
                 'id_guru' => $id,
                 'id_lembaga' => $rg['lembaga_id'],
                 'satminkal' => $satminkal,
+                'id_jabatan' => $idJabatan,
                 'created_at' => date('Y-m-d H:i:s'),
             ];
             $this->db_active->insert('registrasi', $dataR);

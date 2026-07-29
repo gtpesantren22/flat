@@ -406,7 +406,7 @@ class Gaji extends MY_Controller
     }
 
     public function kunci()
-    {
+    { 
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci data honor C: Gaji');
         $gaji_id = $this->input->post('gaji_id', true);
 
@@ -480,6 +480,7 @@ class Gaji extends MY_Controller
             );
 
             $tambahan = $this->m_gaji->tambahan($row->guru_id, $gaji_id);
+            $walas = $this->m_gaji->walas($row->guru_id);
 
 
             $updateBatch[] = [
@@ -491,6 +492,7 @@ class Gaji extends MY_Controller
                 'bpjs' => $bpjs ?? 0,
                 'penyesuaian' => $penyesuaian ?? 0,
                 'tambahan' => $tambahan ?? 0,
+                'walas' => $walas ?? 0,
                 'is_dirty' => 0
             ];
         }

@@ -180,7 +180,7 @@ class Kinerja extends MY_Controller
                 $row->id, // 5
                 bulan($row->bulan) . ' ' . $row->tahun, // 6
                 $kinerja ? $kinerja->nominal : 0, // 7
-                $lembaga->nama, // 8
+                $lembaga->nama ?? '-', // 8
             ];
         }
 

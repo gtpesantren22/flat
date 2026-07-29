@@ -127,6 +127,17 @@ class Gajimodel extends CI_Model
         return $tambahan->total;
     }
 
+    public function walas($guru_id)
+    {
+        $walas = $this->db_active
+            ->where('guru_id', $guru_id)
+            ->get('walas')
+            ->row();
+        $nominal = $walas ? $walas->nominal : 0;
+
+        return $nominal;
+    }
+
     public function detailGuru($guru_id)
     {
         $apiUrl = 'https://data.ppdwk.com/api/ptk/detil-ptk/' . $guru_id;
