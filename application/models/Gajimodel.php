@@ -80,7 +80,7 @@ class Gajimodel extends CI_Model
     public function struktural($kriteria, $jabatan, $satminkal)
     {
         if ($kriteria == 'Pengabdian') {
-            $struktural = $this->pengabdian;
+            $struktural = $jabatan == 116 ? 150000 : $this->pengabdian;
         } else {
             $struktural = $this->db_active
                 ->select('nominal')

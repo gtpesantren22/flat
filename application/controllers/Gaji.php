@@ -373,7 +373,7 @@ class Gaji extends MY_Controller
             $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             if ($guru->kriteria == 'Pengabdian') {
-                $struktural = $guru->jabatan === 116 ? 150000 : $this->pengabdian;
+                $struktural = $guru->jabatan == 116 ? 150000 : $this->pengabdian;
             } else {
                 $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
             }
@@ -1325,7 +1325,7 @@ class Gaji extends MY_Controller
         $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
         if ($guru->kriteria == 'Pengabdian') {
-            $struktural = $guru->jabatan === 116 ? 150000 : $this->pengabdian;
+            $struktural = $guru->jabatan == 116 ? 150000 : $this->pengabdian;
         } else {
             $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
         }
@@ -1430,7 +1430,7 @@ class Gaji extends MY_Controller
         $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
         if ($guru->kriteria == 'Pengabdian') {
-            $struktural = $guru->jabatan === 116 ? 150000 : $this->pengabdian;
+            $struktural = $guru->jabatan == 116 ? 150000 : $this->pengabdian;
         } else {
             $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
         }
