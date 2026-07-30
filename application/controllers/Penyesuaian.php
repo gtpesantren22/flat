@@ -53,7 +53,7 @@ class Penyesuaian extends MY_Controller
             $fungsional = $this->model->getBy('fungsional', 'golongan_id', $row->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($row->tmt))->row();
             if ($row->kriteria == 'Pengabdian') {
-                $struktural = $this->pengabdian;
+                $struktural = $row->jabatan === 116 ? 150000 : $this->pengabdian;
             } else {
                 $struktural = $this->model->getBy2('struktural', 'jabatan_id', $row->jabatan, 'satminkal_id', $row->satminkal)->row('nominal');
             }
@@ -108,7 +108,7 @@ class Penyesuaian extends MY_Controller
             $fungsional = $this->model->getBy2('fungsional', 'golongan_id', $row->golongan, 'kategori', $row->kategori)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($row->tmt))->row();
             if ($row->kriteria == 'Pengabdian') {
-                $struktural = $this->pengabdian;
+                $struktural = $row->jabatan === 116 ? 150000 :  $this->pengabdian;
             } else {
                 $struktural = $this->model->getBy2('struktural', 'jabatan_id', $row->jabatan, 'satminkal_id', $row->satminkal)->row('nominal');
             }

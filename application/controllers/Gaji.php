@@ -373,7 +373,7 @@ class Gaji extends MY_Controller
             $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
             $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
             if ($guru->kriteria == 'Pengabdian') {
-                $struktural = $this->pengabdian;
+                $struktural = $guru->jabatan === 116 ? 150000 : $this->pengabdian;
             } else {
                 $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
             }
@@ -406,7 +406,7 @@ class Gaji extends MY_Controller
     }
 
     public function kunci()
-    { 
+    {
         $this->Auth_model->log_activity($this->userID, 'Akses proses kunci data honor C: Gaji');
         $gaji_id = $this->input->post('gaji_id', true);
 
@@ -1325,7 +1325,7 @@ class Gaji extends MY_Controller
         $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
         if ($guru->kriteria == 'Pengabdian') {
-            $struktural = $this->pengabdian;
+            $struktural = $guru->jabatan === 116 ? 150000 : $this->pengabdian;
         } else {
             $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
         }
@@ -1430,7 +1430,7 @@ class Gaji extends MY_Controller
         $fungsional = $this->model->getBy('fungsional', 'golongan_id', $guru->golongan)->row();
         $kinerja = $this->model->getBy('kinerja', 'masa_kerja', selisihTahun($guru->tmt))->row();
         if ($guru->kriteria == 'Pengabdian') {
-            $struktural = $this->pengabdian;
+            $struktural = $guru->jabatan === 116 ? 150000 : $this->pengabdian;
         } else {
             $struktural = $this->model->getBy2('struktural', 'jabatan_id', $guru->jabatan, 'satminkal_id', $guru->satminkal)->row('nominal');
         }
