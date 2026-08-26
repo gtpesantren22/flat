@@ -82,6 +82,16 @@ class Gaji extends MY_Controller
         if ($cek) {
             $data['datagaji'] = $this->model->getBy('gaji', 'gaji_id', $id)->row();
             $data['potong'] = $this->model->getBy2('potongan', 'bulan', $data['datagaji']->bulan, 'tahun', $data['datagaji']->tahun)->row();
+            
+            // Get unique Satminkal for bulk slip export
+            $data['satminkalList'] = $this->db_active->select('DISTINCT(satminkal) as nama')
+                ->where('gaji_id', $id)
+                ->where('satminkal !=', '')
+                ->where('satminkal !=', '-')
+                ->where('satminkal IS NOT NULL')
+                ->get('gaji_detail')
+                ->result_array();
+
             $this->load->view('gajidetail', $data);
         } else {
             redirect('gaji/regenerate/' . $id);

@@ -1,5 +1,8 @@
     <?php
     include 'head.php';
+    ?>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <?php
     $a = 1;
     $url = $datagaji->status == 'kunci' ? base_url('gaji/detail3') : base_url('gaji/detail2');
     ?>
@@ -28,10 +31,14 @@
                             </div>
                             <?php if ($potong): ?>
                                 <div class=" btn-group float-end">
-                                    <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-spreadsheet"></i> Export to Excel</button>
+                                    <button type="button" class="btn btn-outline-success btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="bx bx-spreadsheet"></i> Export Data</button>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item tbl-confirm" value="Pastikan data gaji nya sudah dikunci terlebih dahulu" href="<?= base_url('gaji/exportGajiV2/' . $idgaji) ?>">Export Gaji</a></li>
                                         <li><a class="dropdown-item" href="<?= base_url('gaji/exportPotongan/' . $potong->potongan_id) ?>">Export Potongan</a></li>
+                                        <?php if ($datagaji->status == 'kunci'): ?>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item text-primary cursor-pointer" data-bs-toggle="modal" data-bs-target="#exportSlipModal"><i class="bx bx-download me-1"></i> Export Slip Gaji</a></li>
+                                        <?php endif ?>
                                     </ul>
                                 </div>
                             <?php endif ?>
@@ -164,6 +171,8 @@
                                     <input type="hidden" name="gaji_id" value="<?= $idgaji ?>">
                                     <button type="submit" class="btn btn-outline-success">Refresh Data</button>
                                 </form>
+                            <?php else: ?>
+                                <a href="#" id="btn-cetak-slip" target="_blank" class="btn btn-outline-primary"><i class="bx bx-printer"></i> Cetak Slip</a>
                             <?php endif ?>
                         </div>
                         <div class="col-md-5">
@@ -266,8 +275,40 @@
         </div>
     </div>
 
+    <!-- Modal Export Slip Kolektif -->
+    <div class="modal fade" id="exportSlipModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class='bx bx-download me-1'></i> Export Slip Gaji Kolektif</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Pilih lembaga (Satminkal) di bawah ini untuk mengunduh semua slip gaji guru di lembaga tersebut dalam format ZIP.</p>
+                    <?php if (empty($satminkalList)): ?>
+                        <div class="text-center text-muted py-3">Tidak ada data lembaga/Satminkal yang terdeteksi.</div>
+                    <?php else: ?>
+                        <div class="list-group">
+                            <?php foreach ($satminkalList as $sat): ?>
+                                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center btn-export-bulk" data-satminkal="<?= htmlspecialchars($sat['nama']) ?>">
+                                    <span><i class='bx bx-school me-2 text-primary'></i> <?= $sat['nama'] ?></span>
+                                    <span class="badge bg-primary rounded-pill"><i class='bx bx-download'></i> ZIP</span>
+                                </button>
+                            <?php endforeach ?>
+                        </div>
+                    <?php endif ?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- / Content -->
     <?php include 'foot.php' ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
         $('document').ready(function() {
@@ -348,6 +389,7 @@
             var total = $(this).data('total');
             var guru_id = $(this).data('guru_id');
             var id = $(this).data('id');
+            var id_detail = $(this).data('id_detail');
             var sik = $(this).data('sik');
             var info = sik == 'PTY' ? 'Gaji Pokok' : 'Honor Insentif';
             var kriteria = $(this).data('kriteria');
@@ -365,6 +407,10 @@
             $('#total').text(total);
             $('#guru_id').val(guru_id);
             $('#nama_gaji').text(info);
+
+            if ($('#btn-cetak-slip').length) {
+                $('#btn-cetak-slip').attr('href', '<?= base_url("informasi/slip/") ?>' + id_detail);
+            }
 
             $('#editModal').modal('show');
 
@@ -596,7 +642,7 @@
                         <td>${row.tmt} <span class="badge bg-secondary">${selisihTahun(row.tmt)} thn</span></td>
                         <td>${formatRupiah(row.total_gaji-row.potongan)}</td>
                         <td>
-                            <button class="btn btn-xs btn-warning btn-detail" data-id="<?= $datagaji->gaji_id ?>" data-nama="${row['nama']}" data-satminkal="${row['satminkal']}" data-sik="${row['sik']}" data-gapok="${formatRupiah(row['gapok'])}" data-fungsional="${formatRupiah(row['fungsional'])}" data-kinerja="${formatRupiah(row['kinerja'])}" data-bpjs="${formatRupiah(row['bpjs'])}" data-struktural="${formatRupiah(row['struktural'])}" data-walas="${formatRupiah(row['walas'])}" data-penyesuaian="${formatRupiah(row['penyesuaian'])}" data-tambahan="${formatRupiah(row['tambahan'])}" data-total="${formatRupiah(row['total_gaji'])}" data-guru_id="${row['guru_id']}" data-kriteria="${row['kriteria']}">Rincian</button>
+                            <button class="btn btn-xs btn-warning btn-detail" data-id="<?= $datagaji->gaji_id ?>" data-id_detail="${row['id_detail']}" data-nama="${row['nama']}" data-satminkal="${row['satminkal']}" data-sik="${row['sik']}" data-gapok="${formatRupiah(row['gapok'])}" data-fungsional="${formatRupiah(row['fungsional'])}" data-kinerja="${formatRupiah(row['kinerja'])}" data-bpjs="${formatRupiah(row['bpjs'])}" data-struktural="${formatRupiah(row['struktural'])}" data-walas="${formatRupiah(row['walas'])}" data-penyesuaian="${formatRupiah(row['penyesuaian'])}" data-tambahan="${formatRupiah(row['tambahan'])}" data-total="${formatRupiah(row['total_gaji'])}" data-guru_id="${row['guru_id']}" data-kriteria="${row['kriteria']}">Rincian</button>
                         </td>
                     </tr>
                 `;
@@ -717,4 +763,136 @@
 
             return y;
         }
+
+        // Click handler for exporting slips collectively by Satminkal using silent iframe capture
+        $(document).on('click', '.btn-export-bulk', function() {
+            var satminkal = $(this).data('satminkal');
+            var gaji_id = '<?= $idgaji ?>';
+
+            $('#exportSlipModal').modal('hide');
+
+            Swal.fire({
+                title: 'Exporting Slips...',
+                html: `Sedang memproses Satminkal <b>${satminkal}</b>.<br><br>
+                       <div class="progress" style="height: 20px;">
+                           <div id="bulk-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                       </div><br>
+                       <span id="bulk-progress-text">Mengambil data guru...</span>`,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    $.ajax({
+                        url: '<?= base_url("informasi/get_slips_by_satminkal") ?>',
+                        type: 'POST',
+                        data: {
+                            gaji_id: gaji_id,
+                            satminkal: satminkal
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                var slips = response.slips;
+                                if (slips.length === 0) {
+                                    Swal.fire('Kosong', 'Tidak ada data guru untuk satminkal ini.', 'warning');
+                                    return;
+                                }
+
+                                var zip = new JSZip();
+                                var processed = 0;
+                                var total = slips.length;
+
+                                function processNext() {
+                                    if (processed < total) {
+                                        var slip = slips[processed];
+                                        var clean_nama = slip.detail.nama.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                                        var filename = 'Slip_Gaji_' + clean_nama + '_' + response.bulan_nama + '_' + response.tahun + '.png';
+
+                                        $('#bulk-progress-text').text(`Mengekstrak slip: ${slip.detail.nama} (${processed + 1}/${total})`);
+
+                                        // Create a temporary iframe to load the slip page with 0.01 opacity in the active viewport
+                                        var iframe = document.createElement('iframe');
+                                        iframe.style.position = 'fixed';
+                                        iframe.style.left = '0';
+                                        iframe.style.top = '0';
+                                        iframe.style.width = '780px';
+                                        iframe.style.height = '1200px';
+                                        iframe.style.zIndex = '-9999';
+                                        iframe.style.opacity = '0.01';
+                                        iframe.style.pointerEvents = 'none';
+                                        iframe.style.border = 'none';
+                                        iframe.src = '<?= base_url("informasi/slip/") ?>' + slip.detail.id_detail + '?mode=print_silent';
+
+                                        document.body.appendChild(iframe);
+
+                                        iframe.onload = function() {
+                                            // Wait for all web fonts to load inside the iframe before capturing
+                                            iframe.contentWindow.document.fonts.ready.then(function() {
+                                                setTimeout(() => {
+                                                    var captureEl = iframe.contentWindow.document.querySelector("#capture");
+                                                    if (!captureEl) {
+                                                        console.error("Capture element not found in iframe");
+                                                        document.body.removeChild(iframe);
+                                                        processed++;
+                                                        processNext();
+                                                        return;
+                                                    }
+
+                                                    html2canvas(captureEl, {
+                                                        useCORS: true,
+                                                        allowTaint: true,
+                                                        scale: 2
+                                                    }).then(canvas => {
+                                                        canvas.toBlob(function(blob) {
+                                                            zip.file(filename, blob);
+
+                                                            // Clean up iframe
+                                                            document.body.removeChild(iframe);
+
+                                                            processed++;
+                                                            var percent = Math.round((processed / total) * 100);
+                                                            $('#bulk-progress-bar').css('width', percent + '%').attr('aria-valuenow', percent).text(percent + '%');
+
+                                                            processNext();
+                                                        }, 'image/png');
+                                                    }).catch(err => {
+                                                        console.error("Canvas capture failed", err);
+                                                        document.body.removeChild(iframe);
+                                                        processed++;
+                                                        processNext();
+                                                    });
+                                                }, 400); // 400ms safety delay after fonts are ready
+                                            });
+                                        };
+                                    } else {
+                                        $('#bulk-progress-text').text('Mengompres berkas ZIP...');
+                                        zip.generateAsync({ type: 'blob' }).then(function(content) {
+                                            var zipFilename = 'Slip_Gaji_' + satminkal.replace(/[^a-z0-9]/gi, '_') + '_' + response.bulan_nama + '_' + response.tahun + '.zip';
+                                            var link = document.createElement('a');
+                                            link.download = zipFilename;
+                                            link.href = URL.createObjectURL(content);
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            document.body.removeChild(link);
+
+                                            Swal.fire({
+                                                title: 'Berhasil!',
+                                                text: `Berhasil mengekspor ${total} slip gaji untuk Satminkal ${satminkal}.`,
+                                                icon: 'success'
+                                            });
+                                        });
+                                    }
+                                }
+
+                                processNext();
+                            } else {
+                                Swal.fire('Error', response.message || 'Gagal mengambil data.', 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error', 'Gagal menghubungi server.', 'error');
+                        }
+                    });
+                }
+            });
+        });
     </script>
