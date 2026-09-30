@@ -34,8 +34,10 @@ class Gajimodel extends CI_Model
                 ->row();
             $gapok = $gapok &&  !in_array($jabatan, $this->struktural) ? $gapok->nominal : 0;
         } else {
+            $guru = $this->db_active->where('guru_id', $guru_id)->get('guru')->row();
             $gapok1 = $this->db_active
-                ->select_sum('nominal')
+                // ->select_sum('nominal')
+                ->select_sum('kehadiran')
                 ->where([
                     'guru_id' => $guru_id,
                     'bulan'   => $bulan,
@@ -43,7 +45,9 @@ class Gajimodel extends CI_Model
                 ])
                 ->get('honor')
                 ->row();
-            $gapok = $gapok1 &&  !in_array($jabatan, $this->struktural) && $kriteria != 'Karyawan' ? $gapok1->nominal : 0;
+            $jenis_hnr = $guru->santri == 'santri' ? $this->honor_santri : $this->honor_non;
+            $gapok80 = $gapok1 && $gapok1->kehadiran > 80 ? 80 * $jenis_hnr : $gapok1->kehadiran * $jenis_hnr;
+            $gapok = $gapok1 &&  !in_array($jabatan, $this->struktural) && $kriteria != 'Karyawan' ? $gapok80 : 0;
         }
 
         return $gapok;
